@@ -1,3 +1,4 @@
+import os
 import asyncpg
 from urllib.parse import urlparse, unquote
 from config import DATABASE_URL
@@ -6,16 +7,24 @@ pool = None
 
 async def init_db():
     global pool
-    url = urlparse(DATABASE_URL)
+    if not DATABASE_URL:
+        raise ValueError("DATABASE_URL environment variable is missing")
+
+    dsn = DATABASE_URL
+    if dsn.startswith("postgres://"):
+        dsn = dsn.replace("postgres://", "postgresql://", 1)
+
+    ssl_mode = "require"
+    if "sslmode=disable" in dsn or os.getenv("DB_SSL", "").lower() == "false":
+        ssl_mode = False
+
+    clean_dsn = dsn.split("?")[0]
+
     pool = await asyncpg.create_pool(
-        host=url.hostname,
-        port=url.port,
-        user=unquote(url.username),
-        password=unquote(url.password),
-        database=url.path.lstrip("/"),
+        dsn=clean_dsn,
         min_size=2,
         max_size=10,
-        ssl="require",
+        ssl=ssl_mode,
         statement_cache_size=0,
     )
 
