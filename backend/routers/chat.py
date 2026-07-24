@@ -54,52 +54,58 @@ async def send_message(ride_id: str, req: MessageCreate, user_id: str = Depends(
         raise HTTPException(status_code=400, detail="Message cannot be empty")
 
     row = await fetchrow(
-        """INSERT INTO chat_messages (ride_id, sender_id, content)
-           VALUES ($1, $2, $3)
-           RETURNING *""",
+        """WITH inserted AS (
+             INSERT INTO chat_messages (ride_id, sender_id, content)
+             VALUES ($1, $2, $3)
+             RETURNING *
+           )
+           SELECT i.*, u.name as sender_name
+           FROM inserted i
+           JOIN users u ON u.id = i.sender_id""",
         ride_id, user_id, req.content.strip()[:500],
     )
     return dict(row)
+
 @router.get("/conversations/list")
 async def get_conversations(user_id: str = Depends(get_current_user)):
     rows = await fetch(
         """
-        SELECT
+        SELECT DISTINCT ON (r.id)
             r.id AS ride_id,
             r.from_city,
             r.to_city,
             r.status,
             r.departure_time,
-            -- Get the other person's name (if user is passenger, get driver; if driver, get a passenger)
             CASE
-                WHEN r.owner_id = $1 THEN (
-                    SELECT u.name FROM ride_requests rr
-                    JOIN users u ON u.id = rr.passenger_id
-                    WHERE rr.ride_id = r.id AND rr.status = 'accepted'
-                    LIMIT 1
+                WHEN r.owner_id = $1 THEN COALESCE(
+                    (SELECT u.name FROM ride_requests rr JOIN users u ON u.id = rr.passenger_id WHERE rr.ride_id = r.id AND rr.status = 'accepted' LIMIT 1),
+                    'Passenger'
                 )
-                ELSE (
-                    SELECT u.name FROM users u WHERE u.id = r.owner_id
-                )
+                ELSE (SELECT u.name FROM users u WHERE u.id = r.owner_id)
             END AS name,
-            (
-                SELECT cm.content FROM chat_messages cm
-                WHERE cm.ride_id = r.id
-                ORDER BY cm.created_at DESC LIMIT 1
-            ) AS last_message,
-            (
-                SELECT cm.created_at FROM chat_messages cm
-                WHERE cm.ride_id = r.id
-                ORDER BY cm.created_at DESC LIMIT 1
-            ) AS last_message_time
+            cm.content AS last_message,
+            cm.created_at AS last_message_time
         FROM rides r
+        LEFT JOIN LATERAL (
+            SELECT content, created_at
+            FROM chat_messages
+            WHERE ride_id = r.id
+            ORDER BY created_at DESC
+            LIMIT 1
+        ) cm ON true
         WHERE
             r.owner_id = $1
-            OR r.id IN (
-                SELECT rp.ride_id FROM ride_participants rp WHERE rp.user_id = $1
+            OR EXISTS (
+                SELECT 1 FROM ride_participants rp WHERE rp.ride_id = r.id AND rp.user_id = $1
             )
-        ORDER BY last_message_time DESC NULLS LAST
+            OR EXISTS (
+                SELECT 1 FROM ride_requests rr WHERE rr.ride_id = r.id AND rr.passenger_id = $1 AND rr.status = 'accepted'
+            )
+        ORDER BY r.id, cm.created_at DESC NULLS LAST
         """,
         user_id,
     )
-    return [dict(r) for r in rows]
+    # Sort final result list by last_message_time DESC
+    result = [dict(r) for r in rows]
+    result.sort(key=lambda x: x.get("last_message_time") or "", reverse=True)
+    return result

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from './contexts/AuthContext'
 import Navbar from './components/layout/Navbar'
+import Footer from './components/layout/Footer'
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
 import SearchRides from './pages/SearchRides'
@@ -16,15 +17,15 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
 
 const pageVariants = {
-  initial: { opacity: 0, y: 12 },
+  initial: { opacity: 0, y: 10 },
   in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -12 },
+  out: { opacity: 0, y: -10 },
 }
 
 const pageTransition = {
   type: 'tween',
   ease: 'easeOut',
-  duration: 0.25,
+  duration: 0.2,
 }
 
 function AnimatedPage({ children }) {
@@ -57,6 +58,7 @@ function AppLayout({ children }) {
   const location = useLocation()
   const isLanding = location.pathname === '/'
   const isAuth = location.pathname === '/login' || location.pathname === '/register'
+  const isChat = location.pathname.startsWith('/chat')
 
   const content = (
     <AnimatePresence mode="wait">
@@ -71,7 +73,10 @@ function AppLayout({ children }) {
   return (
     <div className="app">
       <Navbar />
-      {content}
+      <main className="main-content">
+        {content}
+      </main>
+      {!isChat && <Footer />}
     </div>
   )
 }

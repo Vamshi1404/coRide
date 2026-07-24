@@ -59,53 +59,89 @@ export default function ChatWindow({ rideId, conversation }) {
     }
   }, [rideId, conversation])
 
+  const areaRef = useRef(null)
+  const userScrolledUpRef = useRef(false)
+
   useEffect(() => {
     if (!rideId) return
     setMessages([])
     setLoading(true)
     lastIdRef.current = null
-    loadMessages()
-    const interval = setInterval(loadMessages, 3000)
+    loadMessages(true)
+    const interval = setInterval(() => loadMessages(false), 3000)
     return () => clearInterval(interval)
   }, [rideId])
 
-  const loadMessages = async () => {
+  const loadMessages = async (isInitial = false) => {
     try {
       const params = lastIdRef.current ? { after_id: lastIdRef.current } : {}
       const data = await api.get(`/api/chat/${rideId}`, params)
       if (data && data.length > 0) {
         setMessages((prev) => {
-          const existing = new Set(prev.map((m) => m.id))
-          const newMsgs = data.filter((m) => !existing.has(m.id))
+          const existingIds = new Set(prev.map((m) => m.id))
+          const newMsgs = data.filter((m) => !existingIds.has(m.id))
           if (newMsgs.length > 0) {
             lastIdRef.current = data[data.length - 1].id
+            // Replace any temp message if matched
+            const filteredPrev = prev.filter((m) => !String(m.id).startsWith('temp-'))
+            return [...filteredPrev, ...newMsgs]
           }
-          return [...prev, ...newMsgs]
+          return prev
         })
       }
     } catch {
       // silent on poll
     }
-    setLoading(false)
+    if (isInitial) setLoading(false)
+  }
+
+  const handleScrollArea = () => {
+    if (!areaRef.current) return
+    const { scrollTop, scrollHeight, clientHeight } = areaRef.current
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 120
+    userScrolledUpRef.current = !isNearBottom
   }
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (!userScrolledUpRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
   }, [messages])
 
   const send = async (messageContent = content) => {
     const payload = (messageContent || content).trim()
-    if (!payload) return
+    if (!payload || sending) return
+
+    const tempId = `temp-${Date.now()}`
+    const tempMsg = {
+      id: tempId,
+      ride_id: rideId,
+      sender_id: user?.id,
+      sender_name: user?.name,
+      content: payload.slice(0, 500),
+      created_at: new Date().toISOString(),
+      pending: true,
+    }
+
+    // Optimistic UI update
+    setMessages((prev) => [...prev, tempMsg])
+    if (messageContent === content) setContent('')
+    userScrolledUpRef.current = false
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+
     setSending(true)
     try {
       const msg = await api.post(`/api/chat/${rideId}`, { content: payload.slice(0, 500) })
-      setMessages((prev) => [...prev, msg])
+      setMessages((prev) =>
+        prev.map((m) => (m.id === tempId ? { ...msg, sender_name: msg.sender_name || user?.name } : m))
+      )
       lastIdRef.current = msg.id
-      if (messageContent === content) setContent('')
     } catch {
       toast.error('Failed to send message.')
+      setMessages((prev) => prev.filter((m) => m.id !== tempId))
+    } finally {
+      setSending(false)
     }
-    setSending(false)
   }
 
   const shareLocation = async () => {
@@ -188,7 +224,7 @@ export default function ChatWindow({ rideId, conversation }) {
         </div>
       </header>
 
-      <div className="chat-messages-area">
+      <div className="chat-messages-area" ref={areaRef} onScroll={handleScrollArea}>
         {messages.length === 0 && (
           <div className="empty-text" style={{ textAlign: 'center', padding: 40 }}>
             No messages yet. Say hello!
@@ -196,25 +232,27 @@ export default function ChatWindow({ rideId, conversation }) {
         )}
 
         <AnimatePresence initial={false}>
-          {messages.map((msg, idx) => (
-            <div key={msg.id}>
-              {showTimestamp(msg, idx) && (
-                <div className="chat-timestamp-sep">
-                  <span>{formatTime(msg.created_at)}</span>
-                </div>
-              )}
-              <motion.div
-                className={`chat-msg-row ${msg.sender_id === user.id ? 'mine' : 'theirs'}`}
-                variants={msgVariants}
-                initial="hidden"
-                animate="visible"
-                layout
-              >
-                {msg.sender_id !== user.id && (
-                  <div className="chat-msg-avatar-sm">{getInitials(convName)}</div>
+          {messages.map((msg, idx) => {
+            const isMine = String(msg.sender_id) === String(user?.id)
+            return (
+              <div key={msg.id}>
+                {showTimestamp(msg, idx) && (
+                  <div className="chat-timestamp-sep">
+                    <span>{formatTime(msg.created_at)}</span>
+                  </div>
                 )}
-                <div className="chat-msg-content">
-                  <div className={`chat-msg-bubble ${msg.sender_id === user.id ? 'mine' : 'theirs'}`}>
+                <motion.div
+                  className={`chat-msg-row ${isMine ? 'mine' : 'theirs'}`}
+                  variants={msgVariants}
+                  initial="hidden"
+                  animate="visible"
+                  layout
+                >
+                  {!isMine && (
+                    <div className="chat-msg-avatar-sm">{getInitials(msg.sender_name || convName)}</div>
+                  )}
+                  <div className="chat-msg-content">
+                    <div className={`chat-msg-bubble ${isMine ? 'mine' : 'theirs'}`}>
                     {isLocationMsg(msg.content) ? (
                       <a href={msg.content} target="_blank" rel="noreferrer" className="chat-location-card">
                         <div className="chat-location-map-preview">
@@ -236,14 +274,17 @@ export default function ChatWindow({ rideId, conversation }) {
                         ? new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
                         : ''}
                     </span>
-                    {msg.sender_id === user.id && (
-                      <span className="material-symbols-outlined chat-msg-read">done_all</span>
+                    {isMine && (
+                      <span className="material-symbols-outlined chat-msg-read" style={{ opacity: msg.pending ? 0.5 : 1 }}>
+                        {msg.pending ? 'schedule' : 'done_all'}
+                      </span>
                     )}
                   </div>
                 </div>
               </motion.div>
             </div>
-          ))}
+          )
+        })}
         </AnimatePresence>
 
         {isTyping && (

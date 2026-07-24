@@ -72,10 +72,11 @@ web_modules/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variable files - EXPLICITLY ALLOWED PER USER REQUEST
-!.env
-!.env.test
-!.env*.local
+# dotenv environment variable files
+.env
+.env.local
+.env.*.local
+*.env
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -223,9 +224,7 @@ ENV/
 env.bak/
 venv.bak/
 
-# explicitly allow .env despite python ignore rules
-!.env
-!.env.*
+# explicitly allow .env rules removed
 
 # Spyder project settings
 .spyderproject

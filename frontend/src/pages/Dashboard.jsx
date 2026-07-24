@@ -21,6 +21,13 @@ const stagger = {
   },
 }
 
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
 export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -62,7 +69,7 @@ export default function Dashboard() {
           <div className="dash-hero-overlay" />
         </div>
         <div className="dash-hero-content">
-          <h1 className="dash-greeting">Good morning, {firstName}</h1>
+          <h1 className="dash-greeting">{getGreeting()}, {firstName}</h1>
           <p className="dash-subtitle">Ready for your next commute?</p>
         </div>
       </motion.div>

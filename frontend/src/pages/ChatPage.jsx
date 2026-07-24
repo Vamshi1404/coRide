@@ -10,6 +10,22 @@ function getInitials(name) {
   return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
 }
 
+function formatRelativeTime(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffSec = Math.floor((now - date) / 1000)
+  if (diffSec < 60) return 'Just now'
+  const diffMin = Math.floor(diffSec / 60)
+  if (diffMin < 60) return `${diffMin}m ago`
+  const diffHours = Math.floor(diffMin / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  const diffDays = Math.floor(diffHours / 24)
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays}d ago`
+  return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })
+}
+
 export default function ChatPage() {
   const { rideId } = useParams()
   const { user } = useAuth()
@@ -22,6 +38,10 @@ export default function ChatPage() {
   useEffect(() => {
     loadConversations()
   }, [])
+
+  useEffect(() => {
+    if (rideId) setSelectedId(rideId)
+  }, [rideId])
 
   const loadConversations = async () => {
     try {
@@ -87,7 +107,10 @@ export default function ChatPage() {
                   <motion.div
                     key={convId}
                     className={`conv-item ${isActive ? 'active' : ''}`}
-                    onClick={() => setSelectedId(convId)}
+                    onClick={() => {
+                      setSelectedId(convId)
+                      navigate(`/chat/${convId}`, { replace: true })
+                    }}
                     initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.03 }}
@@ -102,7 +125,7 @@ export default function ChatPage() {
                     <div className="conv-content">
                       <div className="conv-top-row">
                         <h3 className="conv-name">{convName}</h3>
-                        <span className="conv-time">{conv.last_message_time ? '2m ago' : ''}</span>
+                        <span className="conv-time">{formatRelativeTime(conv.last_message_time)}</span>
                       </div>
                       {conv.status_text && (
                         <p className="conv-status">{conv.status_text}</p>
