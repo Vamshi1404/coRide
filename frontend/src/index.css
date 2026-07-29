@@ -6685,3 +6685,90 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 .main-content {
   min-height: calc(100vh - 64px);
 }
+
+/* ══════════════════════════════════════════════
+   LANDING PAGE RESPONSIVE
+   ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .landing-nav {
+    padding: 12px 16px;
+  }
+  .landing-nav-links {
+    gap: 10px;
+  }
+  .landing-nav-links a[href^="#"] {
+    display: none;
+  }
+  .landing-logo {
+    font-size: 1.2rem;
+  }
+  .landing-btn-primary,
+  .landing-btn-secondary {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .hero-content {
+    padding: 100px 16px 60px;
+  }
+  .hero-btns {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .features-bento {
+    grid-template-columns: 1fr;
+  }
+  .bento-wide {
+    grid-column: span 1;
+  }
+  .bento-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .section-tracking-inner {
+    grid-template-columns: 1fr;
+  }
+  .tracking-mockup {
+    order: -1;
+  }
+
+  .routes-grid-new {
+    grid-template-columns: 1fr;
+  }
+  .routes-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .steps-grid::before {
+    display: none;
+  }
+
+  .vision-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  .landing-nav-links {
+    gap: 6px;
+  }
+  .landing-btn-primary,
+  .landing-btn-secondary {
+    padding: 7px 10px;
+    font-size: 0.72rem;
+  }
+}
