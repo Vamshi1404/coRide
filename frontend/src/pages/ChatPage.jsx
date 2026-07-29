@@ -45,13 +45,15 @@ export default function ChatPage() {
     try {
       const data = await api.get('/api/chat/conversations/list')
       setConversations(data || [])
-      if (!selectedId && data?.length > 0) {
-        setSelectedId(data[0].ride_id || data[0].id)
-      }
     } catch {
       // silent
     }
     setLoading(false)
+  }
+
+  const handleBack = () => {
+    setSelectedId(null)
+    navigate('/chats', { replace: true })
   }
 
   const filteredConvs = conversations.filter((conv) => {
@@ -65,7 +67,7 @@ export default function ChatPage() {
   )
 
   return (
-    <div className="chat-page-layout">
+    <div className={`chat-page-layout ${selectedId ? 'chat-mobile-detail' : ''}`}>
       {/* Conversations Sidebar */}
       <motion.aside
         className="chat-conversations-sidebar"
@@ -145,6 +147,7 @@ export default function ChatPage() {
             key={selectedId}
             rideId={selectedId}
             conversation={selectedConv}
+            onBack={handleBack}
           />
         ) : (
           <div className="chat-empty-state">
