@@ -16,7 +16,7 @@ function getInitials(name) {
 
 const isLocationMsg = (text) => text?.startsWith('https://www.google.com/maps')
 
-export default function ChatWindow({ rideId, conversation }) {
+export default function ChatWindow({ rideId, conversation, onBack }) {
   const { user } = useAuth()
   const [messages, setMessages] = useState([])
   const [content, setContent] = useState('')
@@ -200,6 +200,11 @@ export default function ChatWindow({ rideId, conversation }) {
     <div className="chat-window-full">
       <header className="chat-window-header">
         <div className="chat-header-left">
+          {onBack && (
+            <button className="chat-back-btn" title="Back to conversations" onClick={onBack}>
+              <span className="material-symbols-outlined">arrow_back</span>
+            </button>
+          )}
           <div className="chat-header-avatar">{getInitials(convName)}</div>
           <div>
             <h2 className="chat-header-name">{convName || 'Loading...'}</h2>
