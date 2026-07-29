@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime, timezone
 from database import fetch, fetchrow, execute
 from auth import get_current_user
 
@@ -25,7 +26,10 @@ async def get_messages(
         raise HTTPException(status_code=403, detail="Not a participant of this ride")
 
     if after_id:
-        after = await fetchrow("SELECT created_at FROM chat_messages WHERE id = $1", after_id)
+        after = await fetchrow(
+            "SELECT created_at FROM chat_messages WHERE id = $1 AND ride_id = $2",
+            after_id, ride_id,
+        )
         if after:
             rows = await fetch(
                 """SELECT cm.*, u.name as sender_name
@@ -52,6 +56,16 @@ async def get_messages(
 async def send_message(ride_id: str, req: MessageCreate, user_id: str = Depends(get_current_user)):
     if not req.content.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty")
+
+    participant = await fetchrow(
+        "SELECT id FROM ride_participants WHERE ride_id = $1 AND user_id = $2",
+        ride_id, user_id,
+    )
+    owner = await fetchrow("SELECT owner_id FROM rides WHERE id = $1", ride_id)
+    if not owner:
+        raise HTTPException(status_code=404, detail="Ride not found")
+    if not participant and owner["owner_id"] != user_id:
+        raise HTTPException(status_code=403, detail="Not a participant of this ride")
 
     row = await fetchrow(
         """WITH inserted AS (
@@ -107,5 +121,5 @@ async def get_conversations(user_id: str = Depends(get_current_user)):
     )
     # Sort final result list by last_message_time DESC
     result = [dict(r) for r in rows]
-    result.sort(key=lambda x: x.get("last_message_time") or "", reverse=True)
+    result.sort(key=lambda x: x.get("last_message_time") or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     return result

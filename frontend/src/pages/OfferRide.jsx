@@ -73,7 +73,7 @@ export default function OfferRide() {
       return setError('Please enter a valid fare.')
     }
 
-    const departureTime = `${form.departure_date}T${form.departure_time}:00`
+    const departureTime = new Date(`${form.departure_date}T${form.departure_time}:00`).toISOString()
 
     setSaving(true)
     try {

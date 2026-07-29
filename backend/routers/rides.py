@@ -1,11 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime, timezone
 from typing import Optional
 from database import fetch, fetchrow, execute
 from auth import get_current_user
 
 router = APIRouter(prefix="/api/rides", tags=["rides"])
+
+VALID_STATUS_TRANSITIONS = {
+    "open": {"in_progress", "cancelled"},
+    "in_progress": {"completed", "cancelled"},
+    "completed": set(),
+    "cancelled": set(),
+}
 
 class RideCreate(BaseModel):
     from_city: str
@@ -15,8 +22,8 @@ class RideCreate(BaseModel):
     to_lat: float
     to_lng: float
     departure_time: str
-    total_seats: int
-    final_cost: float
+    total_seats: int = Field(gt=0)
+    final_cost: float = Field(gt=0)
     vehicle_id: str
     distance_km: Optional[float] = None
 
@@ -145,6 +152,12 @@ async def update_ride_status(ride_id: str, status: str = Query(...), user_id: st
     ride = await fetchrow("SELECT * FROM rides WHERE id = $1 AND owner_id = $2", ride_id, user_id)
     if not ride:
         raise HTTPException(status_code=404, detail="Ride not found or not authorized")
+
+    if status not in VALID_STATUS_TRANSITIONS.get(ride["status"], set()):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot transition ride from '{ride['status']}' to '{status}'",
+        )
 
     await execute("UPDATE rides SET status = $1 WHERE id = $2", status, ride_id)
 
