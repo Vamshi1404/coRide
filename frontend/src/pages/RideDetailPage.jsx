@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import toast from 'react-hot-toast'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useRideStatus } from '../hooks/useRideStatus'
 import RequestButton from '../components/bookings/RequestButton'
+import RequestList from '../components/bookings/RequestList'
+import LiveTracker from '../components/map/LiveTracker'
 import RouteMap from '../components/maps/RouteMap'
 import { formatCurrency, formatRideTime, formatVehicleName, getDriverName } from '../lib/rideDisplay'
 
@@ -33,6 +36,7 @@ export default function RideDetailPage() {
   const [ride, setRide] = useState(null)
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
+  const [requests, setRequests] = useState([])
 
   const isDriver = ride?.owner_id === user?.id
 
@@ -42,25 +46,37 @@ export default function RideDetailPage() {
     setLoading(false)
   }
 
+  const fetchRequests = async () => {
+    try {
+      const data = await api.get(`/api/requests/ride/${id}`)
+      setRequests(data || [])
+    } catch {
+      // silent - not the owner, or ride not found
+    }
+  }
+
   const { startRide, completeRide, cancelRide, updating } = useRideStatus(ride, fetchData)
 
   useEffect(() => {
     fetchData()
   }, [id])
 
+  useEffect(() => {
+    if (!isDriver) return
+    fetchRequests()
+    const interval = setInterval(fetchRequests, 5000)
+    return () => clearInterval(interval)
+  }, [isDriver, id])
+
   const handleCancel = async () => {
+    if (!ride.booking_id) return
     if (!window.confirm('Are you sure you want to cancel this request?')) return
     setCancelling(true)
     try {
-      if (ride.booking_id) {
-        await api.patch(`/api/requests/${ride.booking_id}?status=cancelled`)
-      } else {
-        await api.post(`/api/requests/${id}/cancel`)
-      }
+      await api.patch(`/api/requests/${ride.booking_id}?status=cancelled`)
       await fetchData()
-    } catch {
-      await api.patch(`/api/rides/${id}/cancel`).catch(() => {})
-      await fetchData()
+    } catch (err) {
+      toast.error(err.message)
     }
     setCancelling(false)
   }
@@ -237,14 +253,6 @@ export default function RideDetailPage() {
                 <span className="material-symbols-outlined">chat_bubble</span>
                 {isDriver ? 'Chat with Passengers' : 'Chat with Driver'}
               </motion.button>
-              <motion.button
-                className="driver-track-btn"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span className="material-symbols-outlined">track_changes</span>
-                Track Live
-              </motion.button>
             </div>
 
             {!isDriver && (
@@ -314,8 +322,40 @@ export default function RideDetailPage() {
             </div>
           </motion.div>
 
+          {/* Live Tracking */}
+          {ride.status === 'in_progress' && (
+            <motion.div
+              className="detail-card"
+              variants={sectionVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.27 }}
+            >
+              <h3 className="detail-card-title">Live Tracking</h3>
+              <LiveTracker ride={ride} />
+            </motion.div>
+          )}
+
+          {/* Passenger Requests (driver only) */}
+          {isDriver && (
+            <motion.div
+              className="detail-card"
+              variants={sectionVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.28 }}
+            >
+              <h3 className="detail-card-title">Passenger Requests</h3>
+              <RequestList
+                requests={requests}
+                ride={ride}
+                onUpdate={() => { fetchData(); fetchRequests() }}
+              />
+            </motion.div>
+          )}
+
           {/* Cancel Button */}
-          {!isDriver && (
+          {!isDriver && ride.booking_id && (
             <motion.button
               className="cancel-request-btn"
               onClick={handleCancel}

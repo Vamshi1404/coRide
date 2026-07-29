@@ -11,7 +11,10 @@ async def list_notifications(
     user_id: str = Depends(get_current_user),
 ):
     if after_id:
-        after = await fetch("SELECT created_at FROM notifications WHERE id = $1", after_id)
+        after = await fetch(
+            "SELECT created_at FROM notifications WHERE id = $1 AND user_id = $2",
+            after_id, user_id,
+        )
         if after:
             rows = await fetch(
                 """SELECT * FROM notifications

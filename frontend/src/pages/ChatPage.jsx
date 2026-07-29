@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../lib/api'
-import { useAuth } from '../contexts/AuthContext'
 import ChatWindow from '../components/chat/ChatWindow'
 
 function getInitials(name) {
@@ -28,7 +27,6 @@ function formatRelativeTime(dateStr) {
 
 export default function ChatPage() {
   const { rideId } = useParams()
-  const { user } = useAuth()
   const navigate = useNavigate()
   const [conversations, setConversations] = useState([])
   const [selectedId, setSelectedId] = useState(rideId || null)

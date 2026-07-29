@@ -26,7 +26,7 @@ async def signup(req: SignupRequest):
     user = await fetchrow(
         """INSERT INTO users (name, email, phone, password_hash)
            VALUES ($1, $2, $3, $4)
-           RETURNING id, name, email, phone, avg_rating, total_ratings""",
+           RETURNING id, name, email, phone, avg_rating, total_ratings, completed_rides, cancelled_rides""",
         req.name, req.email, req.phone, hashed,
     )
 
@@ -40,6 +40,8 @@ async def signup(req: SignupRequest):
             "phone": user["phone"],
             "avg_rating": float(user["avg_rating"] or 0),
             "total_ratings": user["total_ratings"],
+            "completed_rides": user["completed_rides"],
+            "cancelled_rides": user["cancelled_rides"],
         },
     }
 
@@ -59,13 +61,15 @@ async def login(req: LoginRequest):
             "phone": user["phone"],
             "avg_rating": float(user["avg_rating"] or 0),
             "total_ratings": user["total_ratings"],
+            "completed_rides": user["completed_rides"],
+            "cancelled_rides": user["cancelled_rides"],
         },
     }
 
 @router.get("/me")
 async def get_me(user_id: str = Depends(get_current_user)):
     user = await fetchrow(
-        "SELECT id, name, email, phone, avg_rating, total_ratings FROM users WHERE id = $1",
+        "SELECT id, name, email, phone, avg_rating, total_ratings, completed_rides, cancelled_rides FROM users WHERE id = $1",
         user_id,
     )
     if not user:
@@ -77,4 +81,6 @@ async def get_me(user_id: str = Depends(get_current_user)):
         "phone": user["phone"],
         "avg_rating": float(user["avg_rating"] or 0),
         "total_ratings": user["total_ratings"],
+        "completed_rides": user["completed_rides"],
+        "cancelled_rides": user["cancelled_rides"],
     }

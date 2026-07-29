@@ -9,13 +9,6 @@ const msgVariants = {
   visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.2, ease: 'easeOut' } },
 }
 
-const dotVariants = {
-  animate: {
-    y: [0, -6, 0],
-    transition: { duration: 0.6, repeat: Infinity, ease: 'easeInOut' },
-  },
-}
-
 function getInitials(name) {
   if (!name) return '?'
   return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
@@ -30,7 +23,6 @@ export default function ChatWindow({ rideId, conversation }) {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [sharingLocation, setSharingLocation] = useState(false)
-  const [isTyping, setIsTyping] = useState(false)
   const [convName, setConvName] = useState(
     conversation?.name || conversation?.driver_name || ''
   )
@@ -287,21 +279,6 @@ export default function ChatWindow({ rideId, conversation }) {
         })}
         </AnimatePresence>
 
-        {isTyping && (
-          <motion.div
-            className="chat-typing-indicator"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div className="typing-dots">
-              <motion.span className="typing-dot" variants={dotVariants} animate="animate" />
-              <motion.span className="typing-dot" variants={dotVariants} animate="animate" style={{ animationDelay: '0.15s' }} />
-              <motion.span className="typing-dot" variants={dotVariants} animate="animate" style={{ animationDelay: '0.3s' }} />
-            </div>
-            <span className="typing-text">{convName} is typing...</span>
-          </motion.div>
-        )}
-
         <div ref={bottomRef} />
       </div>
 
@@ -340,9 +317,6 @@ export default function ChatWindow({ rideId, conversation }) {
               maxLength={500}
               className="chat-text-input"
             />
-            <button className="chat-mood-btn">
-              <span className="material-symbols-outlined">mood</span>
-            </button>
           </div>
           <motion.button
             className="chat-send-btn"

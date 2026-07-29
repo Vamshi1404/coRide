@@ -100,22 +100,22 @@ export default function Navbar() {
             transition={{ duration: 0.25 }}
           >
             <div className="mobile-drawer-inner">
-              <NavLink to="/dashboard" className="mobile-nav-item">
+              <NavLink to="/dashboard" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="material-symbols-outlined">dashboard</span> Home
               </NavLink>
-              <NavLink to="/search" className="mobile-nav-item">
+              <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="material-symbols-outlined">search</span> Find Ride
               </NavLink>
-              <NavLink to="/offer-ride" className="mobile-nav-item">
+              <NavLink to="/offer-ride" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="material-symbols-outlined">add_circle</span> Offer Ride
               </NavLink>
-              <NavLink to="/my-rides" className="mobile-nav-item">
+              <NavLink to="/my-rides" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="material-symbols-outlined">directions_car</span> My Rides
               </NavLink>
-              <NavLink to="/chats" className="mobile-nav-item">
+              <NavLink to="/chats" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="material-symbols-outlined">chat</span> Chats
               </NavLink>
-              <NavLink to="/profile" className="mobile-nav-item">
+              <NavLink to="/profile" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
                 <span className="material-symbols-outlined">person</span> Profile
               </NavLink>
               {user ? (

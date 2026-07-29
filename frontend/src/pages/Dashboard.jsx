@@ -235,7 +235,7 @@ export default function Dashboard() {
             <div className="dash-stats-grid">
               <div className="dash-stat-card">
                 <span className="material-symbols-outlined">done_all</span>
-                <p className="dash-stat-num">0</p>
+                <p className="dash-stat-num">{user?.completed_rides || 0}</p>
                 <p className="dash-stat-label">Rides Completed</p>
               </div>
               <div className="dash-stat-card">
