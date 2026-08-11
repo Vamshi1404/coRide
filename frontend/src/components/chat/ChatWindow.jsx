@@ -3,6 +3,7 @@ import { gsap, useGSAP } from '../../lib/gsapSetup'
 import toast from 'react-hot-toast'
 import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
+import { Icon } from '../../components/ui/icon'
 
 function getInitials(name) {
   if (!name) return '?'
@@ -213,7 +214,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
         <div className="chat-header-left">
           {onBack && (
             <button className="chat-back-btn" title="Back to conversations" onClick={onBack}>
-              <span className="material-symbols-outlined">arrow_back</span>
+              <Icon name="arrow_back" />
             </button>
           )}
           <div className="chat-header-avatar">{getInitials(convName)}</div>
@@ -227,7 +228,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
         </div>
         <div className="chat-header-actions">
           <button className="chat-header-btn" title="Call Driver" onClick={handleCall}>
-            <span className="material-symbols-outlined">call</span>
+            <Icon name="call" />
           </button>
         </div>
       </header>
@@ -260,13 +261,13 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
                   {isLocationMsg(msg.content) ? (
                     <a href={msg.content} target="_blank" rel="noreferrer" className="chat-location-card">
                       <div className="chat-location-map-preview">
-                        <span className="material-symbols-outlined chat-location-pin">location_on</span>
+                        <Icon name="location_on" className="chat-location-pin" />
                       </div>
                       <div className="chat-location-info">
                         <span className="chat-location-title">Shared Location</span>
                         <span className="chat-location-sub">Tap to open in Google Maps</span>
                       </div>
-                      <span className="material-symbols-outlined chat-location-arrow">open_in_new</span>
+                      <Icon name="open_in_new" className="chat-location-arrow" />
                     </a>
                   ) : (
                     <p className="chat-msg-text">{msg.content}</p>
@@ -279,9 +280,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
                       : ''}
                   </span>
                   {isMine && (
-                    <span className="material-symbols-outlined chat-msg-read" style={{ opacity: msg.pending ? 0.5 : 1 }}>
-                      {msg.pending ? 'schedule' : 'done_all'}
-                    </span>
+                    <Icon name={msg.pending ? 'schedule' : 'done_all'} className="chat-msg-read" style={{ opacity: msg.pending ? 0.5 : 1 }} />
                   )}
                 </div>
               </div>
@@ -300,7 +299,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
             onClick={shareLocation}
             disabled={sharingLocation}
           >
-            <span className="material-symbols-outlined">location_on</span>
+            <Icon name="location_on" />
             {sharingLocation ? 'Getting location...' : 'Share Location'}
           </button>
           <button
@@ -333,8 +332,9 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
             className="chat-send-btn"
             onClick={send}
             disabled={sending || !content.trim()}
+            aria-label="Send message"
           >
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
+            <Icon name="send" filled />
           </button>
         </div>
       </footer>

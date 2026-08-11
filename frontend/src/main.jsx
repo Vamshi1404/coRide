@@ -17,13 +17,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           toastOptions={{
             duration: 3000,
             style: {
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
               borderRadius: '12px',
               padding: '12px 16px',
               fontSize: '0.9rem',
+              boxShadow: '0 12px 32px -8px rgba(16,20,24,0.18)',
             },
             success: {
-              iconTheme: { primary: '#16a34a', secondary: '#fff' },
+              iconTheme: { primary: '#1b7f3c', secondary: '#fff' },
             },
             error: {
               iconTheme: { primary: '#dc2626', secondary: '#fff' },

@@ -10,6 +10,7 @@ import RequestList from '../components/bookings/RequestList'
 import LiveTracker from '../components/map/LiveTracker'
 import RouteMap from '../components/maps/RouteMap'
 import { formatCurrency, formatRideTime, formatVehicleName, getDriverName } from '../lib/rideDisplay'
+import { Icon } from '../components/ui/icon'
 
 const STEP_ORDER = ['open', 'in_progress', 'completed']
 
@@ -112,7 +113,7 @@ export default function RideDetailPage() {
         <div>
           <nav className="ride-breadcrumb">
             <button className="breadcrumb-link" onClick={() => navigate('/my-rides')}>My Rides</button>
-            <span className="material-symbols-outlined breadcrumb-chevron">chevron_right</span>
+            <Icon name="chevron_right" className="breadcrumb-chevron" />
             <span className="breadcrumb-current">#CR-{ride.id}-HYD</span>
           </nav>
           <h1 className="ride-detail-title">{ride.from_city} to {ride.to_city}</h1>
@@ -122,8 +123,8 @@ export default function RideDetailPage() {
             <span className="live-badge-dot" />
             Live Tracking
           </span>
-          <button className="share-btn">
-            <span className="material-symbols-outlined">share</span>
+          <button className="share-btn" aria-label="Share ride">
+            <Icon name="share" />
           </button>
         </div>
       </header>
@@ -173,9 +174,9 @@ export default function RideDetailPage() {
                   >
                     <div className={`timeline-step-icon ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}>
                       {isCompleted ? (
-                        <span className="material-symbols-outlined">check</span>
+                        <Icon name="check" />
                       ) : (
-                        <span className="material-symbols-outlined">{config.icon}</span>
+                        <Icon name={config.icon} />
                       )}
                     </div>
                     <div className="timeline-step-info">
@@ -204,14 +205,14 @@ export default function RideDetailPage() {
               <div className="driver-info">
                 <h2 className="driver-name">{getDriverName(ride)}</h2>
                 <div className="driver-rating-row">
-                  <span className="material-symbols-outlined driver-rating-icon">star</span>
+                  <Icon name="star" className="driver-rating-icon" />
                   <span className="driver-rating-value">{ride.driver_avg_rating != null ? Number(ride.driver_avg_rating).toFixed(1) : 'No ratings yet'}</span>
                 </div>
               </div>
             </div>
 
             <div className="driver-vehicle-card">
-              <span className="material-symbols-outlined driver-vehicle-icon">directions_car</span>
+              <Icon name="directions_car" className="driver-vehicle-icon" />
               <div>
                 <p className="driver-vehicle-name">{formatVehicleName(ride)}</p>
                 {ride.vehicle_plate && <p className="driver-vehicle-plate">{ride.vehicle_plate}</p>}
@@ -223,7 +224,7 @@ export default function RideDetailPage() {
                 className="driver-chat-btn"
                 onClick={() => navigate(`/chat/${ride.id}`)}
               >
-                <span className="material-symbols-outlined">chat_bubble</span>
+                <Icon name="chat_bubble" />
                 {isDriver ? 'Chat with Passengers' : 'Chat with Driver'}
               </button>
             </div>
@@ -312,7 +313,7 @@ export default function RideDetailPage() {
               onClick={handleCancel}
               disabled={cancelling}
             >
-              <span className="material-symbols-outlined">cancel</span>
+              <Icon name="cancel" />
               {cancelling ? 'Cancelling...' : 'Cancel Request'}
             </button>
           )}
@@ -323,7 +324,7 @@ export default function RideDetailPage() {
               onClick={cancelRide}
               disabled={updating}
             >
-              <span className="material-symbols-outlined">cancel</span>
+              <Icon name="cancel" />
               {updating ? 'Cancelling...' : 'Cancel Ride'}
             </button>
           )}
@@ -333,17 +334,17 @@ export default function RideDetailPage() {
             <h3 className="safety-section-title">Ride Experience & Safety</h3>
             <div className="safety-grid">
               <div className="safety-card">
-                <span className="material-symbols-outlined safety-card-icon">gpp_good</span>
+                <Icon name="gpp_good" className="safety-card-icon" />
                 <h4 className="safety-card-title">Safety Shield</h4>
                 <p className="safety-card-desc">Your ride is protected with real-time GPS monitoring and SOS support.</p>
               </div>
               <div className="safety-card">
-                <span className="material-symbols-outlined safety-card-icon">air</span>
+                <Icon name="air" className="safety-card-icon" />
                 <h4 className="safety-card-title">Climate Preferences</h4>
                 <p className="safety-card-desc">Pre-set to 22&deg;C. Air purifier active for your comfort.</p>
               </div>
               <div className="safety-card">
-                <span className="material-symbols-outlined safety-card-icon">support_agent</span>
+                <Icon name="support_agent" className="safety-card-icon" />
                 <h4 className="safety-card-title">Concierge Support</h4>
                 <p className="safety-card-desc">24/7 priority support available for any route adjustments.</p>
               </div>

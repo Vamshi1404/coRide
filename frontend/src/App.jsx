@@ -23,9 +23,9 @@ function AnimatedPage({ children }) {
   useGSAP(() => {
     gsap.from(ref.current, {
       autoAlpha: 0,
-      y: 12,
-      duration: 0.3,
-      ease: 'power1.out',
+      y: 16,
+      duration: 0.45,
+      ease: 'expo.out',
     })
   }, { scope: ref })
 

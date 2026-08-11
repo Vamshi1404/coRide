@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
+import { Icon } from '../components/ui/icon'
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth()
@@ -72,14 +73,14 @@ export default function ProfilePage() {
         {/* Edit Form */}
         <div className="profile-form-section">
           <h2 className="profile-section-title">
-            <span className="material-symbols-outlined">edit</span>
+            <Icon name="edit" />
             Edit Profile
           </h2>
 
           <form onSubmit={handleSubmit} noValidate className="profile-form">
             <label className="form-field">
               <span className="field-label">
-                <span className="material-symbols-outlined">person</span> Full Name
+                <Icon name="person" /> Full Name
               </span>
               <input
                 type="text"
@@ -92,7 +93,7 @@ export default function ProfilePage() {
 
             <label className="form-field">
               <span className="field-label">
-                <span className="material-symbols-outlined">mail</span> Email Address
+                <Icon name="mail" /> Email Address
               </span>
               <input
                 type="email"
@@ -104,7 +105,7 @@ export default function ProfilePage() {
 
             <label className="form-field">
               <span className="field-label">
-                <span className="material-symbols-outlined">phone</span> Phone Number
+                <Icon name="phone" /> Phone Number
               </span>
               <input
                 type="tel"
@@ -124,7 +125,7 @@ export default function ProfilePage() {
                   </span>
                 ) : (
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>save</span>
+                    <Icon name="save" size={18} />
                     Save Changes
                   </span>
                 )}
@@ -138,19 +139,19 @@ export default function ProfilePage() {
         {/* Quick Links */}
         <div className="profile-quick-links">
           <Link to="/my-rides" className="profile-quick-link">
-            <span className="material-symbols-outlined">directions_car</span>
+            <Icon name="directions_car" />
             <span>My Rides</span>
-            <span className="material-symbols-outlined chevron">chevron_right</span>
+            <Icon name="chevron_right" className="chevron" />
           </Link>
           <Link to="/chats" className="profile-quick-link">
-            <span className="material-symbols-outlined">chat</span>
+            <Icon name="chat" />
             <span>Messages</span>
-            <span className="material-symbols-outlined chevron">chevron_right</span>
+            <Icon name="chevron_right" className="chevron" />
           </Link>
           <Link to="/privacy-policy" className="profile-quick-link">
-            <span className="material-symbols-outlined">privacy_tip</span>
+            <Icon name="privacy_tip" />
             <span>Privacy Policy</span>
-            <span className="material-symbols-outlined chevron">chevron_right</span>
+            <Icon name="chevron_right" className="chevron" />
           </Link>
         </div>
       </div>

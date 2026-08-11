@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { gsap, useGSAP } from '../lib/gsapSetup'
 import { api } from '../lib/api'
 import { Button } from '../components/ui/button'
+import { Icon } from '../components/ui/icon'
+import AuthVisual from '../components/auth/AuthVisual'
 
 export default function Register() {
   const [name, setName] = useState('')
@@ -33,7 +35,10 @@ export default function Register() {
 
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
-      tl.from('.auth-logo', { autoAlpha: 0, x: -20, duration: 0.6 })
+      tl.from('.auth-route-art', { autoAlpha: 0, duration: 0.9 })
+        .from('.auth-logo', { autoAlpha: 0, x: -20, duration: 0.6 }, '-=0.4')
+        .from('.auth-route-chips > *', { autoAlpha: 0, y: 12, stagger: 0.08, duration: 0.4 }, '-=0.3')
+        .from('.auth-stats > *', { autoAlpha: 0, y: 16, stagger: 0.08, duration: 0.5 }, '-=0.25')
         .from('.auth-left-heading', { autoAlpha: 0, y: 30, duration: 0.6 })
         .from('.auth-left-sub', { autoAlpha: 0, duration: 0.6 })
         .from('.auth-form-panel', { autoAlpha: 0, x: 20, duration: 0.5 }, '-=0.3')
@@ -82,11 +87,17 @@ export default function Register() {
   return (
     <div className="auth-split" ref={containerRef}>
       <div className="auth-split-left auth-left-primary">
+        <div className="auth-left-bg">
+          <img src="/images/login-bg.jpg" alt="" />
+        </div>
+        <div className="auth-left-overlay" />
         <div className="auth-left-content">
           <div className="auth-logo">
-            <span className="material-symbols-outlined auth-logo-icon">directions_car</span>
+            <Icon name="directions_car" className="auth-logo-icon" />
             <span className="auth-logo-text">CoRide</span>
           </div>
+
+          <AuthVisual />
 
           <div>
             <h1 className="auth-left-heading">
@@ -103,7 +114,7 @@ export default function Register() {
       <div className="auth-split-right">
         <div className="auth-form-panel">
           <div className="auth-mobile-logo">
-            <span className="material-symbols-outlined">directions_car</span>
+            <Icon name="directions_car" />
             <span>CoRide</span>
           </div>
 
@@ -178,9 +189,7 @@ export default function Register() {
                   onClick={() => setShowPassword((p) => !p)}
                   tabIndex={-1}
                 >
-                  <span className="material-symbols-outlined">
-                    {showPassword ? 'visibility' : 'visibility_off'}
-                  </span>
+                  <Icon name={showPassword ? 'visibility' : 'visibility_off'} />
                 </button>
               </div>
             </div>
@@ -191,7 +200,7 @@ export default function Register() {
               ) : (
                 <>
                   Create Account
-                  <span className="material-symbols-outlined">arrow_forward</span>
+                  <Icon name="arrow_forward" />
                 </>
               )}
             </Button>
@@ -206,7 +215,7 @@ export default function Register() {
       {success && (
         <div className="auth-toast" ref={toastRef}>
           <div className="auth-toast-icon">
-            <span className="material-symbols-outlined">check_circle</span>
+            <Icon name="check_circle" />
           </div>
           <div>
             <p className="auth-toast-title">Registration Successful</p>

@@ -4,6 +4,7 @@ import { gsap, useGSAP } from '../lib/gsapSetup'
 import { api } from '../lib/api'
 import { formatRideDateTime, formatVehicleName, getDriverName, getInitials, getStatusLabel } from '../lib/rideDisplay'
 import { useAuth } from '../contexts/AuthContext'
+import { Icon } from '../components/ui/icon'
 
 export default function MyRides() {
   const { user } = useAuth()
@@ -28,11 +29,11 @@ export default function MyRides() {
 
   useGSAP(() => {
     if (reducedMotion) return
-    gsap.from('.rides-header', { autoAlpha: 0, y: -10, duration: 0.3, ease: 'power2.out' })
-    gsap.from('.rides-upcoming', { autoAlpha: 0, y: 20, duration: 0.25, ease: 'power2.out' })
-    gsap.from('.rides-upcoming .rides-card', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out', stagger: 0.1 })
-    gsap.from('.rides-history', { autoAlpha: 0, y: 20, duration: 0.25, ease: 'power2.out' })
-    gsap.from('.rides-history-table tbody tr', { autoAlpha: 0, x: -10, duration: 0.25, ease: 'power2.out', stagger: 0.05 })
+    gsap.from('.rides-header', { autoAlpha: 0, y: -10, duration: 0.35, ease: 'expo.out' })
+    gsap.from('.rides-upcoming', { autoAlpha: 0, y: 20, duration: 0.3, ease: 'expo.out' })
+    gsap.from('.rides-upcoming .rides-card', { autoAlpha: 0, y: 20, duration: 0.5, ease: 'expo.out', stagger: 0.09 })
+    gsap.from('.rides-history', { autoAlpha: 0, y: 20, duration: 0.3, ease: 'expo.out' })
+    gsap.from('.rides-history-table tbody tr', { autoAlpha: 0, x: -10, duration: 0.3, ease: 'expo.out', stagger: 0.05 })
   }, { scope: pageRef, dependencies: [tab] })
 
   const allUpcoming = [...offered, ...joined].filter(
@@ -99,7 +100,7 @@ export default function MyRides() {
                           {getStatusLabel(ride.status, ride.booking_status)}
                         </span>
                         <span className="rides-date">
-                          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>calendar_today</span>
+                          <Icon name="calendar_today" size={18} />
                           {formatRideDateTime(ride.departure_time)}
                         </span>
                       </div>
@@ -195,7 +196,7 @@ export default function MyRides() {
                         <td>
                           <div className="rides-route-pair">
                             <span>{ride.from_city}</span>
-                            <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'var(--outline)' }}>east</span>
+                            <Icon name="east" size={16} style={{ color: 'var(--outline)' }} />
                             <span>{ride.to_city}</span>
                           </div>
                         </td>

@@ -19,8 +19,8 @@ export default function LiveTracker({ ride }) {
 
   useGSAP(() => {
     if (reducedMotion) return
-    gsap.from('.live-tracker, .tracker-placeholder, .tracker-error', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out' })
-    gsap.from('.tracker-status', { autoAlpha: 0, duration: 0.4, delay: 0.15, ease: 'power2.out' })
+    gsap.from('.live-tracker, .tracker-placeholder, .tracker-error', { autoAlpha: 0, y: 20, duration: 0.55, ease: 'expo.out' })
+    gsap.from('.tracker-status', { autoAlpha: 0, duration: 0.5, delay: 0.15, ease: 'expo.out' })
   }, { scope: rootRef, dependencies: [driverLoc, locError] })
 
   useEffect(() => {

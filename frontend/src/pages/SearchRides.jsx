@@ -5,6 +5,7 @@ import { api } from '../lib/api'
 import RouteMap from '../components/maps/RouteMap'
 import { formatCurrency, formatRideTime, formatVehicleName, getDriverName } from '../lib/rideDisplay'
 import AddressAutocomplete from '../components/AddressAutocomplete'
+import { Icon } from '../components/ui/icon'
 
 const SORT_OPTIONS = [
   { value: 'earliest', label: 'Earliest Departure' },
@@ -31,16 +32,16 @@ export default function SearchRides() {
 
   useGSAP(() => {
     if (reducedMotion) return
-    gsap.from('.search-bar-card', { autoAlpha: 0, y: -12, duration: 0.35, ease: 'power2.out' })
+    gsap.from('.search-bar-card', { autoAlpha: 0, y: -12, duration: 0.4, ease: 'expo.out' })
   }, { scope: pageRef })
 
   useGSAP(() => {
     if (reducedMotion) return
     gsap.from('.error-box', { autoAlpha: 0, x: -10, duration: 0.3 })
     gsap.from('.results-header', { autoAlpha: 0, duration: 0.4 })
-    gsap.from('.search-initial-state', { autoAlpha: 0, y: 16, duration: 0.4, ease: 'power2.out' })
+    gsap.from('.search-initial-state', { autoAlpha: 0, y: 16, duration: 0.45, ease: 'expo.out' })
     gsap.from('.loading', { autoAlpha: 0, duration: 0.3 })
-    gsap.from('.ride-cards-list .ride-card-horizontal', { autoAlpha: 0, y: 24, duration: 0.35, ease: 'power2.out', stagger: 0.06 })
+    gsap.from('.ride-cards-list .ride-card-horizontal', { autoAlpha: 0, y: 24, duration: 0.5, ease: 'expo.out', stagger: 0.07 })
   }, { scope: pageRef, dependencies: [results, loading, initialLoading] })
 
   const updateForm = (field) => (e) =>
@@ -121,7 +122,7 @@ export default function SearchRides() {
             </div>
             <div className="search-bar-divider" />
             <div className="search-bar-field search-bar-date-field">
-              <span className="material-symbols-outlined search-field-icon">calendar_today</span>
+              <Icon name="calendar_today" className="search-field-icon" />
               <div className="search-field-content">
                 <span className="search-field-label">Date</span>
                 <input
@@ -135,8 +136,9 @@ export default function SearchRides() {
                 type="submit"
                 className="search-submit-btn"
                 disabled={loading}
+                aria-label="Search rides"
               >
-                <span className="material-symbols-outlined">search</span>
+                <Icon name="search" />
               </button>
             </div>
           </div>
@@ -181,7 +183,7 @@ export default function SearchRides() {
             {results === null && !initialLoading && allRides.length === 0 && (
               <div className="search-initial-state">
                 <div className="empty-state">
-                  <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--outline-variant)', marginBottom: 12 }}>search</span>
+                  <Icon name="search" size={48} style={{ color: 'var(--outline-variant)', marginBottom: 12 }} />
                   <h3>No rides available</h3>
                   <p>There are no open rides right now. Check back later or offer a ride!</p>
                 </div>
@@ -220,7 +222,7 @@ export default function SearchRides() {
                         <div className="ride-map-column">
                           <div className="ride-map-route-labels">
                             <span className="ride-map-route-label">{ride.from_city}</span>
-                            <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--outline)' }}>east</span>
+                            <Icon name="east" size={14} style={{ color: 'var(--outline)' }} />
                             <span className="ride-map-route-label">{ride.to_city}</span>
                           </div>
                           <div className="ride-map-preview">
@@ -239,14 +241,14 @@ export default function SearchRides() {
                           <div>
                             <div className="ride-card-driver-row">
                               <h3 className="ride-card-driver-name">{getDriverName(ride)}</h3>
-                              <span className="material-symbols-outlined ride-verified-icon">verified</span>
+                              <Icon name="verified" className="ride-verified-icon" />
                               <div className="ride-rating-pill">
-                                <span className="material-symbols-outlined ride-rating-star">star</span>
+                                <Icon name="star" className="ride-rating-star" />
                                 <span>{ride.driver_avg_rating ? Number(ride.driver_avg_rating).toFixed(1) : '-'}</span>
                               </div>
                             </div>
                             <p className="ride-card-vehicle">
-                              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>directions_car</span>
+                              <Icon name="directions_car" size={18} />
                               {formatVehicleName(ride)}
                             </p>
                           </div>
@@ -258,13 +260,13 @@ export default function SearchRides() {
                         <div className="ride-card-features">
                           {ride.available_seats != null && (
                             <div className="ride-feature-item">
-                              <span className="material-symbols-outlined">event_seat</span>
+                              <Icon name="event_seat" />
                               <span>{ride.available_seats} seat{ride.available_seats !== 1 ? 's' : ''} left</span>
                             </div>
                           )}
                           {ride.distance_km != null && (
                             <div className="ride-feature-item">
-                              <span className="material-symbols-outlined">route</span>
+                              <Icon name="route" />
                               <span>{Number(ride.distance_km).toFixed(1)} km</span>
                             </div>
                           )}
@@ -317,7 +319,7 @@ export default function SearchRides() {
                       <div className="ride-map-column">
                         <div className="ride-map-route-labels">
                           <span className="ride-map-route-label">{ride.from_city}</span>
-                          <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'var(--outline)' }}>east</span>
+                          <Icon name="east" size={14} style={{ color: 'var(--outline)' }} />
                           <span className="ride-map-route-label">{ride.to_city}</span>
                         </div>
                         <div className="ride-map-preview">
@@ -338,14 +340,14 @@ export default function SearchRides() {
                           <div>
                             <div className="ride-card-driver-row">
                               <h3 className="ride-card-driver-name">{getDriverName(ride)}</h3>
-                              <span className="material-symbols-outlined ride-verified-icon">verified</span>
+                              <Icon name="verified" className="ride-verified-icon" />
                               <div className="ride-rating-pill">
-                                <span className="material-symbols-outlined ride-rating-star">star</span>
+                                <Icon name="star" className="ride-rating-star" />
                                 <span>{ride.driver_avg_rating ? Number(ride.driver_avg_rating).toFixed(1) : '-'}</span>
                               </div>
                             </div>
                             <p className="ride-card-vehicle">
-                              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>directions_car</span>
+                              <Icon name="directions_car" size={18} />
                               {formatVehicleName(ride)}
                             </p>
                           </div>
@@ -358,13 +360,13 @@ export default function SearchRides() {
                         <div className="ride-card-features">
                           {ride.available_seats != null && (
                             <div className="ride-feature-item">
-                              <span className="material-symbols-outlined">event_seat</span>
+                              <Icon name="event_seat" />
                               <span>{ride.available_seats} seat{ride.available_seats !== 1 ? 's' : ''} left</span>
                             </div>
                           )}
                           {ride.distance_km != null && (
                             <div className="ride-feature-item">
-                              <span className="material-symbols-outlined">route</span>
+                              <Icon name="route" />
                               <span>{Number(ride.distance_km).toFixed(1)} km</span>
                             </div>
                           )}

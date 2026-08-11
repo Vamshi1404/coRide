@@ -5,6 +5,7 @@ import { api } from '../lib/api'
 import AddVehicle from '../components/vehicles/AddVehicle'
 import { geocodeAddress, calculateRoute } from '../lib/tomtom'
 import AddressAutocomplete from '../components/AddressAutocomplete'
+import { Icon } from '../components/ui/icon'
 
 export default function OfferRide() {
   const navigate = useNavigate()
@@ -262,7 +263,7 @@ export default function OfferRide() {
                 </span>
               ) : (
                 <>
-                  <span className="material-symbols-outlined">add_circle</span>
+                  <Icon name="add_circle" />
                   Post Ride
                 </>
               )}

@@ -6,6 +6,7 @@ import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
 import RatingModal from '../ratings/RatingModal'
+import { Icon } from '../../components/ui/icon'
 
 const COMPLETED_RIDE_TYPES = new Set(['ride_completed', 'ride_complete'])
 
@@ -129,7 +130,7 @@ export default function NotificationBell() {
         className={`bell-btn ${shake ? 'shake' : ''}`}
         onClick={() => setOpen(!open)}
       >
-        <span className="material-symbols-outlined" style={{ fontSize: 24 }}>notifications</span>
+        <Icon name="notifications" size={24} />
         {unread > 0 && (
           <span className="bell-badge">
             {unread > 99 ? '99+' : unread}

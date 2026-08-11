@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Icon } from '../../components/ui/icon'
 
 export default function Footer() {
   return (
@@ -6,7 +7,7 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-brand">
           <div className="footer-logo">
-            <span className="material-symbols-outlined logo-icon">directions_car</span>
+            <Icon name="directions_car" className="logo-icon" />
             <span className="logo-text">CoRide</span>
           </div>
           <p className="footer-tagline">

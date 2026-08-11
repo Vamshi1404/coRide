@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../lib/gsapSetup'
 
-export default function useGsapReveal({ selector = '.gsap-reveal', y = 24 } = {}) {
+export default function useGsapReveal({ selector = '.gsap-reveal', y = 28 } = {}) {
   const containerRef = useRef(null)
 
   useGSAP(() => {
@@ -19,8 +19,8 @@ export default function useGsapReveal({ selector = '.gsap-reveal', y = 24 } = {}
         gsap.from(el, {
           autoAlpha: 0,
           y,
-          duration: 0.7,
-          ease: 'power2.out',
+          duration: 0.9,
+          ease: 'expo.out',
           scrollTrigger: {
             trigger: el,
             start: 'top 88%',

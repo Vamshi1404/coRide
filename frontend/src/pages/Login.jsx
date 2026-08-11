@@ -4,6 +4,8 @@ import { gsap, useGSAP } from '../lib/gsapSetup'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { Button } from '../components/ui/button'
+import { Icon } from '../components/ui/icon'
+import AuthVisual from '../components/auth/AuthVisual'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -24,11 +26,14 @@ export default function Login() {
     })
 
     mm.add('(prefers-reduced-motion: no-preference)', () => {
-      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
-      tl.from('.auth-logo', { autoAlpha: 0, x: -20, duration: 0.6 })
-        .from('.auth-left-heading', { autoAlpha: 0, y: 30, duration: 0.6 })
-        .from('.auth-left-sub', { autoAlpha: 0, duration: 0.6 })
-        .from('.auth-form-panel', { autoAlpha: 0, x: 20, duration: 0.5 }, '-=0.3')
+      const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
+      tl.from('.auth-route-art', { autoAlpha: 0, duration: 1 })
+        .from('.auth-logo', { autoAlpha: 0, x: -20, duration: 0.7 })
+        .from('.auth-left-heading', { autoAlpha: 0, y: 32, duration: 0.7 }, '-=0.25')
+        .from('.auth-left-sub', { autoAlpha: 0, duration: 0.6 }, '-=0.3')
+        .from('.auth-route-chips > *', { autoAlpha: 0, y: 12, stagger: 0.08, duration: 0.4 }, '-=0.2')
+        .from('.auth-stats > *', { autoAlpha: 0, y: 16, stagger: 0.08, duration: 0.5 }, '-=0.25')
+        .from('.auth-form-panel', { autoAlpha: 0, x: 24, duration: 0.6 }, '-=0.35')
     })
 
     return () => mm.revert()
@@ -62,9 +67,11 @@ export default function Login() {
         <div className="auth-left-overlay" />
         <div className="auth-left-content">
           <div className="auth-logo">
-            <span className="material-symbols-outlined auth-logo-icon">directions_car</span>
+            <Icon name="directions_car" className="auth-logo-icon" />
             <span className="auth-logo-text">CoRide</span>
           </div>
+
+          <AuthVisual />
 
           <div>
             <h1 className="auth-left-heading">
@@ -81,7 +88,7 @@ export default function Login() {
       <div className="auth-split-right">
         <div className="auth-form-panel">
           <div className="auth-mobile-logo">
-            <span className="material-symbols-outlined">directions_car</span>
+            <Icon name="directions_car" />
             <span>CoRide</span>
           </div>
 
@@ -106,7 +113,7 @@ export default function Login() {
                   placeholder="executive@company.com"
                   autoComplete="email"
                 />
-                <span className="material-symbols-outlined input-icon">mail</span>
+                <Icon name="mail" className="input-icon" />
               </div>
             </div>
 
@@ -127,9 +134,7 @@ export default function Login() {
                   onClick={() => setShowPassword((p) => !p)}
                   tabIndex={-1}
                 >
-                  <span className="material-symbols-outlined">
-                    {showPassword ? 'visibility' : 'visibility_off'}
-                  </span>
+                  <Icon name={showPassword ? 'visibility' : 'visibility_off'} />
                 </button>
               </div>
             </div>
@@ -142,7 +147,7 @@ export default function Login() {
                   onChange={(e) => setRemember(e.target.checked)}
                 />
                 <span className="auth-checkbox-mark">
-                  <span className="material-symbols-outlined">check</span>
+                  <Icon name="check" />
                 </span>
                 <span className="auth-checkbox-label">Remember me</span>
               </label>
@@ -154,7 +159,7 @@ export default function Login() {
               ) : (
                 <>
                   Sign In
-                  <span className="material-symbols-outlined">arrow_forward</span>
+                  <Icon name="arrow_forward" />
                 </>
               )}
             </Button>

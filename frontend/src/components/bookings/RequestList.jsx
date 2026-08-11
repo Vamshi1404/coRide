@@ -25,7 +25,7 @@ export default function RequestList({ requests, ride, onUpdate }) {
     }
     setLoading(null)
 
-    toast.success(status === 'accepted' ? 'Passenger accepted!' : 'Request rejected.')
+    toast.success(status === 'accepted' ? 'Passenger accepted!' : 'Request declined.')
     onUpdate?.()
   }
 
@@ -71,7 +71,7 @@ export default function RequestList({ requests, ride, onUpdate }) {
                   onClick={() => respond(req.id, 'rejected')}
                   disabled={loading === req.id}
                 >
-                  {loading === req.id ? '...' : 'Reject'}
+                  {loading === req.id ? '...' : 'Decline'}
                 </button>
               </div>
             </div>

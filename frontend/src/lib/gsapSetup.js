@@ -4,6 +4,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
 
-gsap.defaults({ ease: 'power2.out', duration: 0.6 })
+gsap.defaults({ ease: 'expo.out', duration: 0.7 })
 
 export { gsap, useGSAP, ScrollTrigger }

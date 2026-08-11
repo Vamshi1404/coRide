@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { gsap, useGSAP } from '../lib/gsapSetup'
 import { api } from '../lib/api'
 import ChatWindow from '../components/chat/ChatWindow'
+import { Icon } from '../components/ui/icon'
 
 function getInitials(name) {
   if (!name) return '?'
@@ -79,7 +80,7 @@ export default function ChatPage() {
       {/* Conversations Sidebar */}
       <aside className="chat-conversations-sidebar">
         <div className="conv-search-wrap">
-          <span className="material-symbols-outlined conv-search-icon">search</span>
+          <Icon name="search" className="conv-search-icon" />
           <input
             type="text"
             placeholder="Search conversations"
@@ -148,7 +149,7 @@ export default function ChatPage() {
           />
         ) : (
           <div className="chat-empty-state">
-            <span className="material-symbols-outlined chat-empty-icon">chat_bubble</span>
+            <Icon name="chat_bubble" className="chat-empty-icon" />
             <h2>Secure Messaging</h2>
             <p>Tap a conversation to start chatting with your captain.</p>
           </div>

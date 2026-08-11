@@ -42,7 +42,7 @@ export default function RouteMap({ from, to, height = 300, className = '' }) {
             },
           },
           layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: { 'line-color': '#008080', 'line-width': 4, 'line-opacity': 0.8 },
+          paint: { 'line-color': '#1b7f3c', 'line-width': 4, 'line-opacity': 0.85 },
         })
 
         const bounds = new tt.LngLatBounds()

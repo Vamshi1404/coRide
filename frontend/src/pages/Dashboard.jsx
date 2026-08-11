@@ -4,6 +4,7 @@ import { gsap, useGSAP } from '../lib/gsapSetup'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
 import { formatRideDateTime } from '../lib/rideDisplay'
+import { Icon } from '../components/ui/icon'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -16,9 +17,21 @@ export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [activeRides, setActiveRides] = useState([])
+  const [mode, setMode] = useState('passenger')
   const pageRef = useRef(null)
+  const pillRef = useRef(null)
 
   const firstName = user?.name?.split(' ')[0] || 'there'
+
+  const selectMode = (m) => {
+    if (m === mode || !pillRef.current) return
+    setMode(m)
+    gsap.to(pillRef.current, {
+      xPercent: m === 'driver' ? 100 : 0,
+      duration: 0.4,
+      ease: 'expo.out',
+    })
+  }
 
   useEffect(() => {
     Promise.all([
@@ -48,12 +61,12 @@ export default function Dashboard() {
     })
 
     mm.add('(prefers-reduced-motion: no-preference)', () => {
-      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
-      tl.from('.dash-hero', { autoAlpha: 0, y: 24, duration: 0.5 })
-        .from('.dash-bento > *', { autoAlpha: 0, y: 24, duration: 0.5, stagger: 0.12 }, '-=0.3')
-        .from('.dash-active-rides, .dash-commute-section', { autoAlpha: 0, y: 24, duration: 0.5 }, '-=0.2')
-        .from('.dash-quick-links', { autoAlpha: 0, y: 24, duration: 0.5 }, '-=0.2')
-        .from('.dash-sidebar-img-card, .dash-stats', { autoAlpha: 0, y: 24, duration: 0.5, stagger: 0.1 }, '-=0.3')
+      const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
+      tl.from('.dash-hero', { autoAlpha: 0, y: 24, duration: 0.6 })
+        .from('.dash-bento > *', { autoAlpha: 0, y: 24, duration: 0.6, stagger: 0.1 }, '-=0.35')
+        .from('.dash-active-rides, .dash-commute-section', { autoAlpha: 0, y: 24, duration: 0.55 }, '-=0.25')
+        .from('.dash-quick-links', { autoAlpha: 0, y: 24, duration: 0.55 }, '-=0.25')
+        .from('.dash-sidebar-img-card, .dash-stats', { autoAlpha: 0, y: 24, duration: 0.55, stagger: 0.1 }, '-=0.35')
     })
 
     return () => mm.revert()
@@ -74,38 +87,66 @@ export default function Dashboard() {
 
       <div className="dash-grid">
         <div className="dash-main">
+          <div className="role-switch" role="tablist" aria-label="Choose your travel mode">
+            <div className="role-switch-pill" ref={pillRef} />
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'passenger'}
+              data-active={mode === 'passenger' ? 'true' : 'false'}
+              className="role-switch-btn"
+              onClick={() => { selectMode('passenger'); navigate('/search') }}
+            >
+              <Icon name="person" />
+              Find a Ride
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'driver'}
+              data-active={mode === 'driver' ? 'true' : 'false'}
+              className="role-switch-btn"
+              onClick={() => { selectMode('driver'); navigate('/offer-ride') }}
+            >
+              <Icon name="directions_car" />
+              Offer a Ride
+            </button>
+          </div>
+
           <div className="dash-bento">
             <button
               className="dash-find-card"
-              onClick={() => navigate('/search')}
+              data-active={mode === 'passenger' ? 'true' : 'false'}
+              onClick={() => { selectMode('passenger'); navigate('/search') }}
             >
               <div className="dash-card-icon">
-                <span className="material-symbols-outlined">search</span>
+                <Icon name="search" />
               </div>
               <h3 className="dash-card-title">Find a Ride</h3>
               <p className="dash-card-desc">Join an existing carpool to your destination.</p>
               <span className="dash-card-link">
-                Explore Routes <span className="material-symbols-outlined">arrow_forward</span>
+                Explore Routes <Icon name="arrow_forward" />
               </span>
               <div className="dash-card-bg-icon">
-                <span className="material-symbols-outlined">commute</span>
+                <Icon name="commute" />
               </div>
             </button>
 
             <button
               className="dash-offer-card"
-              onClick={() => navigate('/offer-ride')}
+              data-active={mode === 'driver' ? 'true' : 'false'}
+              onClick={() => { selectMode('driver'); navigate('/offer-ride') }}
             >
               <div className="dash-card-icon dash-offer-icon">
-                <span className="material-symbols-outlined">directions_car</span>
+                <Icon name="directions_car" />
               </div>
               <h3 className="dash-card-title">Offer a Ride</h3>
               <p className="dash-card-desc">Share your journey and offset your commute costs.</p>
               <span className="dash-card-link">
-                Post your Trip <span className="material-symbols-outlined">arrow_forward</span>
+                Post your Trip <Icon name="arrow_forward" />
               </span>
               <div className="dash-card-bg-icon">
-                <span className="material-symbols-outlined">electric_car</span>
+                <Icon name="electric_car" />
               </div>
             </button>
           </div>
@@ -134,7 +175,7 @@ export default function Dashboard() {
                       className="dash-chat-btn"
                       onClick={() => navigate(`/chat/${ride.id}`)}
                     >
-                      <span className="material-symbols-outlined">chat_bubble</span>
+                      <Icon name="chat_bubble" />
                       Chat
                     </button>
                   </div>
@@ -151,7 +192,7 @@ export default function Dashboard() {
               </div>
               <div className="dash-commute-placeholder">
                 <div className="dash-commute-placeholder-overlay">
-                  <span className="material-symbols-outlined">route</span>
+                  <Icon name="route" />
                   <h3>Plan your next ride</h3>
                   <p>Search for available routes or offer a ride to get started.</p>
                   <button className="dash-placeholder-btn" onClick={() => navigate('/search')}>
@@ -164,11 +205,11 @@ export default function Dashboard() {
 
           <section className="dash-quick-links">
             <button className="dash-quick-link" onClick={() => navigate('/my-rides')}>
-              <span className="material-symbols-outlined">calendar_month</span>
+              <Icon name="calendar_month" />
               <span>My Rides</span>
             </button>
             <button className="dash-quick-link" onClick={() => navigate('/profile')}>
-              <span className="material-symbols-outlined">person</span>
+              <Icon name="person" />
               <span>Profile</span>
             </button>
           </section>
@@ -187,12 +228,12 @@ export default function Dashboard() {
             <h3>Quick Stats</h3>
             <div className="dash-stats-grid">
               <div className="dash-stat-card">
-                <span className="material-symbols-outlined">done_all</span>
+                <Icon name="done_all" />
                 <p className="dash-stat-num">{user?.completed_rides || 0}</p>
                 <p className="dash-stat-label">Rides Completed</p>
               </div>
               <div className="dash-stat-card">
-                <span className="material-symbols-outlined">eco</span>
+                <Icon name="eco" />
                 <p className="dash-stat-num">0</p>
                 <p className="dash-stat-label">CO2 Saved</p>
               </div>

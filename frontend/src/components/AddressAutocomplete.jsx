@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { searchAddress } from '../lib/tomtom'
+import { Icon } from './ui/icon'
 
 export default function AddressAutocomplete({ value, onChange, onSelect, placeholder, icon, inputClassName = '' }) {
   const [suggestions, setSuggestions] = useState([])
@@ -56,9 +57,7 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
     <div className="address-autocomplete" ref={wrapperRef} style={{ position: 'relative' }}>
       <div style={{ position: 'relative' }}>
         {icon && (
-          <span className="material-symbols-outlined" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 20, color: 'var(--on-surface-variant)', pointerEvents: 'none' }}>
-            {icon}
-          </span>
+          <Icon name={icon} size={20} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--on-surface-variant)', pointerEvents: 'none' }} />
         )}
         <input
           type="text"
@@ -77,7 +76,7 @@ export default function AddressAutocomplete({ value, onChange, onSelect, placeho
         <ul className="autocomplete-dropdown">
           {suggestions.map((item, i) => (
             <li key={i} onMouseDown={() => select(item)} className="autocomplete-item">
-              <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 8, color: 'var(--on-surface-variant)' }}>location_on</span>
+              <Icon name="location_on" size={18} style={{ marginRight: 8, color: 'var(--on-surface-variant)' }} />
               {item.label}
             </li>
           ))}

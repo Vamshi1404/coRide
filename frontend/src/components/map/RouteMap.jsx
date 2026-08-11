@@ -65,10 +65,13 @@ export default function RouteMap({ from, to, driverLocation, height = '300px' })
         const el = document.createElement('div')
         el.style.width = '16px'
         el.style.height = '16px'
-        el.style.background = '#4f46e5'
+        el.style.background = 'var(--success)'
         el.style.borderRadius = '50%'
         el.style.border = '3px solid white'
-        el.style.boxShadow = '0 0 8px rgba(79,70,229,0.6)'
+        el.style.boxShadow = '0 0 8px var(--primary-glow)'
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          el.style.animation = 'pulse-ring 2.4s ease-out infinite'
+        }
         const marker = new tt.Marker({ element: el })
           .setLngLat([driverLocation.lng, driverLocation.lat])
           .addTo(mapRef.current)

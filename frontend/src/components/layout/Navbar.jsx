@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../ui/button'
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet'
 import NotificationBell from '../notifications/NotificationBell'
+import { Icon } from '../../components/ui/icon'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
@@ -40,7 +41,7 @@ export default function Navbar() {
     <nav ref={navRef} className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="nav-inner">
         <Link to={user ? "/dashboard" : "/"} className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className="material-symbols-outlined" style={{ color: 'var(--primary)', fontVariationSettings: "'FILL' 1", fontSize: 26 }}>directions_car</span>
+          <Icon name="directions_car" filled size={26} style={{ color: 'var(--primary)' }} />
           CoRide
         </Link>
 
@@ -59,7 +60,7 @@ export default function Navbar() {
                 {user.name?.charAt(0)?.toUpperCase() || 'U'}
               </NavLink>
               <Button variant="outline" className="btn-logout" onClick={handleLogout}>
-                Logout
+                Log Out
               </Button>
             </div>
           ) : (
@@ -73,7 +74,7 @@ export default function Navbar() {
         {/* Mobile Hamburger Toggle */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger className="mobile-menu-btn" aria-label="Toggle navigation menu">
-            <span className="material-symbols-outlined">menu</span>
+            <Icon name="menu" />
           </SheetTrigger>
           <SheetContent side="right" className="w-80 sm:max-w-sm p-0">
             <SheetHeader className="sr-only">
@@ -81,26 +82,26 @@ export default function Navbar() {
             </SheetHeader>
             <div className="mobile-drawer-inner">
               <NavLink to="/dashboard" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                <span className="material-symbols-outlined">dashboard</span> Home
+                <Icon name="dashboard" /> Home
               </NavLink>
               <NavLink to="/search" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                <span className="material-symbols-outlined">search</span> Find Ride
+                <Icon name="search" /> Find Ride
               </NavLink>
               <NavLink to="/offer-ride" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                <span className="material-symbols-outlined">add_circle</span> Offer Ride
+                <Icon name="add_circle" /> Offer Ride
               </NavLink>
               <NavLink to="/my-rides" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                <span className="material-symbols-outlined">directions_car</span> My Rides
+                <Icon name="directions_car" /> My Rides
               </NavLink>
               <NavLink to="/chats" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                <span className="material-symbols-outlined">chat</span> Chats
+                <Icon name="chat" /> Chats
               </NavLink>
               <NavLink to="/profile" className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}>
-                <span className="material-symbols-outlined">person</span> Profile
+                <Icon name="person" /> Profile
               </NavLink>
               {user ? (
                 <Button variant="outline" className="mobile-logout-btn" onClick={handleLogout}>
-                  <span className="material-symbols-outlined">logout</span> Logout
+                  <Icon name="logout" /> Log Out
                 </Button>
               ) : (
                 <div className="mobile-auth-btns">

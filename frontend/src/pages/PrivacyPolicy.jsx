@@ -46,8 +46,8 @@ export default function PrivacyPolicy() {
           padding: 10px 18px;
           border-radius: 999px;
           background: transparent;
-          border: 1px solid rgba(22, 163, 74, 0.3);
-          color: #16a34a;
+          border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+          color: var(--primary);
           font-weight: 500;
           font-size: 0.95rem;
           text-decoration: none;
@@ -55,8 +55,8 @@ export default function PrivacyPolicy() {
         }
 
         .policy-back-link:hover {
-          background: #16a34a;
-          border-color: #16a34a;
+          background: var(--primary);
+          border-color: var(--primary);
           color: #ffffff;
           transform: translateX(-2px);
         }
