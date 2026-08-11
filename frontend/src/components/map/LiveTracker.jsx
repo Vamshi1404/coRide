@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { gsap, useGSAP } from '../../lib/gsapSetup'
 import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLocation } from '../../hooks/useLocation'
@@ -14,6 +14,14 @@ export default function LiveTracker({ ride }) {
   const { location, error: locError, setEnabled } = useLocation()
   const lastUpdateRef = useRef(Date.now())
   const [secondsAgo, setSecondsAgo] = useState(0)
+  const rootRef = useRef(null)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  useGSAP(() => {
+    if (reducedMotion) return
+    gsap.from('.live-tracker, .tracker-placeholder, .tracker-error', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out' })
+    gsap.from('.tracker-status', { autoAlpha: 0, duration: 0.4, delay: 0.15, ease: 'power2.out' })
+  }, { scope: rootRef, dependencies: [driverLoc, locError] })
 
   useEffect(() => {
     if (!isDriver || ride?.status !== 'in_progress' || !location) return
@@ -92,34 +100,29 @@ export default function LiveTracker({ ride }) {
 
   if (ride?.status !== 'in_progress') {
     return (
-      <motion.div
+      <div
         className="tracker-placeholder"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        ref={rootRef}
       >
         <p>Tracking will appear here once the ride starts.</p>
-      </motion.div>
+      </div>
     )
   }
 
   if (isDriver && locError) {
     return (
-      <motion.div
+      <div
         className="tracker-error"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        ref={rootRef}
       >
         <p>{locError}</p>
-        <motion.button
+        <button
           className="btn-secondary"
           onClick={() => setEnabled(true)}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
         >
           Retry GPS
-        </motion.button>
-      </motion.div>
+        </button>
+      </div>
     )
   }
 
@@ -129,20 +132,13 @@ export default function LiveTracker({ ride }) {
   const trafficDelay = eta ? eta.trafficDurationSeconds - eta.durationSeconds : 0
 
   return (
-    <motion.div
+    <div
       className="live-tracker"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.15 }}
+      ref={rootRef}
     >
       <RouteMap from={fromPt} to={toPt} driverLocation={driverLoc} />
       {driverLoc && (
-        <motion.div
-          className="tracker-status"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
+        <div className="tracker-status">
           <p>
             <span className="tracker-dot" />
             {isDriver ? 'Your location is being shared' : 'Driver location updated live'}
@@ -156,8 +152,8 @@ export default function LiveTracker({ ride }) {
           <p className="tracker-staleness" style={{ fontSize: '0.75rem', opacity: 0.6, marginTop: 2 }}>
             Updated {secondsAgo}s ago
           </p>
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   )
 }

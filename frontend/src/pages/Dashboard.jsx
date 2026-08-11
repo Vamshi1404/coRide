@@ -1,25 +1,9 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { gsap, useGSAP } from '../lib/gsapSetup'
 import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
 import { formatRideDateTime } from '../lib/rideDisplay'
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, delay: i * 0.1, ease: 'easeOut' },
-  }),
-}
-
-const stagger = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.12, delayChildren: 0.05 },
-  },
-}
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -32,6 +16,7 @@ export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [activeRides, setActiveRides] = useState([])
+  const pageRef = useRef(null)
 
   const firstName = user?.name?.split(' ')[0] || 'there'
 
@@ -55,15 +40,28 @@ export default function Dashboard() {
     })
   }, [])
 
+  useGSAP(() => {
+    const mm = gsap.matchMedia()
+
+    mm.add('(prefers-reduced-motion: reduce)', () => {
+      gsap.set('.dash-hero, .dash-bento > *, .dash-active-rides, .dash-commute-section, .dash-quick-links, .dash-sidebar-img-card, .dash-stats', { clearProps: 'all' })
+    })
+
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
+      tl.from('.dash-hero', { autoAlpha: 0, y: 24, duration: 0.5 })
+        .from('.dash-bento > *', { autoAlpha: 0, y: 24, duration: 0.5, stagger: 0.12 }, '-=0.3')
+        .from('.dash-active-rides, .dash-commute-section', { autoAlpha: 0, y: 24, duration: 0.5 }, '-=0.2')
+        .from('.dash-quick-links', { autoAlpha: 0, y: 24, duration: 0.5 }, '-=0.2')
+        .from('.dash-sidebar-img-card, .dash-stats', { autoAlpha: 0, y: 24, duration: 0.5, stagger: 0.1 }, '-=0.3')
+    })
+
+    return () => mm.revert()
+  }, { scope: pageRef })
+
   return (
-    <div className="dash-page">
-      <motion.div
-        className="dash-hero"
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        custom={0}
-      >
+    <div className="dash-page" ref={pageRef}>
+      <div className="dash-hero">
         <div className="dash-hero-bg">
           <img src="/images/driver-profile.jpg" alt="" />
           <div className="dash-hero-overlay" />
@@ -72,21 +70,14 @@ export default function Dashboard() {
           <h1 className="dash-greeting">{getGreeting()}, {firstName}</h1>
           <p className="dash-subtitle">Ready for your next commute?</p>
         </div>
-      </motion.div>
+      </div>
 
       <div className="dash-grid">
         <div className="dash-main">
-          <motion.div
-            className="dash-bento"
-            variants={stagger}
-            initial="hidden"
-            animate="visible"
-          >
-            <motion.button
+          <div className="dash-bento">
+            <button
               className="dash-find-card"
-              variants={fadeUp}
               onClick={() => navigate('/search')}
-              whileHover={{ y: -6, transition: { duration: 0.2 } }}
             >
               <div className="dash-card-icon">
                 <span className="material-symbols-outlined">search</span>
@@ -99,13 +90,11 @@ export default function Dashboard() {
               <div className="dash-card-bg-icon">
                 <span className="material-symbols-outlined">commute</span>
               </div>
-            </motion.button>
+            </button>
 
-            <motion.button
+            <button
               className="dash-offer-card"
-              variants={fadeUp}
               onClick={() => navigate('/offer-ride')}
-              whileHover={{ y: -6, transition: { duration: 0.2 } }}
             >
               <div className="dash-card-icon dash-offer-icon">
                 <span className="material-symbols-outlined">directions_car</span>
@@ -118,17 +107,11 @@ export default function Dashboard() {
               <div className="dash-card-bg-icon">
                 <span className="material-symbols-outlined">electric_car</span>
               </div>
-            </motion.button>
-          </motion.div>
+            </button>
+          </div>
 
           {activeRides.length > 0 ? (
-            <motion.section
-              className="dash-active-rides"
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              custom={3}
-            >
+            <section className="dash-active-rides">
               <div className="dash-commute-header">
                 <h2>
                   Active Rides
@@ -136,14 +119,10 @@ export default function Dashboard() {
                 </h2>
               </div>
               <div className="dash-active-list">
-                {activeRides.map((ride, i) => (
-                  <motion.div
+                {activeRides.map((ride) => (
+                  <div
                     key={ride.id}
                     className="dash-active-item"
-                    variants={fadeUp}
-                    custom={i}
-                    initial="hidden"
-                    animate="visible"
                   >
                     <div className="dash-active-route">
                       <span className="dash-active-cities">{ride.from_city} to {ride.to_city}</span>
@@ -151,27 +130,19 @@ export default function Dashboard() {
                         {formatRideDateTime(ride.departure_time)}
                       </span>
                     </div>
-                    <motion.button
+                    <button
                       className="dash-chat-btn"
                       onClick={() => navigate(`/chat/${ride.id}`)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
                     >
                       <span className="material-symbols-outlined">chat_bubble</span>
                       Chat
-                    </motion.button>
-                  </motion.div>
+                    </button>
+                  </div>
                 ))}
               </div>
-            </motion.section>
+            </section>
           ) : (
-            <motion.section
-              className="dash-commute-section"
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              custom={3}
-            >
+            <section className="dash-commute-section">
               <div className="dash-commute-header">
                 <h2>
                   Your Next Commute
@@ -188,16 +159,10 @@ export default function Dashboard() {
                   </button>
                 </div>
               </div>
-            </motion.section>
+            </section>
           )}
 
-          <motion.section
-            className="dash-quick-links"
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={4}
-          >
+          <section className="dash-quick-links">
             <button className="dash-quick-link" onClick={() => navigate('/my-rides')}>
               <span className="material-symbols-outlined">calendar_month</span>
               <span>My Rides</span>
@@ -206,31 +171,19 @@ export default function Dashboard() {
               <span className="material-symbols-outlined">person</span>
               <span>Profile</span>
             </button>
-          </motion.section>
+          </section>
         </div>
 
         <aside className="dash-sidebar">
-          <motion.div
-            className="dash-sidebar-img-card"
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={5}
-          >
+          <div className="dash-sidebar-img-card">
             <img src="/images/corider.jpg" alt="" />
             <div className="dash-sidebar-img-overlay">
               <h4>CoRide Community</h4>
               <p>Connect with professionals on your route.</p>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="dash-stats"
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={6}
-          >
+          <div className="dash-stats">
             <h3>Quick Stats</h3>
             <div className="dash-stats-grid">
               <div className="dash-stat-card">
@@ -244,7 +197,7 @@ export default function Dashboard() {
                 <p className="dash-stat-label">CO2 Saved</p>
               </div>
             </div>
-          </motion.div>
+          </div>
         </aside>
       </div>
     </div>

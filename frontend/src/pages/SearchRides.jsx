@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { gsap, useGSAP } from '../lib/gsapSetup'
 import { api } from '../lib/api'
 import RouteMap from '../components/maps/RouteMap'
 import { formatCurrency, formatRideTime, formatVehicleName, getDriverName } from '../lib/rideDisplay'
@@ -11,14 +11,6 @@ const SORT_OPTIONS = [
   { value: 'price', label: 'Price: Low to High' },
 ]
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.06, duration: 0.35, ease: 'easeOut' },
-  }),
-}
-
 export default function SearchRides() {
   const navigate = useNavigate()
   const [form, setForm] = useState({ from: '', to: '', date: '' })
@@ -28,12 +20,28 @@ export default function SearchRides() {
   const [sortBy, setSortBy] = useState('earliest')
   const [allRides, setAllRides] = useState([])
   const [initialLoading, setInitialLoading] = useState(true)
+  const pageRef = useRef(null)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   useEffect(() => {
     api.get('/api/rides').then((data) => {
       setAllRides(data || [])
     }).catch(() => {}).finally(() => setInitialLoading(false))
   }, [])
+
+  useGSAP(() => {
+    if (reducedMotion) return
+    gsap.from('.search-bar-card', { autoAlpha: 0, y: -12, duration: 0.35, ease: 'power2.out' })
+  }, { scope: pageRef })
+
+  useGSAP(() => {
+    if (reducedMotion) return
+    gsap.from('.error-box', { autoAlpha: 0, x: -10, duration: 0.3 })
+    gsap.from('.results-header', { autoAlpha: 0, duration: 0.4 })
+    gsap.from('.search-initial-state', { autoAlpha: 0, y: 16, duration: 0.4, ease: 'power2.out' })
+    gsap.from('.loading', { autoAlpha: 0, duration: 0.3 })
+    gsap.from('.ride-cards-list .ride-card-horizontal', { autoAlpha: 0, y: 24, duration: 0.35, ease: 'power2.out', stagger: 0.06 })
+  }, { scope: pageRef, dependencies: [results, loading, initialLoading] })
 
   const updateForm = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
@@ -79,14 +87,9 @@ export default function SearchRides() {
     : []
 
   return (
-    <div className="search-rides-page">
+    <div className="search-rides-page" ref={pageRef}>
       {/* Search Bar Card */}
-      <motion.div
-        className="search-bar-card"
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-      >
+      <div className="search-bar-card">
         <form onSubmit={handleSubmit}>
           <div className="search-bar-grid">
             <div className="search-bar-field">
@@ -128,39 +131,28 @@ export default function SearchRides() {
                   className="search-field-input"
                 />
               </div>
-              <motion.button
+              <button
                 type="submit"
                 className="search-submit-btn"
                 disabled={loading}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.92 }}
               >
                 <span className="material-symbols-outlined">search</span>
-              </motion.button>
+              </button>
             </div>
           </div>
         </form>
-      </motion.div>
+      </div>
 
       {/* Results Area */}
       <div className="search-results-area">
           {error && (
-            <motion.div
-              className="error-box"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
+            <div className="error-box">
               {error}
-            </motion.div>
+            </div>
           )}
 
           {results !== null && !loading && (
-            <motion.div
-              className="results-header"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.15 }}
-            >
+            <div className="results-header">
               <span className="results-count">
                 Showing <strong>{results.length} ride{results.length !== 1 ? 's' : ''}</strong> for {form.date ? new Date(form.date).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' }) : 'today'}
               </span>
@@ -176,47 +168,28 @@ export default function SearchRides() {
                   ))}
                 </select>
               </div>
-            </motion.div>
+            </div>
           )}
 
-          <AnimatePresence mode="wait">
             {results === null && initialLoading && (
-              <motion.div
-                key="initial-loading"
-                className="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
+              <div className="loading">
                 <div className="spinner spinner-lg" />
                 <span>Loading available rides...</span>
-              </motion.div>
+              </div>
             )}
 
             {results === null && !initialLoading && allRides.length === 0 && (
-              <motion.div
-                key="empty-all"
-                className="search-initial-state"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
+              <div className="search-initial-state">
                 <div className="empty-state">
                   <span className="material-symbols-outlined" style={{ fontSize: 48, color: 'var(--outline-variant)', marginBottom: 12 }}>search</span>
                   <h3>No rides available</h3>
                   <p>There are no open rides right now. Check back later or offer a ride!</p>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {results === null && !initialLoading && allRides.length > 0 && (
-              <motion.div
-                key="all-rides"
-                className="ride-cards-list"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
+              <div className="ride-cards-list">
                 <div className="results-header">
                   <span className="results-count">
                     Showing <strong>all {allRides.length} open ride{allRides.length !== 1 ? 's' : ''}</strong>
@@ -238,15 +211,10 @@ export default function SearchRides() {
                   if (sortBy === 'price')
                     return (a.price_per_seat || a.final_cost || 0) - (b.price_per_seat || b.final_cost || 0)
                   return new Date(a.departure_time || 0) - new Date(b.departure_time || 0)
-                }).map((ride, i) => (
-                  <motion.div
+                }).map((ride) => (
+                  <div
                     key={ride.id}
                     className="ride-card-horizontal"
-                    custom={i}
-                    variants={cardVariants}
-                    initial="hidden"
-                    animate="visible"
-                    layout
                   >
                       <div className="ride-card-inner">
                         <div className="ride-map-column">
@@ -309,66 +277,41 @@ export default function SearchRides() {
                           <span className="ride-price-label">Total per seat</span>
                           <span className="ride-price-value">{formatCurrency(ride.price_per_seat ?? ride.final_cost)}</span>
                         </div>
-                        <motion.button
+                        <button
                           className="ride-book-btn"
                           onClick={() => navigate(`/rides/${ride.id}`)}
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.95 }}
                         >
                           Book Now
-                        </motion.button>
+                        </button>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
-              </motion.div>
+              </div>
             )}
 
             {loading && (
-              <motion.div
-                key="loading"
-                className="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
+              <div className="loading">
                 <div className="spinner spinner-lg" />
                 <span>Searching rides...</span>
-              </motion.div>
+              </div>
             )}
 
             {results !== null && !loading && results.length === 0 && (
-              <motion.div
-                key="empty"
-                className="search-initial-state"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-              >
+              <div className="search-initial-state">
                 <div className="empty-state">
                   <h3>No rides found</h3>
                   <p>Try different cities, dates, or adjust your filters.</p>
                 </div>
-              </motion.div>
+              </div>
             )}
 
             {results !== null && !loading && results.length > 0 && (
-              <motion.div
-                key="results"
-                className="ride-cards-list"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                {sortedResults.map((ride, i) => (
-                  <motion.div
+              <div className="ride-cards-list">
+                {sortedResults.map((ride) => (
+                  <div
                     key={ride.id}
                     className="ride-card-horizontal"
-                    custom={i}
-                    variants={cardVariants}
-                    initial="hidden"
-                    animate="visible"
-                    layout
                   >
                     <div className="ride-card-inner">
                       <div className="ride-map-column">
@@ -434,21 +377,18 @@ export default function SearchRides() {
                           <span className="ride-price-label">Total per seat</span>
                           <span className="ride-price-value">{formatCurrency(ride.price_per_seat ?? ride.final_cost)}</span>
                         </div>
-                        <motion.button
+                        <button
                           className="ride-book-btn"
                           onClick={() => navigate(`/rides/${ride.id}`)}
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.95 }}
                         >
                           Book Now
-                        </motion.button>
+                        </button>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </div>
     </div>
   )

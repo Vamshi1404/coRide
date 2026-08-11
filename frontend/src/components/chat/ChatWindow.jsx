@@ -1,13 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { gsap, useGSAP } from '../../lib/gsapSetup'
 import toast from 'react-hot-toast'
 import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
-
-const msgVariants = {
-  hidden: { opacity: 0, y: 12, scale: 0.95 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.2, ease: 'easeOut' } },
-}
 
 function getInitials(name) {
   if (!name) return '?'
@@ -30,6 +25,9 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
   const bottomRef = useRef(null)
   const lastIdRef = useRef(null)
   const convStatus = conversation?.status_text || ''
+  const rootRef = useRef(null)
+  const animatedIdsRef = useRef(new Set())
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   useEffect(() => {
     if (conversation?.name || conversation?.driver_name) {
@@ -51,6 +49,18 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
     }
   }, [rideId, conversation])
 
+  useGSAP(() => {
+    if (reducedMotion) return
+    const rows = rootRef.current?.querySelectorAll('.chat-msg-row') || []
+    rows.forEach((row) => {
+      const id = row.getAttribute('data-msg-id')
+      if (id && !animatedIdsRef.current.has(id)) {
+        animatedIdsRef.current.add(id)
+        gsap.from(row, { autoAlpha: 0, y: 12, scale: 0.95, duration: 0.2, ease: 'power2.out' })
+      }
+    })
+  }, { scope: rootRef, dependencies: [messages] })
+
   const areaRef = useRef(null)
   const userScrolledUpRef = useRef(false)
 
@@ -59,6 +69,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
     setMessages([])
     setLoading(true)
     lastIdRef.current = null
+    animatedIdsRef.current = new Set()
     loadMessages(true)
     const interval = setInterval(() => loadMessages(false), 3000)
     return () => clearInterval(interval)
@@ -197,7 +208,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
   )
 
   return (
-    <div className="chat-window-full">
+    <div className="chat-window-full" ref={rootRef}>
       <header className="chat-window-header">
         <div className="chat-header-left">
           {onBack && (
@@ -228,61 +239,56 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
           </div>
         )}
 
-        <AnimatePresence initial={false}>
-          {messages.map((msg, idx) => {
-            const isMine = String(msg.sender_id) === String(user?.id)
-            return (
-              <div key={msg.id}>
-                {showTimestamp(msg, idx) && (
-                  <div className="chat-timestamp-sep">
-                    <span>{formatTime(msg.created_at)}</span>
-                  </div>
-                )}
-                <motion.div
-                  className={`chat-msg-row ${isMine ? 'mine' : 'theirs'}`}
-                  variants={msgVariants}
-                  initial="hidden"
-                  animate="visible"
-                  layout
-                >
-                  {!isMine && (
-                    <div className="chat-msg-avatar-sm">{getInitials(msg.sender_name || convName)}</div>
-                  )}
-                  <div className="chat-msg-content">
-                    <div className={`chat-msg-bubble ${isMine ? 'mine' : 'theirs'}`}>
-                    {isLocationMsg(msg.content) ? (
-                      <a href={msg.content} target="_blank" rel="noreferrer" className="chat-location-card">
-                        <div className="chat-location-map-preview">
-                          <span className="material-symbols-outlined chat-location-pin">location_on</span>
-                        </div>
-                        <div className="chat-location-info">
-                          <span className="chat-location-title">Shared Location</span>
-                          <span className="chat-location-sub">Tap to open in Google Maps</span>
-                        </div>
-                        <span className="material-symbols-outlined chat-location-arrow">open_in_new</span>
-                      </a>
-                    ) : (
-                      <p className="chat-msg-text">{msg.content}</p>
-                    )}
-                  </div>
-                  <div className="chat-msg-meta">
-                    <span className="chat-msg-time">
-                      {msg.created_at
-                        ? new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
-                        : ''}
-                    </span>
-                    {isMine && (
-                      <span className="material-symbols-outlined chat-msg-read" style={{ opacity: msg.pending ? 0.5 : 1 }}>
-                        {msg.pending ? 'schedule' : 'done_all'}
-                      </span>
-                    )}
-                  </div>
+        {messages.map((msg, idx) => {
+          const isMine = String(msg.sender_id) === String(user?.id)
+          return (
+            <div key={msg.id}>
+              {showTimestamp(msg, idx) && (
+                <div className="chat-timestamp-sep">
+                  <span>{formatTime(msg.created_at)}</span>
                 </div>
-              </motion.div>
+              )}
+              <div
+                className={`chat-msg-row ${isMine ? 'mine' : 'theirs'}`}
+                data-msg-id={msg.id}
+              >
+                {!isMine && (
+                  <div className="chat-msg-avatar-sm">{getInitials(msg.sender_name || convName)}</div>
+                )}
+                <div className="chat-msg-content">
+                  <div className={`chat-msg-bubble ${isMine ? 'mine' : 'theirs'}`}>
+                  {isLocationMsg(msg.content) ? (
+                    <a href={msg.content} target="_blank" rel="noreferrer" className="chat-location-card">
+                      <div className="chat-location-map-preview">
+                        <span className="material-symbols-outlined chat-location-pin">location_on</span>
+                      </div>
+                      <div className="chat-location-info">
+                        <span className="chat-location-title">Shared Location</span>
+                        <span className="chat-location-sub">Tap to open in Google Maps</span>
+                      </div>
+                      <span className="material-symbols-outlined chat-location-arrow">open_in_new</span>
+                    </a>
+                  ) : (
+                    <p className="chat-msg-text">{msg.content}</p>
+                  )}
+                </div>
+                <div className="chat-msg-meta">
+                  <span className="chat-msg-time">
+                    {msg.created_at
+                      ? new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+                      : ''}
+                  </span>
+                  {isMine && (
+                    <span className="material-symbols-outlined chat-msg-read" style={{ opacity: msg.pending ? 0.5 : 1 }}>
+                      {msg.pending ? 'schedule' : 'done_all'}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
             </div>
           )
         })}
-        </AnimatePresence>
 
         <div ref={bottomRef} />
       </div>
@@ -323,15 +329,13 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
               className="chat-text-input"
             />
           </div>
-          <motion.button
+          <button
             className="chat-send-btn"
             onClick={send}
             disabled={sending || !content.trim()}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.92 }}
           >
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>send</span>
-          </motion.button>
+          </button>
         </div>
       </footer>
     </div>

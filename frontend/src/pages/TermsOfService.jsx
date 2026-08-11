@@ -1,31 +1,27 @@
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { gsap, useGSAP } from '../lib/gsapSetup'
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 
 export default function TermsOfService() {
-  return (
-    <main className="policy-page">
-      <motion.div
-        className="policy-container"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <motion.h1
-          className="policy-title"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          Terms of Service
-        </motion.h1>
+  const pageRef = useRef(null)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-        <motion.div
-          className="policy-content"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
+  useGSAP(() => {
+    if (reducedMotion) return
+    gsap.from('.policy-title', { autoAlpha: 0, y: 20, duration: 0.5, ease: 'power2.out' })
+    gsap.from('.policy-content', { autoAlpha: 0, y: 20, duration: 0.5, delay: 0.1, ease: 'power2.out' })
+    gsap.from('.policy-footer', { autoAlpha: 0, y: 20, duration: 0.5, delay: 0.2, ease: 'power2.out' })
+  }, { scope: pageRef })
+
+  return (
+    <main className="policy-page" ref={pageRef}>
+      <div className="policy-container">
+        <h1 className="policy-title">
+          Terms of Service
+        </h1>
+
+        <div className="policy-content">
           <p className="policy-placeholder">We're still writing this one</p>
           <p className="policy-subtext">
             Our full Terms of Service are being finalized and will be
@@ -34,20 +30,15 @@ export default function TermsOfService() {
             keep this community trustworthy while we get the formal terms
             in place.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          className="policy-footer"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
+        <div className="policy-footer">
           <Link to="/" className="policy-back-link">
             <ArrowLeft size={18} />
             Back to Home
           </Link>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       <style>{`
         .policy-back-link {

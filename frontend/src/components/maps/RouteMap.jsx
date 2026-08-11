@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import tt from '@tomtom-international/web-sdk-maps'
-import { motion } from 'framer-motion'
 import { calculateRoute } from '../../lib/tomtom'
 
 const API_KEY = import.meta.env.VITE_TOMTOM_API_KEY
@@ -72,12 +71,8 @@ export default function RouteMap({ from, to, height = 300, className = '' }) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div>
       <div ref={mapEl} style={{ height, borderRadius: 12, overflow: 'hidden' }} className={className} />
-    </motion.div>
+    </div>
   )
 }

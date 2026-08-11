@@ -1,17 +1,21 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { gsap, useGSAP } from '../../lib/gsapSetup'
 import toast from 'react-hot-toast'
 import { api } from '../../lib/api'
-
-const fieldVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: (i) => ({ opacity: 1, y: 0, transition: { duration: 0.3, delay: i * 0.05 } }),
-}
 
 export default function AddVehicle({ onSaved, onSkip }) {
   const [form, setForm] = useState({ type: 'car', brand: '', model: '', reg_no: '', seat_capacity: 4 })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const containerRef = useRef(null)
+
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  useGSAP(() => {
+    if (reducedMotion) return
+    gsap.from('.vehicle-form-container', { autoAlpha: 0, y: 20, duration: 0.3, ease: 'power2.out' })
+    gsap.from('.vehicle-form-container form > *', { autoAlpha: 0, y: 10, duration: 0.3, stagger: 0.05, ease: 'power2.out' })
+  }, { scope: containerRef })
 
   const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
   const updateNum = (field) => (e) => setForm({ ...form, [field]: parseInt(e.target.value) || 1 })
@@ -43,40 +47,25 @@ export default function AddVehicle({ onSaved, onSkip }) {
   }
 
   const fields = [
-    { field: 'brand', label: 'Brand', placeholder: 'e.g. Maruti Suzuki', type: 'text', i: 0 },
-    { field: 'model', label: 'Model', placeholder: 'e.g. Swift', type: 'text', i: 1 },
-    { field: 'reg_no', label: 'Registration Number', placeholder: 'e.g. TS 01 AB 1234', type: 'text', i: 2 },
+    { field: 'brand', label: 'Brand', placeholder: 'e.g. Maruti Suzuki', type: 'text' },
+    { field: 'model', label: 'Model', placeholder: 'e.g. Swift', type: 'text' },
+    { field: 'reg_no', label: 'Registration Number', placeholder: 'e.g. TS 01 AB 1234', type: 'text' },
   ]
 
   return (
-    <motion.div
-      className="vehicle-form-container"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <div className="vehicle-form-container" ref={containerRef}>
       <h2>Add a Vehicle</h2>
       <p className="subtitle">You need a vehicle to offer rides</p>
 
       {error && (
-        <motion.div
-          className="error-box"
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
+        <div className="error-box">
           {error}
-        </motion.div>
+        </div>
       )}
 
       <form onSubmit={handleSubmit} noValidate>
-        {fields.map(({ field, label, placeholder, type, i }) => (
-          <motion.label
-            key={field}
-            custom={i}
-            variants={fieldVariants}
-            initial="hidden"
-            animate="visible"
-          >
+        {fields.map(({ field, label, placeholder, type }) => (
+          <label key={field}>
             {label}
             <input
               type={type}
@@ -84,45 +73,29 @@ export default function AddVehicle({ onSaved, onSkip }) {
               onChange={update(field)}
               placeholder={placeholder}
             />
-          </motion.label>
+          </label>
         ))}
 
         <div className="form-row">
-          <motion.label
-            custom={3}
-            variants={fieldVariants}
-            initial="hidden"
-            animate="visible"
-          >
+          <label>
             Type
             <select value={form.type} onChange={update('type')}>
               <option value="car">Car</option>
               <option value="suv">SUV</option>
               <option value="bike">Bike</option>
             </select>
-          </motion.label>
-          <motion.label
-            custom={4}
-            variants={fieldVariants}
-            initial="hidden"
-            animate="visible"
-          >
+          </label>
+          <label>
             Seats
             <select value={form.seat_capacity} onChange={updateNum('seat_capacity')}>
               {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                 <option key={n} value={n}>{n}</option>
               ))}
             </select>
-          </motion.label>
+          </label>
         </div>
 
-        <motion.div
-          className="btn-row"
-          custom={5}
-          variants={fieldVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <div className="btn-row">
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? (
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -132,18 +105,16 @@ export default function AddVehicle({ onSaved, onSkip }) {
             ) : 'Add Vehicle'}
           </button>
           {onSkip && (
-            <motion.button
+            <button
               type="button"
               className="btn-secondary"
               onClick={onSkip}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
             >
               Skip
-            </motion.button>
+            </button>
           )}
-        </motion.div>
+        </div>
       </form>
-    </motion.div>
+    </div>
   )
 }

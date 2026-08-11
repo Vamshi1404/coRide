@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import tt from '@tomtom-international/web-sdk-maps'
-import { motion } from 'framer-motion'
 import { HYDERABAD_CENTER } from '../../lib/hyderabad'
 
 const API_KEY = import.meta.env.VITE_TOMTOM_API_KEY
@@ -79,13 +78,8 @@ export default function RouteMap({ from, to, driverLocation, height = '300px' })
   }, [driverLocation?.lat, driverLocation?.lng])
 
   return (
-    <motion.div
-      style={{ height, width: '100%', borderRadius: 8, overflow: 'hidden' }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div style={{ height, width: '100%', borderRadius: 8, overflow: 'hidden' }}>
       <div ref={mapEl} style={{ height: '100%', width: '100%' }} />
-    </motion.div>
+    </div>
   )
 }

@@ -1,18 +1,10 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { gsap, useGSAP } from '../lib/gsapSetup'
 import { api } from '../lib/api'
 import AddVehicle from '../components/vehicles/AddVehicle'
 import { geocodeAddress, calculateRoute } from '../lib/tomtom'
 import AddressAutocomplete from '../components/AddressAutocomplete'
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i = 0) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.4, delay: i * 0.08, ease: 'easeOut' },
-  }),
-}
 
 export default function OfferRide() {
   const navigate = useNavigate()
@@ -32,6 +24,8 @@ export default function OfferRide() {
   })
   const [fromCoords, setFromCoords] = useState(null)
   const [toCoords, setToCoords] = useState(null)
+  const pageRef = useRef(null)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   useEffect(() => {
     api.get('/api/vehicles')
@@ -44,6 +38,17 @@ export default function OfferRide() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
+
+  useGSAP(() => {
+    if (reducedMotion) return
+    gsap.from('.offer-ride-header', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out' })
+    gsap.from('.offer-ride-form', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out' })
+  }, { scope: pageRef })
+
+  useGSAP(() => {
+    if (reducedMotion) return
+    gsap.from('.error-box', { autoAlpha: 0, x: -10, duration: 0.3 })
+  }, { scope: pageRef, dependencies: [error] })
 
   const update = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
@@ -130,37 +135,24 @@ export default function OfferRide() {
   }
 
   return (
-    <div className="offer-ride-page">
-      <motion.div
-        className="offer-ride-header"
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-      >
+    <div className="offer-ride-page" ref={pageRef}>
+      <div className="offer-ride-header">
         <h1>Offer a Ride</h1>
         <p className="subtitle">Share your commute and split the costs.</p>
-      </motion.div>
+      </div>
 
       {showAddVehicle ? (
         <AddVehicle onSaved={onVehicleSaved} onSkip={() => setShowAddVehicle(false)} />
       ) : (
-        <motion.form
+        <form
           className="offer-ride-form"
           onSubmit={handleSubmit}
           noValidate
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          custom={1}
         >
           {error && (
-            <motion.div
-              className="error-box"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
+            <div className="error-box">
               {error}
-            </motion.div>
+            </div>
           )}
 
           <div className="form-row">
@@ -276,7 +268,7 @@ export default function OfferRide() {
               )}
             </button>
           </div>
-        </motion.form>
+        </form>
       )}
     </div>
   )

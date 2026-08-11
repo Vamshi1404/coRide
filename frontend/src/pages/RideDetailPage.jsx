@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { gsap, useGSAP } from '../lib/gsapSetup'
 import toast from 'react-hot-toast'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
@@ -19,11 +19,6 @@ const STEP_CONFIG = {
   completed: { icon: 'flag', label: 'Completed' },
 }
 
-const sectionVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
-}
-
 const getCurrentStep = (status) => {
   const idx = STEP_ORDER.indexOf(status)
   return idx >= 0 ? idx : -1
@@ -37,6 +32,8 @@ export default function RideDetailPage() {
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
   const [requests, setRequests] = useState([])
+  const pageRef = useRef(null)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   const isDriver = ride?.owner_id === user?.id
 
@@ -68,6 +65,13 @@ export default function RideDetailPage() {
     return () => clearInterval(interval)
   }, [isDriver, id])
 
+  useGSAP(() => {
+    if (reducedMotion) return
+    gsap.from('.ride-detail-page > .ride-detail-header', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out' })
+    gsap.from('.ride-detail-left > *', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out', stagger: 0.1 })
+    gsap.from('.ride-detail-right > *', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out', stagger: 0.1 })
+  }, { scope: pageRef, dependencies: [ride] })
+
   const handleCancel = async () => {
     if (!ride.booking_id) return
     if (!window.confirm('Are you sure you want to cancel this request?')) return
@@ -93,29 +97,18 @@ export default function RideDetailPage() {
   )
 
   if (!ride) return (
-    <motion.div
-      className="empty-state"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-    >
+    <div className="empty-state">
       <h3>Ride not found</h3>
-    </motion.div>
+    </div>
   )
 
   return (
-    <motion.div
+    <div
       className="ride-detail-page"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      ref={pageRef}
     >
       {/* Header */}
-      <motion.header
-        className="ride-detail-header"
-        variants={sectionVariants}
-        initial="hidden"
-        animate="visible"
-      >
+      <header className="ride-detail-header">
         <div>
           <nav className="ride-breadcrumb">
             <button className="breadcrumb-link" onClick={() => navigate('/my-rides')}>My Rides</button>
@@ -133,20 +126,14 @@ export default function RideDetailPage() {
             <span className="material-symbols-outlined">share</span>
           </button>
         </div>
-      </motion.header>
+      </header>
 
       {/* Main Grid */}
       <div className="ride-detail-grid">
         {/* Left Column: Map + Timeline */}
         <div className="ride-detail-left">
           {/* Map Section */}
-          <motion.div
-            className="ride-map-section"
-            variants={sectionVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.1 }}
-          >
+          <div className="ride-map-section">
             <RouteMap
               from={{ lat: ride.from_lat, lng: ride.from_lng }}
               to={{ lat: ride.to_lat, lng: ride.to_lng }}
@@ -167,16 +154,10 @@ export default function RideDetailPage() {
                 <span className="map-overlay-value">{ride.distance_km || '--'} km</span>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Journey Timeline */}
-          <motion.div
-            className="journey-timeline"
-            variants={sectionVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.15 }}
-          >
+          <div className="journey-timeline">
             <h3 className="journey-timeline-title">Journey Timeline</h3>
             <div className="timeline-steps">
               {STEP_ORDER.map((step, idx) => {
@@ -207,19 +188,13 @@ export default function RideDetailPage() {
                 )
               })}
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* Right Column: Driver, Route, Actions */}
         <aside className="ride-detail-right">
           {/* Driver & Vehicle */}
-          <motion.div
-            className="detail-card"
-            variants={sectionVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.2 }}
-          >
+          <div className="detail-card">
             <div className="driver-header">
               <div className="driver-avatar-wrap">
                 <div className="driver-avatar">
@@ -244,15 +219,13 @@ export default function RideDetailPage() {
             </div>
 
             <div className="driver-actions">
-              <motion.button
+              <button
                 className="driver-chat-btn"
                 onClick={() => navigate(`/chat/${ride.id}`)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
               >
                 <span className="material-symbols-outlined">chat_bubble</span>
                 {isDriver ? 'Chat with Passengers' : 'Chat with Driver'}
-              </motion.button>
+              </button>
             </div>
 
             {!isDriver && (
@@ -262,40 +235,30 @@ export default function RideDetailPage() {
             )}
 
             {canStart && (
-              <motion.button
+              <button
                 className="btn-success"
                 onClick={startRide}
                 disabled={updating}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 style={{ marginTop: 12, width: '100%' }}
               >
                 {updating ? 'Starting...' : 'Start Ride'}
-              </motion.button>
+              </button>
             )}
 
             {canComplete && (
-              <motion.button
+              <button
                 className="btn-success"
                 onClick={completeRide}
                 disabled={updating}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 style={{ marginTop: 12, width: '100%' }}
               >
                 {updating ? 'Completing...' : 'Complete Ride'}
-              </motion.button>
+              </button>
             )}
-          </motion.div>
+          </div>
 
           {/* Route Details */}
-          <motion.div
-            className="detail-card"
-            variants={sectionVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.25 }}
-          >
+          <div className="detail-card">
             <h3 className="detail-card-title">Route Details</h3>
             <div className="route-detail-lines">
               <div className="route-detail-point">
@@ -320,83 +283,53 @@ export default function RideDetailPage() {
               </div>
               <span className="route-corp-badge">{formatRideTime(ride.departure_time)}</span>
             </div>
-          </motion.div>
+          </div>
 
           {/* Live Tracking */}
           {ride.status === 'in_progress' && (
-            <motion.div
-              className="detail-card"
-              variants={sectionVariants}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.27 }}
-            >
+            <div className="detail-card">
               <h3 className="detail-card-title">Live Tracking</h3>
               <LiveTracker ride={ride} />
-            </motion.div>
+            </div>
           )}
 
           {/* Passenger Requests (driver only) */}
           {isDriver && (
-            <motion.div
-              className="detail-card"
-              variants={sectionVariants}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.28 }}
-            >
+            <div className="detail-card">
               <h3 className="detail-card-title">Passenger Requests</h3>
               <RequestList
                 requests={requests}
                 ride={ride}
                 onUpdate={() => { fetchData(); fetchRequests() }}
               />
-            </motion.div>
+            </div>
           )}
 
           {/* Cancel Button */}
           {!isDriver && ride.booking_id && (
-            <motion.button
+            <button
               className="cancel-request-btn"
               onClick={handleCancel}
               disabled={cancelling}
-              variants={sectionVariants}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.3 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
             >
               <span className="material-symbols-outlined">cancel</span>
               {cancelling ? 'Cancelling...' : 'Cancel Request'}
-            </motion.button>
+            </button>
           )}
 
           {isDriver && (ride.status === 'open' || ride.status === 'in_progress') && (
-            <motion.button
+            <button
               className="cancel-request-btn"
               onClick={cancelRide}
               disabled={updating}
-              variants={sectionVariants}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.3 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
             >
               <span className="material-symbols-outlined">cancel</span>
               {updating ? 'Cancelling...' : 'Cancel Ride'}
-            </motion.button>
+            </button>
           )}
 
           {/* Safety Section */}
-          <motion.section
-            className="safety-section"
-            variants={sectionVariants}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.35 }}
-          >
+          <section className="safety-section">
             <h3 className="safety-section-title">Ride Experience & Safety</h3>
             <div className="safety-grid">
               <div className="safety-card">
@@ -415,9 +348,9 @@ export default function RideDetailPage() {
                 <p className="safety-card-desc">24/7 priority support available for any route adjustments.</p>
               </div>
             </div>
-          </motion.section>
+          </section>
         </aside>
       </div>
-    </motion.div>
+    </div>
   )
 }

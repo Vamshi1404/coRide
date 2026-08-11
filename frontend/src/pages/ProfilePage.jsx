@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
+import { gsap, useGSAP } from '../lib/gsapSetup'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
@@ -10,6 +10,8 @@ export default function ProfilePage() {
   const [name, setName] = useState(user?.name || '')
   const [phone, setPhone] = useState(user?.phone || '')
   const [saving, setSaving] = useState(false)
+  const pageRef = useRef(null)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   useEffect(() => {
     if (user) {
@@ -17,6 +19,13 @@ export default function ProfilePage() {
       setPhone(user.phone || '')
     }
   }, [user])
+
+  useGSAP(() => {
+    if (reducedMotion) return
+    gsap.from('.profile-card', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out' })
+    gsap.from('.profile-form .form-field', { autoAlpha: 0, y: 10, duration: 0.3, stagger: 0.05, ease: 'power2.out' })
+    gsap.from('.profile-save-btn', { autoAlpha: 0, y: 10, duration: 0.3, ease: 'power2.out' })
+  }, { scope: pageRef })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -36,22 +45,13 @@ export default function ProfilePage() {
   const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
 
   return (
-    <div className="profile-page">
-      <motion.div
-        className="profile-card"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
+    <div className="profile-page" ref={pageRef}>
+      <div className="profile-card">
         {/* Profile Header */}
         <div className="profile-header">
-          <motion.div
-            className="profile-avatar-lg"
-            whileHover={{ scale: 1.06 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-          >
+          <div className="profile-avatar-lg">
             {initials}
-          </motion.div>
+          </div>
           <div className="profile-header-info">
             <h1 className="profile-name">{user?.name || 'Your Profile'}</h1>
             <p className="profile-email-display">{user?.email}</p>
@@ -77,12 +77,7 @@ export default function ProfilePage() {
           </h2>
 
           <form onSubmit={handleSubmit} noValidate className="profile-form">
-            <motion.label
-              className="form-field"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
+            <label className="form-field">
               <span className="field-label">
                 <span className="material-symbols-outlined">person</span> Full Name
               </span>
@@ -93,14 +88,9 @@ export default function ProfilePage() {
                 placeholder="Enter your full name"
                 className="field-input"
               />
-            </motion.label>
+            </label>
 
-            <motion.label
-              className="form-field"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-            >
+            <label className="form-field">
               <span className="field-label">
                 <span className="material-symbols-outlined">mail</span> Email Address
               </span>
@@ -110,14 +100,9 @@ export default function ProfilePage() {
                 disabled
                 className="field-input disabled"
               />
-            </motion.label>
+            </label>
 
-            <motion.label
-              className="form-field"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
+            <label className="form-field">
               <span className="field-label">
                 <span className="material-symbols-outlined">phone</span> Phone Number
               </span>
@@ -128,13 +113,9 @@ export default function ProfilePage() {
                 placeholder="Enter your phone number"
                 className="field-input"
               />
-            </motion.label>
+            </label>
 
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-            >
+            <div>
               <button type="submit" className="btn-primary profile-save-btn" disabled={saving}>
                 {saving ? (
                   <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -148,7 +129,7 @@ export default function ProfilePage() {
                   </span>
                 )}
               </button>
-            </motion.div>
+            </div>
           </form>
         </div>
 
@@ -172,7 +153,7 @@ export default function ProfilePage() {
             <span className="material-symbols-outlined chevron">chevron_right</span>
           </Link>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

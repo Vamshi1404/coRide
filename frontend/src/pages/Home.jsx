@@ -1,28 +1,16 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { gsap, useGSAP } from '../lib/gsapSetup'
 import { useAuth } from '../contexts/AuthContext'
 import { POPULAR_ROUTES } from '../lib/hyderabad'
-import useScrollReveal from '../hooks/useScrollReveal'
+import useGsapReveal from '../hooks/useGsapReveal'
 import toast from 'react-hot-toast'
-
-function SectionLabel({ children }) {
-  const [ref, isVisible] = useScrollReveal()
-  return (
-    <motion.span
-      ref={ref}
-      className="section-label"
-      initial={{ opacity: 0, y: 10 }}
-      animate={isVisible ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.4 }}
-    >
-      {children}
-    </motion.span>
-  )
-}
+import { Button } from '../components/ui/button'
 
 function LandingPage() {
   const [scrolled, setScrolled] = useState(false)
+  const containerRef = useRef(null)
+  const revealRef = useGsapReveal({ selector: '.gsap-reveal' })
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 50)
@@ -33,14 +21,24 @@ function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [handleScroll])
 
-  const [heroRef, heroVisible] = useScrollReveal({ threshold: 0.1 })
-  const [overviewRef, overviewVisible] = useScrollReveal({ threshold: 0.1 })
-  const [featuresRef, featuresVisible] = useScrollReveal({ threshold: 0.1 })
-  const [trackingRef, trackingVisible] = useScrollReveal({ threshold: 0.1 })
-  const [routesRef, routesVisible] = useScrollReveal({ threshold: 0.1 })
-  const [stepsRef, stepsVisible] = useScrollReveal({ threshold: 0.1 })
-  const [visionRef, visionVisible] = useScrollReveal({ threshold: 0.1 })
-  const [ctaRef, ctaVisible] = useScrollReveal({ threshold: 0.1 })
+  useGSAP(() => {
+    const mm = gsap.matchMedia()
+
+    mm.add('(prefers-reduced-motion: reduce)', () => {
+      gsap.set('.landing-nav, .hero-content > *', { clearProps: 'all' })
+    })
+
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
+      tl.from('.landing-nav', { autoAlpha: 0, y: -16, duration: 0.5 })
+        .from('.hero-tag', { autoAlpha: 0, y: 24, duration: 0.5 })
+        .from('.hero-content h1', { autoAlpha: 0, y: 40, duration: 0.7 })
+        .from('.hero-subtitle', { autoAlpha: 0, y: 24, duration: 0.6 })
+        .from('.hero-btns', { autoAlpha: 0, y: 16, duration: 0.5 }, '-=0.2')
+    })
+
+    return () => mm.revert()
+  }, { scope: containerRef })
 
   const handleShare = useCallback(async () => {
     const url = window.location.href
@@ -57,7 +55,7 @@ function LandingPage() {
   }, [])
 
   return (
-    <div className="landing">
+    <div className="landing" ref={containerRef}>
       <nav className={`landing-nav ${scrolled ? 'scrolled' : ''}`}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="material-symbols-outlined" style={{ color: 'var(--primary)', fontSize: 28, fontVariationSettings: "'FILL' 1" }}>directions_car</span>
@@ -68,79 +66,49 @@ function LandingPage() {
           <a href="#routes">Routes</a>
           <a href="#tracking">Tracking</a>
           <Link to="/login" className="landing-btn-secondary">Login</Link>
-          <Link to="/register" className="landing-btn-primary">Join CoRide</Link>
+          <Button render={<Link to="/register" />} className="landing-btn-primary">Join CoRide</Button>
         </div>
       </nav>
 
       {/* Hero */}
-      <header className="hero" ref={heroRef}>
+      <header className="hero" ref={revealRef}>
         <div className="hero-bg">
           <div className="hero-overlay" />
           <img src="/images/hero-bg.jpg" alt="Hyderabad Cityscape" className="hero-bg-img" />
         </div>
         <div className="hero-content">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={heroVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="hero-tag">
-              <span className="hero-tag-dot" />
-              Now Live
-            </span>
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={heroVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.15 }}
-          >
+          <span className="hero-tag">
+            <span className="hero-tag-dot" />
+            Now Live
+          </span>
+          <h1>
             Ride Together,<br /><span className="text-primary">Save Together</span>
-          </motion.h1>
-          <motion.p
-            className="hero-subtitle"
-            initial={{ opacity: 0, y: 30 }}
-            animate={heroVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.3 }}
-          >
+          </h1>
+          <p className="hero-subtitle">
             The ride-sharing community designed exclusively for Cities professionals. Connect with colleagues and commute in comfort.
-          </motion.p>
-          <motion.div
-            className="hero-btns"
-            initial={{ opacity: 0, y: 20 }}
-            animate={heroVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.45 }}
-          >
-            <Link to="/register" className="landing-btn-primary hero-btn-primary">
+          </p>
+          <div className="hero-btns">
+            <Button render={<Link to="/register" />} className="landing-btn-primary hero-btn-primary">
               <span className="material-symbols-outlined">search</span>
               Find a Ride
-            </Link>
-            <Link to="/register" className="landing-btn-secondary hero-btn-secondary">
+            </Button>
+            <Button render={<Link to="/register" />} variant="secondary" className="landing-btn-secondary hero-btn-secondary">
               <span className="material-symbols-outlined">add_circle</span>
               Offer a Ride
-            </Link>
-          </motion.div>
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Overview: What is CoRide? */}
-      <section className="section-overview" ref={overviewRef}>
+      <section className="section-overview">
         <div className="section-overview-inner">
-          <motion.div
-            className="overview-header"
-            initial={{ opacity: 0, y: 20 }}
-            animate={overviewVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-          >
+          <div className="overview-header gsap-reveal">
             <h2>What is CoRide?</h2>
             <p>We bridge the gap between solo commutes and crowded public transport by connecting car owners with empty seats to verified professional passengers.</p>
-          </motion.div>
+          </div>
           <div className="overview-grid">
-            <motion.div
-              className="overview-card"
-              initial={{ opacity: 0, x: -30 }}
-              animate={overviewVisible ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
+            <div className="overview-card gsap-reveal">
               <div className="overview-card-img">
                 <img src="/images/driver.jpg" alt="Professional Driver" />
               </div>
@@ -156,13 +124,8 @@ function LandingPage() {
                   <li><span className="material-symbols-outlined">check_circle</span> Professional network</li>
                 </ul>
               </div>
-            </motion.div>
-            <motion.div
-              className="overview-card"
-              initial={{ opacity: 0, x: 30 }}
-              animate={overviewVisible ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
+            </div>
+            <div className="overview-card gsap-reveal">
               <div className="overview-card-img">
                 <img src="/images/passenger.jpg" alt="Professional Passenger" />
               </div>
@@ -178,28 +141,19 @@ function LandingPage() {
                   <li><span className="material-symbols-outlined">check_circle</span> Cost-effective travel</li>
                 </ul>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features Bento Grid */}
-      <section className="section-features" id="features" ref={featuresRef}>
+      <section className="section-features" id="features">
         <div className="section-features-inner">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={featuresVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-          >
+          <h2 className="gsap-reveal">
             Sophisticated Ecosystem
-          </motion.h2>
+          </h2>
           <div className="features-bento">
-            <motion.div
-              className="bento-card bento-wide"
-              initial={{ opacity: 0, y: 20 }}
-              animate={featuresVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
+            <div className="bento-card bento-wide gsap-reveal">
               <div className="bento-flex">
                 <div className="bento-text">
                   <div className="bento-icon-wrap">
@@ -210,52 +164,32 @@ function LandingPage() {
                 </div>
 
               </div>
-            </motion.div>
-            <motion.div
-              className="bento-card bento-primary"
-              initial={{ opacity: 0, y: 20 }}
-              animate={featuresVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.15 }}
-            >
+            </div>
+            <div className="bento-card bento-primary gsap-reveal">
               <span className="material-symbols-outlined bento-primary-icon">how_to_reg</span>
               <div>
                 <h4>Simple Signup</h4>
                 <p>Register in under 2 minutes with your corporate ID and LinkedIn.</p>
               </div>
-            </motion.div>
-            <motion.div
-              className="bento-card"
-              initial={{ opacity: 0, y: 20 }}
-              animate={featuresVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
+            </div>
+            <div className="bento-card gsap-reveal">
               <span className="material-symbols-outlined bento-icon">chat</span>
               <h4>Secure Chat</h4>
               <p>Coordinate pickups without sharing personal contact numbers.</p>
-            </motion.div>
-          <motion.div
-            className="bento-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={featuresVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.25 }}
-          >
+            </div>
+          <div className="bento-card gsap-reveal">
             <span className="material-symbols-outlined bento-icon">search</span>
             <h4>Easy Search</h4>
             <p>Smart filters for time, route, vehicle type and preferences.</p>
-          </motion.div>
+          </div>
           </div>
         </div>
       </section>
 
       {/* Live Tracking */}
-      <section className="section-tracking" id="tracking" ref={trackingRef}>
+      <section className="section-tracking" id="tracking">
         <div className="section-tracking-inner">
-          <motion.div
-            className="tracking-content"
-            initial={{ opacity: 0, x: -30 }}
-            animate={trackingVisible ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6 }}
-          >
+          <div className="tracking-content gsap-reveal">
             <h2>Real-Time Sync</h2>
             <p>Transparency builds trust. Our advanced tracking interface provides real-time updates for both parties, ensuring you're never left guessing.</p>
             <div className="tracking-pulse">
@@ -269,13 +203,8 @@ function LandingPage() {
                 <p className="tracking-feature-desc">Accurate within 5 meters for seamless pickup experiences.</p>
               </div>
             </div>
-          </motion.div>
-          <motion.div
-            className="tracking-mockup"
-            initial={{ opacity: 0, x: 30 }}
-            animate={trackingVisible ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.15 }}
-          >
+          </div>
+          <div className="tracking-mockup gsap-reveal">
             <div className="mockup-frame">
               <img src="/images/tracking.jpg" alt="Real-time Tracking Interface" />
               <div className="mockup-overlay-top">
@@ -286,32 +215,24 @@ function LandingPage() {
                 <div className="mockup-time">14 MINS</div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Popular Routes */}
-      <section className="section-routes" id="routes" ref={routesRef}>
+      <section className="section-routes" id="routes">
         <div className="section-routes-inner">
-          <motion.div
-            className="routes-header"
-            initial={{ opacity: 0, y: 20 }}
-            animate={routesVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-          >
+          <div className="routes-header gsap-reveal">
             <div>
               <h2>Popular Routes</h2>
               <p>Fastest commute patterns for urban travel.</p>
             </div>
-          </motion.div>
+          </div>
           <div className="routes-grid-new">
             {POPULAR_ROUTES.slice(0, 6).map((route, i) => (
-              <motion.div
+              <div
                 key={i}
-                className="route-card-new"
-                initial={{ opacity: 0, y: 20 }}
-                animate={routesVisible ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: i * 0.06 }}
+                className="route-card-new gsap-reveal"
               >
                 <div className="route-card-header">
                   <div>
@@ -332,22 +253,18 @@ function LandingPage() {
                   </div>
                   <span className="route-count">POPULAR ROUTE</span>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="section-steps" ref={stepsRef}>
+      <section className="section-steps">
         <div className="section-steps-inner">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={stepsVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-          >
+          <h2 className="gsap-reveal">
             How CoRide Works
-          </motion.h2>
+          </h2>
           <div className="steps-grid">
             {[
               { icon: 'person_add', title: 'Join', desc: 'Complete your profile with professional verification.' },
@@ -355,33 +272,25 @@ function LandingPage() {
               { icon: 'handshake', title: 'Confirm', desc: 'Review profile ratings and confirm through secure chat.' },
               { icon: 'celebration', title: 'Ride', desc: 'Share the cost, conversation, and a better commute.' },
             ].map((step, i) => (
-              <motion.div
+              <div
                 key={i}
-                className="step-item"
-                initial={{ opacity: 0, y: 30 }}
-                animate={stepsVisible ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: i * 0.12 }}
+                className="step-item gsap-reveal"
               >
                 <div className={`step-circle ${i === 3 ? 'step-circle-primary' : ''}`}>
                   <span className="material-symbols-outlined">{step.icon}</span>
                 </div>
                 <h5>{step.title}</h5>
                 <p>{step.desc}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Future Vision */}
-      <section className="section-vision" ref={visionRef}>
+      <section className="section-vision">
         <div className="section-vision-inner">
-          <motion.div
-            className="vision-content"
-            initial={{ opacity: 0, y: 30 }}
-            animate={visionVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-          >
+          <div className="vision-content gsap-reveal">
             <span className="vision-label">Roadmap 2026</span>
             <h2>What's Coming to CoRide</h2>
             <p>We are constantly evolving to make your commute even safer and more seamless. Here's a glimpse into the future of urban mobility in Hyderabad.</p>
@@ -398,25 +307,21 @@ function LandingPage() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="section-cta" ref={ctaRef}>
+      <section className="section-cta">
         <div className="section-cta-inner">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={ctaVisible ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-          >
+          <div className="gsap-reveal">
             <h2>Ready to transform your daily commute?</h2>
             <p>Start riding smarter, together with professionals.</p>
             <div className="cta-btns-row">
-              <Link to="/register" className="cta-btn-primary">Start Riding Today</Link>
-              <Link to="/login" className="cta-btn-secondary">Sign In</Link>
+              <Button render={<Link to="/register" />} size="lg" className="cta-btn-primary">Start Riding Today</Button>
+              <Button render={<Link to="/login" />} variant="secondary" size="lg" className="cta-btn-secondary">Sign In</Button>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -469,13 +374,9 @@ export default function Home() {
   if (loading) {
     return (
       <div className="home-loading">
-        <motion.h1
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
+        <h1>
           CoRide
-        </motion.h1>
+        </h1>
         <div className="spinner spinner-lg" />
       </div>
     )

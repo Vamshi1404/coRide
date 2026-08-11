@@ -1,17 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { gsap, useGSAP } from '../../lib/gsapSetup'
 import { format } from 'date-fns'
 import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
 import RatingModal from '../ratings/RatingModal'
-
-const dropdownVariants = {
-  hidden: { opacity: 0, scale: 0.95, y: -8, transformOrigin: 'top right' },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.15, ease: 'easeOut' } },
-  exit: { opacity: 0, scale: 0.95, y: -8, transition: { duration: 0.1 } },
-}
 
 const COMPLETED_RIDE_TYPES = new Set(['ride_completed', 'ride_complete'])
 
@@ -25,8 +19,32 @@ export default function NotificationBell() {
   const lastIdRef = useRef(null)
   const prevCountRef = useRef(0)
   const dismissedIdsRef = useRef(new Set())
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   const unread = notifications.filter((n) => !n.is_read).length
+
+  useGSAP(() => {
+    if (reducedMotion) return
+    if (unread > 0) {
+      gsap.fromTo(
+        '.bell-badge',
+        { scale: 0 },
+        { scale: 1, duration: 0.3, ease: 'back.out(1.7)' }
+      )
+    }
+  }, { scope: ref, dependencies: [unread] })
+
+  useGSAP(() => {
+    if (reducedMotion) return
+    if (open) {
+      gsap.fromTo(
+        '.bell-dropdown',
+        { autoAlpha: 0, scale: 0.95, y: -8, transformOrigin: 'top right' },
+        { autoAlpha: 1, scale: 1, y: 0, duration: 0.15, ease: 'power2.out' }
+      )
+      gsap.from('.bell-item', { autoAlpha: 0, x: -10, duration: 0.2, stagger: 0.04, ease: 'power2.out' })
+    }
+  }, { scope: ref, dependencies: [open, notifications] })
 
   useEffect(() => {
     if (!user) return
@@ -107,75 +125,49 @@ export default function NotificationBell() {
 
   return (
     <div className="notification-bell" ref={ref}>
-      <motion.button
+      <button
         className={`bell-btn ${shake ? 'shake' : ''}`}
         onClick={() => setOpen(!open)}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
       >
         <span className="material-symbols-outlined" style={{ fontSize: 24 }}>notifications</span>
-        <AnimatePresence>
-          {unread > 0 && (
-            <motion.span
-              className="bell-badge"
-              key={unread}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-            >
-              {unread > 99 ? '99+' : unread}
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </motion.button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="bell-dropdown"
-            variants={dropdownVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
-            <div className="bell-header">
-              <h4>Notifications</h4>
-              {unread > 0 && (
-                <motion.button
-                  className="btn-text"
-                  onClick={markAllRead}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Mark all read
-                </motion.button>
-              )}
-            </div>
-
-            <div className="bell-list">
-              {!notifications.length && <p className="empty-text">No notifications</p>}
-              <AnimatePresence initial={false}>
-                {notifications.map((n) => (
-                  <motion.div
-                    key={n.id}
-                    className={`bell-item ${!n.is_read ? 'unread' : ''}`}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <p className="bell-title">{n.title}</p>
-                    <p className="bell-msg">{n.message}</p>
-                    <span className="bell-time">
-                      {format(new Date(n.created_at), 'MMM d, h:mm a')}
-                    </span>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </motion.div>
+        {unread > 0 && (
+          <span className="bell-badge">
+            {unread > 99 ? '99+' : unread}
+          </span>
         )}
-      </AnimatePresence>
+      </button>
+
+      {open && (
+        <div className="bell-dropdown">
+          <div className="bell-header">
+            <h4>Notifications</h4>
+            {unread > 0 && (
+              <button
+                className="btn-text"
+                onClick={markAllRead}
+              >
+                Mark all read
+              </button>
+            )}
+          </div>
+
+          <div className="bell-list">
+            {!notifications.length && <p className="empty-text">No notifications</p>}
+            {notifications.map((n) => (
+              <div
+                key={n.id}
+                className={`bell-item ${!n.is_read ? 'unread' : ''}`}
+              >
+                <p className="bell-title">{n.title}</p>
+                <p className="bell-msg">{n.message}</p>
+                <span className="bell-time">
+                  {format(new Date(n.created_at), 'MMM d, h:mm a')}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {pendingRatingRide && createPortal(
         <RatingModal

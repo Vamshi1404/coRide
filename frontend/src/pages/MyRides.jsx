@@ -1,18 +1,9 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { gsap, useGSAP } from '../lib/gsapSetup'
 import { api } from '../lib/api'
 import { formatRideDateTime, formatVehicleName, getDriverName, getInitials, getStatusLabel } from '../lib/rideDisplay'
 import { useAuth } from '../contexts/AuthContext'
-
-const rideVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, delay: i * 0.1, ease: 'easeOut' },
-  }),
-}
 
 export default function MyRides() {
   const { user } = useAuth()
@@ -21,6 +12,8 @@ export default function MyRides() {
   const [tab, setTab] = useState('upcoming')
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const pageRef = useRef(null)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   useEffect(() => {
     if (!user) {
@@ -32,6 +25,15 @@ export default function MyRides() {
       api.get('/api/rides/joined').then((d) => setJoined((d || []).map((ride) => ({ ...ride, user_role: 'Passenger' })))).catch(() => {}),
     ]).finally(() => setLoading(false))
   }, [user])
+
+  useGSAP(() => {
+    if (reducedMotion) return
+    gsap.from('.rides-header', { autoAlpha: 0, y: -10, duration: 0.3, ease: 'power2.out' })
+    gsap.from('.rides-upcoming', { autoAlpha: 0, y: 20, duration: 0.25, ease: 'power2.out' })
+    gsap.from('.rides-upcoming .rides-card', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out', stagger: 0.1 })
+    gsap.from('.rides-history', { autoAlpha: 0, y: 20, duration: 0.25, ease: 'power2.out' })
+    gsap.from('.rides-history-table tbody tr', { autoAlpha: 0, x: -10, duration: 0.25, ease: 'power2.out', stagger: 0.05 })
+  }, { scope: pageRef, dependencies: [tab] })
 
   const allUpcoming = [...offered, ...joined].filter(
     (r) => r.status !== 'completed' && r.status !== 'cancelled'
@@ -51,18 +53,13 @@ export default function MyRides() {
   }
 
   return (
-    <div className="rides-page">
-      <motion.div
-        className="rides-header"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
+    <div className="rides-page" ref={pageRef}>
+      <div className="rides-header">
         <div>
           <h1>My Rides</h1>
           <p className="rides-subtitle">Manage your scheduled commutes and view travel history.</p>
         </div>
-      </motion.div>
+      </div>
 
       <div className="rides-tabs">
         <button
@@ -79,15 +76,10 @@ export default function MyRides() {
         </button>
       </div>
 
-      <AnimatePresence mode="wait">
         {tab === 'upcoming' ? (
-          <motion.div
+          <div
             key="upcoming"
             className="rides-upcoming"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25 }}
           >
             {allUpcoming.length === 0 ? (
               <div className="empty-state">
@@ -96,13 +88,9 @@ export default function MyRides() {
               </div>
             ) : (
               allUpcoming.map((ride, i) => (
-                <motion.div
+                <div
                   key={ride.id || i}
                   className="rides-card"
-                  custom={i}
-                  variants={rideVariants}
-                  initial="hidden"
-                  animate="visible"
                 >
                   <div className="rides-card-inner">
                     <div className="rides-route-col">
@@ -165,18 +153,14 @@ export default function MyRides() {
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))
             )}
-          </motion.div>
+          </div>
         ) : (
-          <motion.div
+          <div
             key="history"
             className="rides-history"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25 }}
           >
             {history.length === 0 ? (
               <div className="empty-state">
@@ -197,11 +181,8 @@ export default function MyRides() {
                   </thead>
                   <tbody>
                     {history.map((ride, i) => (
-                      <motion.tr
+                      <tr
                         key={ride.id || i}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.05, duration: 0.25 }}
                       >
                         <td>
                           <p className="rides-td-primary">
@@ -234,15 +215,14 @@ export default function MyRides() {
                             Details
                           </button>
                         </td>
-                      </motion.tr>
+                      </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             )}
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   )
 }

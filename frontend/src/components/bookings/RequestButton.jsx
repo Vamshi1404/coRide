@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useRef, useState, useEffect } from 'react'
+import { gsap, useGSAP } from '../../lib/gsapSetup'
 import toast from 'react-hot-toast'
 import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
@@ -8,6 +8,8 @@ export default function RequestButton({ ride, onUpdate }) {
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [existing, setExisting] = useState(null)
+  const rootRef = useRef(null)
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   useEffect(() => {
     if (ride?.booking_status) {
@@ -16,6 +18,17 @@ export default function RequestButton({ ride, onUpdate }) {
       setExisting(null)
     }
   }, [ride])
+
+  useGSAP(() => {
+    if (reducedMotion || !rootRef.current) return
+    gsap.from(rootRef.current, {
+      autoAlpha: 0,
+      y: 10,
+      scale: existing?.status === 'accepted' ? 0.6 : 1,
+      duration: 0.3,
+      ease: existing?.status === 'accepted' ? 'back.out(1.7)' : 'power2.out',
+    })
+  }, { scope: rootRef, dependencies: [existing, ride] })
 
   if (!ride) return null
 
@@ -58,78 +71,55 @@ export default function RequestButton({ ride, onUpdate }) {
 
   if (existing?.status === 'accepted') {
     return (
-      <motion.span
-        className="badge badge-success"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', stiffness: 400 }}
-      >
+      <span ref={rootRef} className="badge badge-success">
         You're In
-      </motion.span>
+      </span>
     )
   }
 
   if (existing?.status === 'pending') {
     return (
-      <motion.button
+      <button
+        ref={rootRef}
         className="btn-secondary"
         onClick={cancelRequest}
         disabled={loading}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
       >
         {loading ? 'Cancelling...' : 'Cancel Request'}
-      </motion.button>
+      </button>
     )
   }
 
   if (existing?.status === 'rejected') {
     return (
-      <motion.span
-        className="badge badge-error"
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-      >
+      <span ref={rootRef} className="badge badge-error">
         Request declined
-      </motion.span>
+      </span>
     )
   }
 
   if (!isOpen) {
     return (
-      <motion.span
-        className="badge"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
+      <span ref={rootRef} className="badge">
         {ride.status === 'completed' ? 'Completed' : 'In Progress'}
-      </motion.span>
+      </span>
     )
   }
 
   if (isFull) {
     return (
-      <motion.span
-        className="badge badge-error"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-      >
+      <span ref={rootRef} className="badge badge-error">
         Fully Booked
-      </motion.span>
+      </span>
     )
   }
 
   return (
-    <motion.button
+    <button
+      ref={rootRef}
       className="btn-primary"
       onClick={handleRequest}
       disabled={loading}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
     >
       {loading ? (
         <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
@@ -137,6 +127,6 @@ export default function RequestButton({ ride, onUpdate }) {
           Sending...
         </span>
       ) : 'Request Seat'}
-    </motion.button>
+    </button>
   )
 }

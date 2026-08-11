@@ -1,5 +1,6 @@
+import { useRef } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { gsap, useGSAP } from './lib/gsapSetup'
 import { useAuth } from './contexts/AuthContext'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
@@ -16,30 +17,19 @@ import Register from './pages/Register'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
 
-const pageVariants = {
-  initial: { opacity: 0, y: 10 },
-  in: { opacity: 1, y: 0 },
-  out: { opacity: 0, y: -10 },
-}
-
-const pageTransition = {
-  type: 'tween',
-  ease: 'easeOut',
-  duration: 0.2,
-}
-
 function AnimatedPage({ children }) {
-  return (
-    <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
-      {children}
-    </motion.div>
-  )
+  const ref = useRef(null)
+
+  useGSAP(() => {
+    gsap.from(ref.current, {
+      autoAlpha: 0,
+      y: 12,
+      duration: 0.3,
+      ease: 'power1.out',
+    })
+  }, { scope: ref })
+
+  return <div ref={ref}>{children}</div>
 }
 
 function ProtectedRoute({ children }) {
@@ -60,13 +50,7 @@ function AppLayout({ children }) {
   const isAuth = location.pathname === '/login' || location.pathname === '/register'
   const isChat = location.pathname.startsWith('/chat')
 
-  const content = (
-    <AnimatePresence mode="wait">
-      <AnimatedPage key={location.pathname}>
-        {children}
-      </AnimatedPage>
-    </AnimatePresence>
-  )
+  const content = <AnimatedPage key={location.pathname}>{children}</AnimatedPage>
 
   if (isLanding || isAuth) return content
 

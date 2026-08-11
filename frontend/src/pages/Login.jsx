@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { gsap, useGSAP } from '../lib/gsapSetup'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
+import { Button } from '../components/ui/button'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -13,6 +14,25 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const containerRef = useRef(null)
+
+  useGSAP(() => {
+    const mm = gsap.matchMedia()
+
+    mm.add('(prefers-reduced-motion: reduce)', () => {
+      gsap.set('.auth-left-content > *, .auth-form-panel', { clearProps: 'all' })
+    })
+
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
+      tl.from('.auth-logo', { autoAlpha: 0, x: -20, duration: 0.6 })
+        .from('.auth-left-heading', { autoAlpha: 0, y: 30, duration: 0.6 })
+        .from('.auth-left-sub', { autoAlpha: 0, duration: 0.6 })
+        .from('.auth-form-panel', { autoAlpha: 0, x: 20, duration: 0.5 }, '-=0.3')
+    })
+
+    return () => mm.revert()
+  }, { scope: containerRef })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -34,52 +54,32 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-split">
+    <div className="auth-split" ref={containerRef}>
       <div className="auth-split-left">
         <div className="auth-left-bg">
           <img src="/images/login-bg.jpg" alt="" />
         </div>
         <div className="auth-left-overlay" />
         <div className="auth-left-content">
-          <motion.div
-            className="auth-logo"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-          >
+          <div className="auth-logo">
             <span className="material-symbols-outlined auth-logo-icon">directions_car</span>
             <span className="auth-logo-text">CoRide</span>
-          </motion.div>
+          </div>
 
           <div>
-            <motion.h1
-              className="auth-left-heading"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
+            <h1 className="auth-left-heading">
               Elevate Your Daily Commute
-            </motion.h1>
-            <motion.p
-              className="auth-left-sub"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-            >
+            </h1>
+            <p className="auth-left-sub">
               Experience the gold standard in corporate ride-sharing. Designed for professionals, refined for Hyderabad.
-            </motion.p>
+            </p>
           </div>
 
         </div>
       </div>
 
       <div className="auth-split-right">
-        <motion.div
-          className="auth-form-panel"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className="auth-form-panel">
           <div className="auth-mobile-logo">
             <span className="material-symbols-outlined">directions_car</span>
             <span>CoRide</span>
@@ -89,13 +89,9 @@ export default function Login() {
           <p className="auth-form-subtitle">Please enter your details to access your dashboard.</p>
 
           {error && (
-            <motion.div
-              className="error-box"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
+            <div className="error-box">
               {error}
-            </motion.div>
+            </div>
           )}
 
           <form onSubmit={handleSubmit} noValidate>
@@ -152,7 +148,7 @@ export default function Login() {
               </label>
             </div>
 
-            <button type="submit" className="auth-submit" disabled={loading}>
+            <Button type="submit" className="auth-submit" disabled={loading}>
               {loading ? (
                 <span className="spinner" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
               ) : (
@@ -161,13 +157,13 @@ export default function Login() {
                   <span className="material-symbols-outlined">arrow_forward</span>
                 </>
               )}
-            </button>
+            </Button>
           </form>
 
           <p className="auth-footer-text">
             Don't have an account? <Link to="/register">Sign up</Link>
           </p>
-        </motion.div>
+        </div>
       </div>
     </div>
   )
