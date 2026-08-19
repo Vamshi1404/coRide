@@ -1,20 +1,43 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { api } from '@/lib/api'
-import { useAuth } from '@/contexts/AuthContext'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Navigation, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { gsap, useGSAP } from '../lib/gsapSetup'
+import { api } from '../lib/api'
+import { useAuth } from '../contexts/AuthContext'
+import { Button } from '../components/ui/button'
+import { Icon } from '../components/ui/icon'
+import AuthVisual from '../components/auth/AuthVisual'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [remember, setRemember] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+  const containerRef = useRef(null)
+
+  useGSAP(() => {
+    const mm = gsap.matchMedia()
+
+    mm.add('(prefers-reduced-motion: reduce)', () => {
+      gsap.set('.auth-left-content > *, .auth-form-panel', { clearProps: 'all' })
+    })
+
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
+      tl.from('.auth-route-art', { autoAlpha: 0, duration: 1 })
+        .from('.auth-logo', { autoAlpha: 0, x: -20, duration: 0.7 })
+        .from('.auth-left-heading', { autoAlpha: 0, y: 32, duration: 0.7 }, '-=0.25')
+        .from('.auth-left-sub', { autoAlpha: 0, duration: 0.6 }, '-=0.3')
+        .from('.auth-route-chips > *', { autoAlpha: 0, y: 12, stagger: 0.08, duration: 0.4 }, '-=0.2')
+        .from('.auth-stats > *', { autoAlpha: 0, y: 16, stagger: 0.08, duration: 0.5 }, '-=0.25')
+        .from('.auth-form-panel', { autoAlpha: 0, x: 24, duration: 0.6 }, '-=0.35')
+    })
+
+    return () => mm.revert()
+  }, { scope: containerRef })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -36,134 +59,116 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Left panel — brand visual */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-secondary overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--nc-accent)]/5 via-transparent to-transparent" />
-        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="size-9 rounded-[10px] bg-primary flex items-center justify-center">
-              <Navigation size={18} className="text-[var(--nc-accent)]" />
-            </div>
-            <span className="text-primary font-bold text-xl tracking-tight">coRide</span>
-          </Link>
+    <div className="auth-split" ref={containerRef}>
+      <div className="auth-split-left">
+        <div className="auth-left-bg">
+          <img src="/images/login-bg.jpg" alt="" />
+        </div>
+        <div className="auth-left-overlay" />
+        <div className="auth-left-content">
+          <div className="auth-logo">
+            <Icon name="directions_car" className="auth-logo-icon" />
+            <span className="auth-logo-text">CoRide</span>
+          </div>
 
-          <div className="space-y-6 max-w-md">
-            <h1 className="text-foreground text-4xl font-bold tracking-tight leading-tight">
+          <AuthVisual />
+
+          <div>
+            <h1 className="auth-left-heading">
               Elevate Your Daily Commute
             </h1>
-            <p className="text-muted-foreground text-lg leading-relaxed">
+            <p className="auth-left-sub">
               Experience the gold standard in corporate ride-sharing. Designed for professionals, refined for Hyderabad.
             </p>
-            <div className="flex gap-8 pt-4">
-              {[
-                { value: '18K+', label: 'Rides Shared' },
-                { value: '4.9', label: 'Avg. Rating' },
-                { value: '214t', label: 'CO₂ Saved' },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <p className="text-foreground text-2xl font-bold tabular-nums">{stat.value}</p>
-                  <p className="text-muted-foreground text-xs">{stat.label}</p>
-                </div>
-              ))}
-            </div>
           </div>
 
-          <div className="flex gap-4">
-            {['Live Tracking', 'Verified Drivers', 'Secure Chat'].map((chip) => (
-              <span key={chip} className="px-3 py-1.5 rounded-full bg-background/50 border border-border text-muted-foreground text-xs">
-                {chip}
-              </span>
-            ))}
-          </div>
         </div>
       </div>
 
-      {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
-        <motion.div
-          className="w-full max-w-md space-y-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className="lg:hidden flex items-center gap-2.5">
-            <div className="size-9 rounded-[10px] bg-primary flex items-center justify-center">
-              <Navigation size={18} className="text-[var(--nc-accent)]" />
-            </div>
-            <span className="text-primary font-bold text-xl tracking-tight">coRide</span>
+      <div className="auth-split-right">
+        <div className="auth-form-panel">
+          <div className="auth-mobile-logo">
+            <Icon name="directions_car" />
+            <span>CoRide</span>
           </div>
 
-          <div className="space-y-2">
-            <h2 className="text-foreground text-2xl font-bold tracking-tight">Welcome Back</h2>
-            <p className="text-muted-foreground">Please enter your details to access your account.</p>
-          </div>
+          <h2 className="auth-form-title">Welcome Back</h2>
+          <p className="auth-form-subtitle">Please enter your details to access your dashboard.</p>
 
           {error && (
-            <motion.div
-              className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
+            <div className="error-box">
               {error}
-            </motion.div>
+            </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-foreground text-sm font-medium">Email</label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
+          <form onSubmit={handleSubmit} noValidate>
+            <div className="auth-field">
+              <label className="auth-label" htmlFor="email">EMAIL ADDRESS</label>
+              <div className="input-wrap">
+                <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="executive@company.com"
                   autoComplete="email"
-                  className="pl-10 h-11"
                 />
+                <Icon name="mail" className="input-icon" />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-foreground text-sm font-medium">Password</label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
+            <div className="auth-field">
+              <label className="auth-label" htmlFor="password">PASSWORD</label>
+              <div className="input-wrap">
+                <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
                   autoComplete="current-password"
-                  className="pl-10 pr-10 h-11"
                 />
                 <button
                   type="button"
+                  className="input-icon-btn"
                   onClick={() => setShowPassword((p) => !p)}
                   tabIndex={-1}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  <Icon name={showPassword ? 'visibility' : 'visibility_off'} />
                 </button>
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-11 cursor-pointer" disabled={loading}>
+            <div className="auth-options">
+              <label className="auth-checkbox">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                />
+                <span className="auth-checkbox-mark">
+                  <Icon name="check" />
+                </span>
+                <span className="auth-checkbox-label">Remember me</span>
+              </label>
+            </div>
+
+            <Button type="submit" className="auth-submit" disabled={loading}>
               {loading ? (
-                <span className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                <span className="spinner" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
               ) : (
-                <>Sign In <ArrowRight size={16} className="ml-2" /></>
+                <>
+                  Sign In
+                  <Icon name="arrow_forward" />
+                </>
               )}
             </Button>
           </form>
 
-          <p className="text-muted-foreground text-sm text-center">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-foreground font-medium hover:underline">Sign up</Link>
+          <p className="auth-footer-text">
+            Don't have an account? <Link to="/register">Sign up</Link>
           </p>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

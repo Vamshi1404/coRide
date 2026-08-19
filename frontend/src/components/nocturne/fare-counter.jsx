@@ -1,38 +1,49 @@
-import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { useReducedMotion } from '@/lib/motion/MotionProvider'
 
+// Odometer-style digit roll for fare/ETA display
 export function FareCounter({ value, prefix = '₹', className }) {
-  const [digits, setDigits] = useState([])
+  const reducedMotion = useReducedMotion()
+  const [displayDigits, setDisplayDigits] = useState([])
+  const prevValueRef = useRef(value)
 
   useEffect(() => {
     const str = String(Math.round(value))
-    setDigits(str.split(''))
-  }, [value])
+    const prevStr = String(Math.round(prevValueRef.current))
+    prevValueRef.current = value
+
+    if (reducedMotion) {
+      setDisplayDigits(str.split('').map((d) => ({ char: d, key: d, animate: false })))
+      return
+    }
+
+    const padded = str.padStart(Math.max(prevStr.length, str.length), ' ')
+    const prevPadded = prevStr.padStart(padded.length, ' ')
+
+    setDisplayDigits(
+      padded.split('').map((char, i) => ({
+        char,
+        key: `${i}-${char}`,
+        animate: char !== prevPadded[i],
+      }))
+    )
+  }, [value, reducedMotion])
 
   return (
-    <span className={cn('inline-flex items-baseline tabular-nums', className)}>
+    <span className={cn('inline-flex items-baseline tabular-nums font-variant-numeric-tabular-nums', className)}>
       {prefix && <span className="mr-0.5">{prefix}</span>}
-      <AnimatePresence mode="popLayout">
-        {digits.map((char, i) => (
-          <motion.span
-            key={`${i}-${char}`}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -20, opacity: 0 }}
-            transition={{
-              type: 'spring',
-              stiffness: 300,
-              damping: 25,
-              mass: 0.8,
-              delay: i * 0.03,
-            }}
-            className="inline-block"
-          >
-            {char}
-          </motion.span>
-        ))}
-      </AnimatePresence>
+      {displayDigits.map((digit) => (
+        <span
+          key={digit.key}
+          className={cn(
+            'inline-block overflow-hidden',
+            digit.animate && 'animate-[counterRoll_600ms_cubic-bezier(0.22,1,0.36,1)]'
+          )}
+        >
+          {digit.char}
+        </span>
+      ))}
     </span>
   )
 }

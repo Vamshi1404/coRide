@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { MagneticButton } from './magnetic-button'
 import { MapPin, Search, Plus, Navigation, User, LogOut } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -23,26 +23,27 @@ export function NocturneNav({ user, onLogout, className }) {
   }, [])
 
   return (
-    <motion.header
+    <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
         scrolled
-          ? 'bg-background/70 backdrop-blur-xl border-b border-border/50'
+          ? 'bg-[var(--nc-50)]/70 backdrop-blur-xl border-b border-[var(--nc-300)]/50 shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
           : 'bg-transparent',
         className
       )}
-      initial={{ y: -64 }}
-      animate={{ y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
       <nav className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="size-8 rounded-[10px] bg-primary flex items-center justify-center">
+          <div className="size-8 rounded-[10px] bg-[var(--nc-900)] flex items-center justify-center">
             <Navigation size={16} className="text-[var(--nc-accent)]" />
           </div>
-          <span className="text-primary font-bold text-lg tracking-tight">coRide</span>
+          <span className="text-[var(--nc-900)] font-bold text-lg tracking-tight">
+            NOCTURNE
+          </span>
         </Link>
 
+        {/* Desktop nav items */}
         <div className="hidden md:flex items-center gap-1">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
@@ -52,16 +53,14 @@ export function NocturneNav({ user, onLogout, className }) {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  'relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200',
-                  isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  'relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
+                  isActive
+                    ? 'text-[var(--nc-900)]'
+                    : 'text-[var(--nc-500)] hover:text-[var(--nc-700)]'
                 )}
               >
                 {isActive && (
-                  <motion.span
-                    className="absolute inset-0 bg-secondary rounded-full"
-                    layoutId="activeNav"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
+                  <span className="absolute inset-0 bg-[var(--nc-200)] rounded-full" />
                 )}
                 <span className="relative flex items-center gap-2">
                   <Icon size={15} />
@@ -72,12 +71,13 @@ export function NocturneNav({ user, onLogout, className }) {
           })}
         </div>
 
+        {/* Right side */}
         <div className="flex items-center gap-3">
           {user ? (
             <>
               <Link
                 to="/profile"
-                className="size-9 rounded-full bg-secondary border border-border flex items-center justify-center text-foreground text-sm font-semibold hover:bg-secondary/80 transition-colors"
+                className="size-9 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] flex items-center justify-center text-[var(--nc-700)] text-sm font-semibold hover:bg-[var(--nc-300)] transition-colors"
               >
                 {user.name?.[0]?.toUpperCase() || 'U'}
               </Link>
@@ -85,21 +85,21 @@ export function NocturneNav({ user, onLogout, className }) {
                 variant="ghost"
                 size="sm"
                 onClick={onLogout}
-                className="text-muted-foreground hover:text-foreground cursor-pointer"
+                className="text-[var(--nc-500)] hover:text-[var(--nc-800)] cursor-pointer"
               >
                 <LogOut size={16} />
               </Button>
             </>
           ) : (
-            <Button asChild variant="default" size="sm" className="cursor-pointer">
+            <MagneticButton asChild variant="default" size="sm">
               <Link to="/login">
                 <User size={15} className="mr-1.5" />
                 Sign In
               </Link>
-            </Button>
+            </MagneticButton>
           )}
         </div>
       </nav>
-    </motion.header>
+    </header>
   )
 }
