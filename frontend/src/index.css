@@ -137,6 +137,225 @@
   --sidebar-ring: #0f6b74;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   NOCTURNE — Design Tokens (§1.1 + §1.2 + §1.3)
+   Monochrome scale, signal orange accent, tight typography
+   ═══════════════════════════════════════════════════════════════ */
+
+:root[data-theme="dark"] {
+  /* Monochrome scale — 11 steps, perceptually even */
+  --nc-0: #000000;
+  --nc-50: #0a0a0b;
+  --nc-100: #121214;
+  --nc-200: #1c1c1f;
+  --nc-300: #2a2a2e;
+  --nc-400: #3d3d42;
+  --nc-500: #6b6b70;
+  --nc-600: #9a9aa0;
+  --nc-700: #c4c4c8;
+  --nc-800: #ececee;
+  --nc-900: #ffffff;
+
+  /* Accent — signal orange, live/active states ONLY */
+  --nc-accent: #ff4d1c;
+  --nc-accent-dim: rgba(255, 77, 28, 0.1);
+  --nc-accent-glow: rgba(255, 77, 28, 0.4);
+
+  /* Semantic (derived from accent + neutrals) */
+  --nc-surge: var(--nc-accent);
+  --nc-live: var(--nc-accent);
+  --nc-success: #ffffff;
+  --nc-error: var(--nc-accent);
+
+  /* Override shadcn tokens for dark theme */
+  --background: var(--nc-50);
+  --foreground: var(--nc-800);
+  --card: var(--nc-200);
+  --card-foreground: var(--nc-800);
+  --popover: var(--nc-200);
+  --popover-foreground: var(--nc-800);
+  --primary: var(--nc-900);
+  --primary-foreground: var(--nc-0);
+  --secondary: var(--nc-300);
+  --secondary-foreground: var(--nc-800);
+  --muted: var(--nc-200);
+  --muted-foreground: var(--nc-600);
+  --accent: var(--nc-200);
+  --accent-foreground: var(--nc-800);
+  --destructive: var(--nc-accent);
+  --border: var(--nc-300);
+  --input: var(--nc-300);
+  --ring: var(--nc-accent);
+  --radius: 12px;
+
+  /* NOCTURNE shadows */
+  --nc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --nc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --nc-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --nc-shadow-glow: 0 0 20px var(--nc-accent-glow);
+}
+
+:root[data-theme="light"] {
+  --nc-0: #ffffff;
+  --nc-50: #fafafa;
+  --nc-100: #f2f2f3;
+  --nc-200: #e8e8ea;
+  --nc-300: #dcdce0;
+  --nc-400: #c8c8cd;
+  --nc-500: #8a8a90;
+  --nc-600: #5c5c62;
+  --nc-700: #3a3a3f;
+  --nc-800: #1a1a1c;
+  --nc-900: #000000;
+  --nc-accent: #e8430f;
+  --nc-accent-dim: rgba(232, 67, 15, 0.1);
+  --nc-accent-glow: rgba(232, 67, 15, 0.3);
+  --nc-surge: var(--nc-accent);
+  --nc-live: var(--nc-accent);
+  --nc-success: #000000;
+  --nc-error: var(--nc-accent);
+}
+
+/* ─── NOCTURNE Typography (§1.2) ─── */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+}
+
+/* ─── NOCTURNE Keyframes ─── */
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes surgePop {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes counterRoll {
+  0% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes drawRing {
+  0% { stroke-dashoffset: 163.36; }
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes particle-drift {
+  0% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-8px) translateX(4px); }
+  50% { transform: translateY(-2px) translateX(-3px); }
+  75% { transform: translateY(-10px) translateX(2px); }
+  100% { transform: translateY(0) translateX(0); }
+}
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes routeDraw {
+  from { stroke-dashoffset: 1200; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* ─── NOCTURNE Scrollbar ─── */
+:root[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--nc-400);
+}
+:root[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--nc-100);
+}
+
+/* ─── NOCTURNE Focus States ─── */
+:root[data-theme="dark"] *:focus-visible {
+  outline: 2px solid var(--nc-900);
+  outline-offset: 2px;
+}
+:root[data-theme="light"] *:focus-visible {
+  outline: 2px solid var(--nc-800);
+  outline-offset: 2px;
+}
+
+/* ─── NOCTURNE Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── NOCTURNE Component Styles ─── */
+.nc-glass {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(var(--nc-50-rgb, 10, 10, 11), 0.7);
+}
+
+.nc-card {
+  background: var(--nc-200);
+  border: 1px solid var(--nc-300);
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.nc-card-live {
+  background: var(--nc-200);
+  border: 1px solid var(--nc-accent);
+  border-left: 3px solid var(--nc-accent);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 0 20px var(--nc-accent-glow);
+}
+
+.nc-section-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nc-section-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nc-stagger-child {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1),
+              transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nc-section-reveal.visible .nc-stagger-child {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger delays for children */
+.nc-section-reveal.visible .nc-stagger-child:nth-child(1) { transition-delay: 60ms; }
+.nc-section-reveal.visible .nc-stagger-child:nth-child(2) { transition-delay: 120ms; }
+.nc-section-reveal.visible .nc-stagger-child:nth-child(3) { transition-delay: 180ms; }
+.nc-section-reveal.visible .nc-stagger-child:nth-child(4) { transition-delay: 240ms; }
+.nc-section-reveal.visible .nc-stagger-child:nth-child(5) { transition-delay: 300ms; }
+.nc-section-reveal.visible .nc-stagger-child:nth-child(6) { transition-delay: 360ms; }
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html { scroll-behavior: smooth; }

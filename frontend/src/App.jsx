@@ -2,8 +2,10 @@ import { useRef } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { gsap, useGSAP } from './lib/gsapSetup'
 import { useAuth } from './contexts/AuthContext'
+import { MotionProvider } from './lib/motion/MotionProvider'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
+import { NocturneNav } from './components/nocturne/nocturne-nav'
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
 import SearchRides from './pages/SearchRides'
@@ -16,6 +18,10 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
+import NocturneHome from './pages/NocturneHome'
+import NocturneSearch from './pages/NocturneSearch'
+import NocturneConfirm from './pages/NocturneConfirm'
+import NocturneTrack from './pages/NocturneTrack'
 
 function AnimatedPage({ children }) {
   const ref = useRef(null)
@@ -65,11 +71,27 @@ function AppLayout({ children }) {
   )
 }
 
+function NocturneLayout({ children }) {
+  const { user, logout } = useAuth()
+  return (
+    <div className="min-h-screen bg-[var(--nc-50)]" data-theme="dark">
+      <NocturneNav user={user} onLogout={logout} />
+      <main>{children}</main>
+    </div>
+  )
+}
+
 export default function App() {
   return (
-    <Routes>
-      <Route path="*" element={<AppLayout><InnerRoutes /></AppLayout>} />
-    </Routes>
+    <MotionProvider>
+      <Routes>
+        <Route path="*" element={<AppLayout><InnerRoutes /></AppLayout>} />
+        <Route path="/" element={<NocturneLayout><NocturneHome /></NocturneLayout>} />
+        <Route path="/search" element={<NocturneLayout><NocturneSearch /></NocturneLayout>} />
+        <Route path="/confirm" element={<NocturneLayout><NocturneConfirm /></NocturneLayout>} />
+        <Route path="/track/:rideId" element={<NocturneLayout><NocturneTrack /></NocturneLayout>} />
+      </Routes>
+    </MotionProvider>
   )
 }
 
@@ -82,7 +104,6 @@ function InnerRoutes() {
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/search" element={<ProtectedRoute><SearchRides /></ProtectedRoute>} />
       <Route path="/offer-ride" element={<ProtectedRoute><OfferRide /></ProtectedRoute>} />
       <Route path="/my-rides" element={<ProtectedRoute><MyRides /></ProtectedRoute>} />
       <Route path="/rides/:id" element={<ProtectedRoute><RideDetailPage /></ProtectedRoute>} />

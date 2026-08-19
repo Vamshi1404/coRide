@@ -7,6 +7,9 @@ import App from './App'
 import '@tomtom-international/web-sdk-maps/dist/maps.css'
 import './index.css'
 
+// Activate NOCTURNE dark theme
+document.documentElement.setAttribute('data-theme', 'dark')
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>

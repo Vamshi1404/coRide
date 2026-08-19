@@ -253,6 +253,9 @@ cython_debug/
 # Demo files
 demos/
 
+# UI/UX Pro Max skill
+ui-ux-pro-max-skill/
+
 # IDEs
 .idea/
 .vscode/
