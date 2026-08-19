@@ -1,20 +1,15 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { RideTypeCarousel } from '@/components/nocturne/ride-type-carousel'
 import { FareCounter } from '@/components/nocturne/fare-counter'
-import { SurgeChip } from '@/components/nocturne/live-indicators'
 import { RideCardSkeleton } from '@/components/nocturne/skeletons'
-import { MOCK_ROUTES } from '@/lib/mock/routes'
-import { MOCK_DRIVERS } from '@/lib/mock/drivers'
-import { calculateFare } from '@/lib/mock/fares'
-import { cn } from '@/lib/utils'
+import { api } from '@/lib/api'
 import { Search, MapPin, Navigation, Clock, Users, ArrowRight } from 'lucide-react'
 
-function RideResultCard({ route, driver, fare, onSelect }) {
+function RideResultCard({ ride, onSelect }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -23,44 +18,53 @@ function RideResultCard({ route, driver, fare, onSelect }) {
     >
       <Card
         className="bg-card border-border hover:border-[var(--nc-400)] transition-all duration-300 cursor-pointer group"
-        onClick={() => onSelect?.(route)}
+        onClick={() => onSelect?.(ride)}
       >
         <CardContent className="p-5 space-y-4">
           <div className="flex items-center gap-3">
             <div className="size-2.5 rounded-full bg-[var(--nc-accent)] shrink-0" />
-            <span className="text-foreground font-medium text-sm">{route.from.label}</span>
+            <span className="text-foreground font-medium text-sm">{ride.from_city}</span>
             <div className="flex-1 flex items-center gap-1.5">
               <div className="flex-1 h-px bg-border" />
-              <Navigation size={10} className="text-muted-foreground" />
+              <ArrowRight size={12} className="text-muted-foreground" />
               <div className="flex-1 h-px bg-border" />
             </div>
-            <span className="text-foreground font-medium text-sm">{route.to.label}</span>
+            <span className="text-foreground font-medium text-sm">{ride.to_city}</span>
             <div className="size-2.5 rounded-full bg-muted-foreground shrink-0" />
           </div>
 
           <div className="flex items-center gap-3">
             <div className="size-9 rounded-full bg-secondary flex items-center justify-center text-foreground text-sm font-semibold">
-              {driver.name.split(' ').map(n => n[0]).join('')}
+              {ride.driver_name?.split(' ').map(n => n[0]).join('') || '?'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-foreground text-sm font-medium truncate">{driver.name}</p>
-              <p className="text-muted-foreground text-xs">{driver.vehicle.make} {driver.vehicle.model}</p>
+              <p className="text-foreground text-sm font-medium truncate">{ride.driver_name}</p>
+              <p className="text-muted-foreground text-xs">{ride.vehicle_brand} {ride.vehicle_model}</p>
             </div>
-            <span className="text-foreground text-xs">★ {driver.rating}</span>
+            {ride.driver_avg_rating && (
+              <span className="text-foreground text-xs">★ {Number(ride.driver_avg_rating).toFixed(1)}</span>
+            )}
           </div>
 
           <div className="flex items-center justify-between pt-3 border-t border-border">
             <div className="flex items-center gap-4 text-muted-foreground text-xs">
-              <span className="flex items-center gap-1"><Clock size={12} />{route.duration} min</span>
-              <span className="flex items-center gap-1"><MapPin size={12} />{route.distance} km</span>
-              <span className="flex items-center gap-1"><Users size={12} />{route.seatsAvailable} seats</span>
+              {ride.departure_time && (
+                <span className="flex items-center gap-1">
+                  <Clock size={12} />
+                  {new Date(ride.departure_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
+              {ride.distance_km && (
+                <span className="flex items-center gap-1"><MapPin size={12} />{ride.distance_km} km</span>
+              )}
+              <span className="flex items-center gap-1"><Users size={12} />{ride.available_seats} seats</span>
             </div>
             <div className="flex items-center gap-3">
-              <FareCounter value={fare.total} className="text-foreground font-bold text-lg" />
+              <FareCounter value={ride.final_cost} className="text-foreground font-bold text-lg" />
               <Button
                 size="sm"
                 className="cursor-pointer"
-                onClick={(e) => { e.stopPropagation(); onSelect?.(route) }}
+                onClick={(e) => { e.stopPropagation(); onSelect?.(ride) }}
               >
                 Book
                 <ArrowRight size={14} className="ml-1" />
@@ -77,35 +81,33 @@ export default function NocturneSearch() {
   const navigate = useNavigate()
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
-  const [rideType, setRideType] = useState('economy')
   const [isSearching, setIsSearching] = useState(false)
   const [results, setResults] = useState([])
   const [hasSearched, setHasSearched] = useState(false)
-  const [showSurge, setShowSurge] = useState(false)
-  const [surgeMultiplier, setSurgeMultiplier] = useState(1.0)
+  const [error, setError] = useState('')
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+    if (!from.trim() || !to.trim()) return
     setIsSearching(true)
     setHasSearched(true)
-    setTimeout(() => {
-      setResults(MOCK_ROUTES)
+    setError('')
+    try {
+      const rides = await api.get('/api/rides', { from_city: from.trim(), to_city: to.trim() })
+      setResults(rides)
+    } catch (err) {
+      setError(err.message)
+      setResults([])
+    } finally {
       setIsSearching(false)
-    }, 800)
+    }
   }
 
-  const handleSelectRide = (route) => {
-    navigate('/confirm', { state: { route, rideType } })
+  const handleSelectRide = (ride) => {
+    navigate('/confirm', { state: { ride } })
   }
-
-  const fares = useMemo(() => {
-    return results.map((route) => ({
-      route,
-      fare: calculateFare(route.distance, rideType, showSurge ? surgeMultiplier : null),
-    }))
-  }, [results, rideType, showSurge, surgeMultiplier])
 
   return (
-    <div className="min-h-screen bg-background pt-20 pb-12 px-6">
+    <div className="min-h-screen bg-background pt-24 pb-12 px-6">
       <div className="max-w-3xl mx-auto space-y-8">
         <motion.div
           className="space-y-2"
@@ -127,14 +129,24 @@ export default function NocturneSearch() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="relative">
                   <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--nc-accent)]" />
-                  <Input placeholder="From" value={from} onChange={(e) => setFrom(e.target.value)} className="pl-10" />
+                  <Input
+                    placeholder="From city"
+                    value={from}
+                    onChange={(e) => setFrom(e.target.value)}
+                    className="pl-10 h-11"
+                  />
                 </div>
                 <div className="relative">
                   <Navigation size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <Input placeholder="To" value={to} onChange={(e) => setTo(e.target.value)} className="pl-10" />
+                  <Input
+                    placeholder="To city"
+                    value={to}
+                    onChange={(e) => setTo(e.target.value)}
+                    className="pl-10 h-11"
+                  />
                 </div>
               </div>
-              <Button onClick={handleSearch} className="w-full cursor-pointer" disabled={isSearching}>
+              <Button onClick={handleSearch} className="w-full h-11 cursor-pointer" disabled={isSearching || !from.trim() || !to.trim()}>
                 {isSearching ? (
                   <span className="flex items-center gap-2">
                     <span className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
@@ -147,29 +159,6 @@ export default function NocturneSearch() {
             </CardContent>
           </Card>
         </motion.div>
-
-        <div className="space-y-4">
-          <h2 className="text-foreground text-lg font-semibold">Choose your ride type</h2>
-          <RideTypeCarousel selected={rideType} onSelect={setRideType} />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setShowSurge(!showSurge)
-              setSurgeMultiplier(showSurge ? 1.0 : 1.8)
-            }}
-            className={cn(
-              'cursor-pointer',
-              showSurge ? 'bg-[var(--nc-accent-dim)] border-[var(--nc-accent)] text-[var(--nc-accent)]' : 'text-muted-foreground'
-            )}
-          >
-            {showSurge ? 'Remove Surge' : 'Simulate Surge'}
-          </Button>
-          {showSurge && <SurgeChip multiplier={surgeMultiplier} />}
-        </div>
 
         <div className="space-y-4">
           <AnimatePresence mode="wait">
@@ -186,7 +175,18 @@ export default function NocturneSearch() {
               </motion.div>
             )}
 
-            {!isSearching && hasSearched && results.length === 0 && (
+            {!isSearching && error && (
+              <motion.div
+                key="error"
+                className="text-center py-12 space-y-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <p className="text-destructive text-sm">{error}</p>
+              </motion.div>
+            )}
+
+            {!isSearching && !error && hasSearched && results.length === 0 && (
               <motion.div
                 key="empty"
                 className="text-center py-16 space-y-4"
@@ -208,32 +208,29 @@ export default function NocturneSearch() {
                 <p className="text-muted-foreground text-sm">
                   {results.length} ride{results.length !== 1 ? 's' : ''} available
                 </p>
-                {fares.map(({ route, fare }) => {
-                  const driver = MOCK_DRIVERS.find((d) => d.id === route.driver)
-                  return (
-                    <RideResultCard
-                      key={route.id}
-                      route={route}
-                      driver={driver}
-                      fare={fare}
-                      onSelect={handleSelectRide}
-                    />
-                  )
-                })}
+                {results.map((ride) => (
+                  <RideResultCard
+                    key={ride.id}
+                    ride={ride}
+                    onSelect={handleSelectRide}
+                  />
+                ))}
               </motion.div>
             )}
 
             {!hasSearched && (
               <motion.div
                 key="placeholder"
-                className="text-center py-16 space-y-4"
+                className="text-center py-20 space-y-4 max-h-[50vh] flex flex-col items-center justify-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >
                 <div className="mx-auto size-16 rounded-full bg-secondary border border-border flex items-center justify-center">
                   <MapPin size={24} className="text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground">Enter your route to find available rides</p>
+                <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+                  Enter your pickup and destination above to find available rides
+                </p>
               </motion.div>
             )}
           </AnimatePresence>

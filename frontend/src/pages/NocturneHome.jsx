@@ -59,18 +59,18 @@ function RouteCard({ from, to, distance }) {
   return (
     <motion.div {...child}>
       <div className="flex items-center gap-4 p-4 rounded-[14px] bg-card border border-border hover:border-[var(--nc-400)] transition-colors duration-200 group cursor-pointer">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="size-2 rounded-full bg-[var(--nc-accent)] shrink-0" />
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+          <div className="size-2.5 rounded-full bg-[var(--nc-accent)] shrink-0" />
           <span className="text-foreground text-sm font-medium truncate">{from}</span>
         </div>
-        <div className="flex items-center gap-1.5 text-[var(--nc-400)]">
-          <div className="w-8 h-px bg-[var(--nc-400)]" />
-          <ArrowRight size={12} />
-          <div className="w-8 h-px bg-[var(--nc-400)]" />
+        <div className="flex items-center gap-2 text-[var(--nc-400)]">
+          <div className="w-6 h-px bg-[var(--nc-400)]" />
+          <ArrowRight size={14} className="shrink-0" />
+          <div className="w-6 h-px bg-[var(--nc-400)]" />
         </div>
-        <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
+        <div className="flex items-center gap-2.5 flex-1 min-w-0 justify-end">
           <span className="text-foreground text-sm font-medium truncate">{to}</span>
-          <div className="size-2 rounded-full bg-muted-foreground shrink-0" />
+          <div className="size-2.5 rounded-full bg-muted-foreground shrink-0" />
         </div>
         <span className="text-muted-foreground text-xs tabular-nums shrink-0">{distance} km</span>
       </div>
@@ -78,15 +78,18 @@ function RouteCard({ from, to, distance }) {
   )
 }
 
-function StepCard({ number, title, description }) {
+function StepCard({ number, title, description, isLast }) {
   return (
-    <motion.div {...child} className="relative pl-12 space-y-2">
-      <div className="absolute left-0 top-0 size-8 rounded-full bg-primary text-[var(--nc-accent)] flex items-center justify-center text-sm font-bold">
+    <div className="relative pl-12 space-y-2">
+      {!isLast && (
+        <div className="absolute left-[15px] top-10 bottom-0 w-px bg-border" />
+      )}
+      <div className="absolute left-0 top-0 size-8 rounded-full bg-primary text-[var(--nc-accent)] flex items-center justify-center text-sm font-bold border border-border">
         {number}
       </div>
       <h3 className="text-foreground font-semibold">{title}</h3>
       <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
-    </motion.div>
+    </div>
   )
 }
 
@@ -152,13 +155,13 @@ export default function NocturneHome() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.55, duration: 0.6 }}
           >
-            <MagneticButton asChild size="lg" className="px-8 text-base cursor-pointer">
+            <MagneticButton size="lg" className="px-8 text-base cursor-pointer">
               <Link to="/search">
                 <MapPin size={18} className="mr-2" />
                 Find a Ride
               </Link>
             </MagneticButton>
-            <MagneticButton asChild variant="outline" size="lg" className="px-8 text-base cursor-pointer">
+            <MagneticButton variant="outline" size="lg" className="px-8 text-base cursor-pointer">
               <Link to="/offer-ride">
                 <Navigation size={18} className="mr-2" />
                 Offer a Ride
@@ -169,7 +172,7 @@ export default function NocturneHome() {
       </section>
 
       {/* Stats */}
-      <motion.section {...fadeUp} className="py-20 px-6">
+      <motion.section {...fadeUp} className="py-20 px-6" style={{ scrollMarginTop: '5rem' }}>
         <motion.div {...stagger} className="max-w-4xl mx-auto grid grid-cols-3 gap-8">
           <StatCard value="18K+" label="Rides Completed" icon={TrendingUp} />
           <StatCard value="4.9" label="Average Rating" icon={Shield} />
@@ -224,7 +227,7 @@ export default function NocturneHome() {
             <StepCard number="1" title="Search your route" description="Enter your pickup and destination. We'll show you available rides from verified drivers heading your way." />
             <StepCard number="2" title="Book your seat" description="Choose a ride, confirm your seat, and you're set. Payment is simple — pay directly to the driver." />
             <StepCard number="3" title="Track live" description="Watch your driver approach in real-time. Chat directly, share your location, and arrive together." />
-            <StepCard number="4" title="Rate & repeat" description="Rate your experience. Build trust in the community. Find your regular commute partners." />
+            <StepCard number="4" title="Rate & repeat" description="Rate your experience. Build trust in the community. Find your regular commute partners." isLast />
           </motion.div>
         </div>
       </motion.section>
@@ -240,7 +243,7 @@ export default function NocturneHome() {
             Join thousands of professionals already saving time, money, and carbon with every ride.
           </motion.p>
           <motion.div {...child}>
-            <MagneticButton asChild size="lg" className="px-10 text-base cursor-pointer">
+            <MagneticButton size="lg" className="px-10 text-base cursor-pointer">
               <Link to="/register">
                 Get Started
                 <ArrowRight size={18} className="ml-2" />
@@ -257,7 +260,7 @@ export default function NocturneHome() {
             <div className="size-7 rounded-[8px] bg-primary flex items-center justify-center">
               <Navigation size={14} className="text-[var(--nc-accent)]" />
             </div>
-            <span className="text-foreground font-bold tracking-tight">NOCTURNE</span>
+            <span className="text-foreground font-bold tracking-tight">coRide</span>
           </div>
           <div className="flex items-center gap-8 text-muted-foreground text-sm">
             <a href="#" className="hover:text-foreground transition-colors">About</a>
@@ -265,7 +268,7 @@ export default function NocturneHome() {
             <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
             <a href="#" className="hover:text-foreground transition-colors">Terms</a>
           </div>
-          <p className="text-muted-foreground text-xs">© 2026 Nocturne. Hyderabad, India.</p>
+          <p className="text-muted-foreground text-xs">© 2026 coRide. Hyderabad, India.</p>
         </div>
       </footer>
     </div>

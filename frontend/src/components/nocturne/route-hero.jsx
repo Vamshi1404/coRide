@@ -1,15 +1,10 @@
 import { useRef } from 'react'
-import { motion, useScroll } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 export function RouteHero({ className }) {
   const containerRef = useRef(null)
   const pathRef = useRef(null)
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start end', 'end start'],
-  })
 
   return (
     <div ref={containerRef} className={cn('relative w-full overflow-hidden', className)}>

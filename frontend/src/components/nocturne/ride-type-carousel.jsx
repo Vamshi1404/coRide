@@ -33,10 +33,10 @@ export function RideTypeCarousel({ selected, onSelect, className }) {
           >
             <Card
               className={cn(
-                'cursor-pointer transition-colors duration-300',
+                'cursor-pointer transition-all duration-300',
                 isActive
-                  ? 'bg-card border-2 border-[var(--nc-accent)]'
-                  : 'bg-card border-border opacity-60 hover:opacity-100'
+                  ? 'bg-card border-2 border-[var(--nc-accent)] shadow-sm'
+                  : 'bg-card border border-[var(--nc-300)] hover:border-[var(--nc-400)] hover:bg-card/80'
               )}
               onClick={() => handleSelect(index)}
             >

@@ -40,7 +40,7 @@ export function NocturneNav({ user, onLogout, className }) {
           <div className="size-8 rounded-[10px] bg-primary flex items-center justify-center">
             <Navigation size={16} className="text-[var(--nc-accent)]" />
           </div>
-          <span className="text-primary font-bold text-lg tracking-tight">NOCTURNE</span>
+          <span className="text-primary font-bold text-lg tracking-tight">coRide</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">
