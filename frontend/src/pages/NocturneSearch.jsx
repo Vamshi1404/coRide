@@ -1,14 +1,13 @@
 import { useState, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { RideTypeCarousel } from '@/components/nocturne/ride-type-carousel'
 import { FareCounter } from '@/components/nocturne/fare-counter'
 import { SurgeChip } from '@/components/nocturne/live-indicators'
 import { RideCardSkeleton } from '@/components/nocturne/skeletons'
-import { useScrollReveal } from '@/hooks/useScrollReveal'
 import { MOCK_ROUTES } from '@/lib/mock/routes'
 import { MOCK_DRIVERS } from '@/lib/mock/drivers'
 import { calculateFare } from '@/lib/mock/fares'
@@ -16,62 +15,51 @@ import { cn } from '@/lib/utils'
 import { Search, MapPin, Navigation, Clock, Users, ArrowRight } from 'lucide-react'
 
 function RideResultCard({ route, driver, fare, onSelect }) {
-  const [ref, isVisible] = useScrollReveal()
   return (
-    <div ref={ref} className={cn('nc-section-reveal', isVisible && 'visible')}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+    >
       <Card
-        className="bg-[var(--nc-200)] border-[var(--nc-300)] border hover:border-[var(--nc-400)] transition-all duration-300 cursor-pointer group"
+        className="bg-card border-border hover:border-[var(--nc-400)] transition-all duration-300 cursor-pointer group"
         onClick={() => onSelect?.(route)}
       >
         <CardContent className="p-5 space-y-4">
-          {/* Route line */}
           <div className="flex items-center gap-3">
             <div className="size-2.5 rounded-full bg-[var(--nc-accent)] shrink-0" />
-            <span className="text-[var(--nc-800)] font-medium text-sm">{route.from.label}</span>
+            <span className="text-foreground font-medium text-sm">{route.from.label}</span>
             <div className="flex-1 flex items-center gap-1.5">
-              <div className="flex-1 h-px bg-[var(--nc-400)]" />
-              <Navigation size={10} className="text-[var(--nc-500)]" />
-              <div className="flex-1 h-px bg-[var(--nc-400)]" />
+              <div className="flex-1 h-px bg-border" />
+              <Navigation size={10} className="text-muted-foreground" />
+              <div className="flex-1 h-px bg-border" />
             </div>
-            <span className="text-[var(--nc-800)] font-medium text-sm">{route.to.label}</span>
-            <div className="size-2.5 rounded-full bg-[var(--nc-500)] shrink-0" />
+            <span className="text-foreground font-medium text-sm">{route.to.label}</span>
+            <div className="size-2.5 rounded-full bg-muted-foreground shrink-0" />
           </div>
 
-          {/* Driver info */}
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-full bg-[var(--nc-300)] flex items-center justify-center text-[var(--nc-700)] text-sm font-semibold">
+            <div className="size-9 rounded-full bg-secondary flex items-center justify-center text-foreground text-sm font-semibold">
               {driver.name.split(' ').map(n => n[0]).join('')}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[var(--nc-800)] text-sm font-medium truncate">{driver.name}</p>
-              <p className="text-[var(--nc-500)] text-xs">{driver.vehicle.make} {driver.vehicle.model}</p>
+              <p className="text-foreground text-sm font-medium truncate">{driver.name}</p>
+              <p className="text-muted-foreground text-xs">{driver.vehicle.make} {driver.vehicle.model}</p>
             </div>
-            <div className="text-right">
-              <span className="text-[var(--nc-800)] text-xs">★ {driver.rating}</span>
-            </div>
+            <span className="text-foreground text-xs">★ {driver.rating}</span>
           </div>
 
-          {/* Footer: meta + price + CTA */}
-          <div className="flex items-center justify-between pt-3 border-t border-[var(--nc-300)]">
-            <div className="flex items-center gap-4 text-[var(--nc-500)] text-xs">
-              <span className="flex items-center gap-1">
-                <Clock size={12} />
-                {route.duration} min
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin size={12} />
-                {route.distance} km
-              </span>
-              <span className="flex items-center gap-1">
-                <Users size={12} />
-                {route.seatsAvailable} seats
-              </span>
+          <div className="flex items-center justify-between pt-3 border-t border-border">
+            <div className="flex items-center gap-4 text-muted-foreground text-xs">
+              <span className="flex items-center gap-1"><Clock size={12} />{route.duration} min</span>
+              <span className="flex items-center gap-1"><MapPin size={12} />{route.distance} km</span>
+              <span className="flex items-center gap-1"><Users size={12} />{route.seatsAvailable} seats</span>
             </div>
             <div className="flex items-center gap-3">
-              <FareCounter value={fare.total} className="text-[var(--nc-900)] font-bold text-lg" />
+              <FareCounter value={fare.total} className="text-foreground font-bold text-lg" />
               <Button
                 size="sm"
-                className="bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] cursor-pointer"
+                className="cursor-pointer"
                 onClick={(e) => { e.stopPropagation(); onSelect?.(route) }}
               >
                 Book
@@ -81,7 +69,7 @@ function RideResultCard({ route, driver, fare, onSelect }) {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   )
 }
 
@@ -99,7 +87,6 @@ export default function NocturneSearch() {
   const handleSearch = () => {
     setIsSearching(true)
     setHasSearched(true)
-    // Simulate search delay
     setTimeout(() => {
       setResults(MOCK_ROUTES)
       setIsSearching(false)
@@ -118,69 +105,54 @@ export default function NocturneSearch() {
   }, [results, rideType, showSurge, surgeMultiplier])
 
   return (
-    <div className="min-h-screen bg-[var(--nc-50)] pt-20 pb-12 px-6">
+    <div className="min-h-screen bg-background pt-20 pb-12 px-6">
       <div className="max-w-3xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-[var(--nc-900)] text-3xl font-bold tracking-tight">
-            Find your ride
-          </h1>
-          <p className="text-[var(--nc-500)]">
-            Search available rides across Hyderabad
-          </p>
-        </div>
+        <motion.div
+          className="space-y-2"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <h1 className="text-foreground text-3xl font-bold tracking-tight">Find your ride</h1>
+          <p className="text-muted-foreground">Search available rides across Hyderabad</p>
+        </motion.div>
 
-        {/* Search Card */}
-        <Card className="bg-[var(--nc-200)] border-[var(--nc-300)] border">
-          <CardContent className="p-5 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="relative">
-                <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--nc-accent)]" />
-                <Input
-                  placeholder="From"
-                  value={from}
-                  onChange={(e) => setFrom(e.target.value)}
-                  className="pl-10 bg-[var(--nc-100)] border-[var(--nc-300)] text-[var(--nc-800)] placeholder:text-[var(--nc-500)]"
-                />
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <Card className="bg-card border-border">
+            <CardContent className="p-5 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="relative">
+                  <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--nc-accent)]" />
+                  <Input placeholder="From" value={from} onChange={(e) => setFrom(e.target.value)} className="pl-10" />
+                </div>
+                <div className="relative">
+                  <Navigation size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input placeholder="To" value={to} onChange={(e) => setTo(e.target.value)} className="pl-10" />
+                </div>
               </div>
-              <div className="relative">
-                <Navigation size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--nc-500)]" />
-                <Input
-                  placeholder="To"
-                  value={to}
-                  onChange={(e) => setTo(e.target.value)}
-                  className="pl-10 bg-[var(--nc-100)] border-[var(--nc-300)] text-[var(--nc-800)] placeholder:text-[var(--nc-500)]"
-                />
-              </div>
-            </div>
+              <Button onClick={handleSearch} className="w-full cursor-pointer" disabled={isSearching}>
+                {isSearching ? (
+                  <span className="flex items-center gap-2">
+                    <span className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                    Searching...
+                  </span>
+                ) : (
+                  <><Search size={16} className="mr-2" />Search Rides</>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-            <Button
-              onClick={handleSearch}
-              className="w-full bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] cursor-pointer"
-              disabled={isSearching}
-            >
-              {isSearching ? (
-                <span className="flex items-center gap-2">
-                  <span className="size-4 border-2 border-[var(--nc-0)]/30 border-t-[var(--nc-0)] rounded-full animate-spin" />
-                  Searching...
-                </span>
-              ) : (
-                <>
-                  <Search size={16} className="mr-2" />
-                  Search Rides
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Ride Type Selector */}
         <div className="space-y-4">
-          <h2 className="text-[var(--nc-800)] text-lg font-semibold">Choose your ride type</h2>
+          <h2 className="text-foreground text-lg font-semibold">Choose your ride type</h2>
           <RideTypeCarousel selected={rideType} onSelect={setRideType} />
         </div>
 
-        {/* Surge toggle (demo) */}
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
@@ -190,8 +162,8 @@ export default function NocturneSearch() {
               setSurgeMultiplier(showSurge ? 1.0 : 1.8)
             }}
             className={cn(
-              'border-[var(--nc-400)] cursor-pointer',
-              showSurge ? 'bg-[var(--nc-accent-dim)] border-[var(--nc-accent)] text-[var(--nc-accent)]' : 'text-[var(--nc-600)]'
+              'cursor-pointer',
+              showSurge ? 'bg-[var(--nc-accent-dim)] border-[var(--nc-accent)] text-[var(--nc-accent)]' : 'text-muted-foreground'
             )}
           >
             {showSurge ? 'Remove Surge' : 'Simulate Surge'}
@@ -199,50 +171,72 @@ export default function NocturneSearch() {
           {showSurge && <SurgeChip multiplier={surgeMultiplier} />}
         </div>
 
-        {/* Results */}
         <div className="space-y-4">
-          {isSearching && (
-            <div className="space-y-4">
-              <RideCardSkeleton />
-              <RideCardSkeleton />
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {isSearching && (
+              <motion.div
+                key="skeletons"
+                className="space-y-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <RideCardSkeleton />
+                <RideCardSkeleton />
+              </motion.div>
+            )}
 
-          {!isSearching && hasSearched && results.length === 0 && (
-            <div className="text-center py-16 space-y-4">
-              <Search size={32} className="mx-auto text-[var(--nc-400)]" />
-              <p className="text-[var(--nc-500)]">No rides found for this route</p>
-            </div>
-          )}
+            {!isSearching && hasSearched && results.length === 0 && (
+              <motion.div
+                key="empty"
+                className="text-center py-16 space-y-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <Search size={32} className="mx-auto text-muted-foreground" />
+                <p className="text-muted-foreground">No rides found for this route</p>
+              </motion.div>
+            )}
 
-          {!isSearching && results.length > 0 && (
-            <div className="space-y-4">
-              <p className="text-[var(--nc-500)] text-sm">
-                {results.length} ride{results.length !== 1 ? 's' : ''} available
-              </p>
-              {fares.map(({ route, fare }) => {
-                const driver = MOCK_DRIVERS.find((d) => d.id === route.driver)
-                return (
-                  <RideResultCard
-                    key={route.id}
-                    route={route}
-                    driver={driver}
-                    fare={fare}
-                    onSelect={handleSelectRide}
-                  />
-                )
-              })}
-            </div>
-          )}
+            {!isSearching && results.length > 0 && (
+              <motion.div
+                key="results"
+                className="space-y-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <p className="text-muted-foreground text-sm">
+                  {results.length} ride{results.length !== 1 ? 's' : ''} available
+                </p>
+                {fares.map(({ route, fare }) => {
+                  const driver = MOCK_DRIVERS.find((d) => d.id === route.driver)
+                  return (
+                    <RideResultCard
+                      key={route.id}
+                      route={route}
+                      driver={driver}
+                      fare={fare}
+                      onSelect={handleSelectRide}
+                    />
+                  )
+                })}
+              </motion.div>
+            )}
 
-          {!hasSearched && (
-            <div className="text-center py-16 space-y-4">
-              <div className="mx-auto size-16 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] flex items-center justify-center">
-                <MapPin size={24} className="text-[var(--nc-400)]" />
-              </div>
-              <p className="text-[var(--nc-500)]">Enter your route to find available rides</p>
-            </div>
-          )}
+            {!hasSearched && (
+              <motion.div
+                key="placeholder"
+                className="text-center py-16 space-y-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <div className="mx-auto size-16 rounded-full bg-secondary border border-border flex items-center justify-center">
+                  <MapPin size={24} className="text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground">Enter your route to find available rides</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
