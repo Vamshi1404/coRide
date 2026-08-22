@@ -13,7 +13,7 @@ export function Preloader({ onDone }) {
       return undefined
     }
 
-    const ctx = gsap.context((self) => {
+    const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         defaults: { ease: 'expo.out' },
         onComplete: () => window.setTimeout(finish, 250),
@@ -35,8 +35,6 @@ export function Preloader({ onDone }) {
           duration: 0.45,
           ease: 'power2.inOut',
         }, '+=0.15')
-
-      self.vars.tl = tl
     }, rootRef)
 
     return () => ctx.revert()

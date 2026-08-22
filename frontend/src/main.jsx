@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './contexts/AuthContext'
 import { MotionProvider } from './lib/motion/MotionProvider'
+import { ErrorBoundary } from './components/layout/ErrorBoundary'
 import { queryClient } from './lib/queryClient'
 import App from './App'
 import '@tomtom-international/web-sdk-maps/dist/maps.css'
@@ -17,9 +18,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <MotionProvider>
-            <App />
+        <ErrorBoundary>
+          <AuthProvider>
+            <MotionProvider>
+              <App />
             <Toaster
               position="top-right"
               toastOptions={{
@@ -44,6 +46,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             />
           </MotionProvider>
         </AuthProvider>
+        </ErrorBoundary>
       </QueryClientProvider>
     </BrowserRouter>
   </React.StrictMode>

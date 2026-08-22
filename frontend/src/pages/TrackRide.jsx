@@ -133,8 +133,8 @@ export default function TrackRide() {
           <AlertTriangle size={28} className="mx-auto text-[var(--nc-accent)]" />
           <h1 className="mt-4 text-xl font-bold text-[var(--nc-900)]">Ride not found</h1>
           <p className="mt-1.5 text-sm text-[var(--nc-500)]">It may have been cancelled or removed.</p>
-          <Button asChild variant="outline" className="mt-6 border-[var(--nc-400)] text-[var(--nc-600)] cursor-pointer">
-            <Link to="/my-rides"><ArrowLeft size={16} className="mr-2" />My Rides</Link>
+          <Button render={<Link to="/my-rides" />} variant="outline" className="mt-6 border-[var(--nc-400)] text-[var(--nc-600)] cursor-pointer">
+            <ArrowLeft size={16} className="mr-2" />My Rides
           </Button>
         </div>
       </div>
@@ -299,18 +299,14 @@ export default function TrackRide() {
               ) : (
                 <>
                   {ride.driver_phone && (
-                    <Button asChild className="w-full bg-[var(--nc-900)] text-white hover:bg-[var(--nc-800)] cursor-pointer" size="lg">
-                      <a href={`tel:${ride.driver_phone}`}>
-                        <Phone size={16} className="mr-2" />
-                        Call driver
-                      </a>
+                    <Button render={<a href={`tel:${ride.driver_phone}`} />} className="w-full bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] cursor-pointer" size="lg">
+                      <Phone size={16} className="mr-2" />
+                      Call driver
                     </Button>
                   )}
-                  <Button asChild variant="outline" className="w-full border-[var(--nc-400)] text-[var(--nc-600)] cursor-pointer">
-                    <Link to={`/chat/${ride.id}`}>
-                      <MessageCircle size={16} className="mr-2" />
-                      Message driver
-                    </Link>
+                  <Button render={<Link to={`/chat/${ride.id}`} />} variant="outline" className="w-full border-[var(--nc-400)] text-[var(--nc-600)] cursor-pointer">
+                    <MessageCircle size={16} className="mr-2" />
+                    Message driver
                   </Button>
                 </>
               )}
@@ -387,7 +383,7 @@ function TimelineStep({ label, time, active, completed }) {
           active
             ? 'bg-[var(--nc-accent)] text-white'
             : completed
-              ? 'bg-[var(--nc-900)] text-white'
+              ? 'bg-[var(--nc-900)] text-[var(--nc-0)]'
               : 'bg-[var(--nc-300)] text-[var(--nc-500)]'
         )}
       >

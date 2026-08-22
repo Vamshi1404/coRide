@@ -48,7 +48,7 @@ export default function ProfilePage() {
       >
         {/* Identity */}
         <div className="flex items-center gap-4">
-          <div className="size-[72px] shrink-0 rounded-full bg-gradient-to-br from-[var(--nc-900)] to-[var(--nc-700)] text-white flex items-center justify-center text-2xl font-bold shadow-lg">
+          <div className="size-[72px] shrink-0 rounded-full bg-gradient-to-br from-[var(--nc-900)] to-[var(--nc-700)] text-[var(--nc-0)] flex items-center justify-center text-2xl font-bold shadow-lg">
             {getInitials(user?.name)}
           </div>
           <div className="min-w-0">

@@ -63,7 +63,7 @@ export default function RequestList({ requests, ride, onUpdate }) {
                     disabled={loading === req.id || !canAccept}
                     aria-label={`Accept ${req.passenger_name}`}
                     title={!canAccept ? 'No seats available' : 'Accept'}
-                    className="size-8 rounded-full bg-[var(--nc-900)] text-white flex items-center justify-center hover:bg-[var(--nc-accent)] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="size-8 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] flex items-center justify-center hover:bg-[var(--nc-accent)] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Check size={14} />
                   </button>

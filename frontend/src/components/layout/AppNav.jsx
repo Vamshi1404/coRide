@@ -114,11 +114,11 @@ export function AppNav() {
               </>
             ) : (
               <div className="hidden md:flex items-center gap-2">
-                <Button variant="ghost" size="sm" asChild className="text-[var(--nc-500)] hover:text-[var(--nc-900)] cursor-pointer">
-                  <Link to="/login">Sign In</Link>
+                <Button variant="ghost" size="sm" render={<Link to="/login" />} className="text-[var(--nc-500)] hover:text-[var(--nc-900)] cursor-pointer">
+                  Sign In
                 </Button>
-                <Button size="sm" asChild className="bg-[var(--nc-900)] text-white hover:bg-[var(--nc-800)] cursor-pointer">
-                  <Link to="/register">Get Started</Link>
+                <Button size="sm" render={<Link to="/register" />} className="bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] cursor-pointer">
+                  Get Started
                 </Button>
               </div>
             )}
@@ -181,11 +181,11 @@ export function AppNav() {
 
               {!user && (
                 <motion.div variants={reduced ? {} : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }} className="flex flex-col gap-2 mt-4">
-                  <Button asChild variant="outline" className="border-[var(--nc-400)] text-[var(--nc-700)] h-11 cursor-pointer">
-                    <Link to="/login">Sign In</Link>
+                  <Button render={<Link to="/login" />} variant="outline" className="border-[var(--nc-400)] text-[var(--nc-700)] h-11 cursor-pointer">
+                    Sign In
                   </Button>
-                  <Button asChild className="bg-[var(--nc-900)] text-white hover:bg-[var(--nc-800)] h-11 cursor-pointer">
-                    <Link to="/register">Get Started</Link>
+                  <Button render={<Link to="/register" />} className="bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] h-11 cursor-pointer">
+                    Get Started
                   </Button>
                 </motion.div>
               )}

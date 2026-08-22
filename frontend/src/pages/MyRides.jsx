@@ -56,7 +56,7 @@ export default function MyRides() {
             onClick={() => setTab(t.id)}
             className={cn(
               'relative px-5 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer',
-              tab === t.id ? 'text-white' : 'text-[var(--nc-500)] hover:text-[var(--nc-800)]'
+              tab === t.id ? 'text-[var(--nc-0)]' : 'text-[var(--nc-500)] hover:text-[var(--nc-800)]'
             )}
           >
             {tab === t.id && (
@@ -175,7 +175,7 @@ function UpcomingCard({ ride, onOpen }) {
           className={cn(
             'px-2.5 py-1 rounded-full text-[11px] font-semibold',
             confirmed
-              ? 'bg-[var(--nc-900)] text-white'
+              ? 'bg-[var(--nc-900)] text-[var(--nc-0)]'
               : 'bg-[var(--nc-accent-dim)] text-[var(--nc-accent)]'
           )}
         >
@@ -222,7 +222,7 @@ function UpcomingCard({ ride, onOpen }) {
             {ride.vehicle_plate && <span className="font-mono">· {ride.vehicle_plate}</span>}
           </p>
         </div>
-        <span className="shrink-0 inline-flex items-center gap-1 px-4 py-2 rounded-full bg-[var(--nc-900)] text-white text-xs font-semibold group-hover:bg-[var(--nc-accent)] transition-colors">
+        <span className="shrink-0 inline-flex items-center gap-1 px-4 py-2 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-xs font-semibold group-hover:bg-[var(--nc-accent)] transition-colors">
           Details
           <ArrowRight size={13} />
         </span>
@@ -262,7 +262,7 @@ function EmptyState({ icon: Icon, title, body, cta }) {
       {cta && (
         <button
           onClick={() => window.location.assign(cta.to)}
-          className="mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-white text-sm font-medium hover:bg-[var(--nc-800)] transition-colors cursor-pointer"
+          className="mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-sm font-medium hover:bg-[var(--nc-800)] transition-colors cursor-pointer"
         >
           {cta.label}
         </button>

@@ -200,7 +200,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
               <ArrowLeft size={18} />
             </button>
           )}
-          <div className="size-10 shrink-0 rounded-full bg-[var(--nc-900)] flex items-center justify-center text-sm font-bold text-white">
+          <div className="size-10 shrink-0 rounded-full bg-[var(--nc-900)] flex items-center justify-center text-sm font-bold text-[var(--nc-0)]">
             {getInitials(convName)}
           </div>
           <div className="min-w-0">
@@ -338,7 +338,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
             onClick={() => send()}
             disabled={sending || !content.trim()}
             aria-label="Send message"
-            className="size-11 shrink-0 rounded-full bg-[var(--nc-900)] text-white hover:bg-[var(--nc-accent)] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center justify-center"
+            className="size-11 shrink-0 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-accent)] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center justify-center"
           >
             {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
           </button>

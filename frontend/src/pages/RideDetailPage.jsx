@@ -91,7 +91,7 @@ export default function RideDetailPage() {
           <CircleAlert size={28} className="mx-auto text-[var(--nc-accent)]" />
           <h1 className="mt-4 text-xl font-bold text-[var(--nc-900)]">Ride not found</h1>
           <p className="mt-1.5 text-sm text-[var(--nc-500)]">It may have been cancelled or removed.</p>
-          <Link to="/my-rides" className="inline-block mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-white text-sm font-medium hover:bg-[var(--nc-800)] transition-colors">
+          <Link to="/my-rides" className="inline-block mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-sm font-medium hover:bg-[var(--nc-800)] transition-colors">
             My Rides
           </Link>
         </div>
@@ -180,7 +180,7 @@ export default function RideDetailPage() {
                         activeNow
                           ? 'bg-[var(--nc-accent)] text-white'
                           : done
-                            ? 'bg-[var(--nc-900)] text-white'
+                            ? 'bg-[var(--nc-900)] text-[var(--nc-0)]'
                             : 'bg-[var(--nc-100)] border border-[var(--nc-400)] text-[var(--nc-500)]'
                       )}
                     >
@@ -211,8 +211,8 @@ export default function RideDetailPage() {
                 <span className="relative inline-flex rounded-full size-3 bg-[var(--nc-accent)]" />
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm">This ride is live</p>
-                <p className="text-white/60 text-xs mt-0.5">
+                <p className="text-[var(--nc-0)] font-semibold text-sm">This ride is live</p>
+                <p className="text-[var(--nc-0)]/60 text-xs mt-0.5">
                   Follow the driver's GPS position and traffic-aware ETA in real time.
                 </p>
               </div>
@@ -278,7 +278,7 @@ export default function RideDetailPage() {
 
             <button
               onClick={() => navigate(`/chat/${ride.id}`)}
-              className="mt-4 w-full h-11 rounded-full bg-[var(--nc-900)] text-white text-sm font-semibold hover:bg-[var(--nc-800)] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="mt-4 w-full h-11 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-sm font-semibold hover:bg-[var(--nc-800)] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <MessageCircle size={15} />
               {isDriver ? 'Chat with passengers' : 'Chat with driver'}

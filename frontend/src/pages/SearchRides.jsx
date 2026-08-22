@@ -267,7 +267,7 @@ function RideResultCard({ ride, onSelect }) {
             {formatCurrency(ride.final_cost)}
           </span>
           <span className="size-8 rounded-full bg-[var(--nc-900)] flex items-center justify-center group-hover:bg-[var(--nc-accent)] transition-colors">
-            <ArrowRight size={14} className="text-white" />
+            <ArrowRight size={14} className="text-[var(--nc-0)] group-hover:text-white" />
           </span>
         </div>
       </div>
@@ -291,7 +291,7 @@ function EmptyState({ hasQuery }) {
       </p>
       <button
         onClick={() => window.location.assign('/offer-ride')}
-        className="mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-white text-sm font-medium hover:bg-[var(--nc-800)] transition-colors cursor-pointer"
+        className="mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-sm font-medium hover:bg-[var(--nc-800)] transition-colors cursor-pointer"
       >
         Offer a ride instead
       </button>
@@ -309,7 +309,7 @@ function ErrorState({ onRetry }) {
       <p className="mt-1.5 text-sm text-[var(--nc-500)]">We couldn't load rides. Check your connection.</p>
       <button
         onClick={onRetry}
-        className="mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-white text-sm font-medium hover:bg-[var(--nc-800)] transition-colors cursor-pointer"
+        className="mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-sm font-medium hover:bg-[var(--nc-800)] transition-colors cursor-pointer"
       >
         Try again
       </button>

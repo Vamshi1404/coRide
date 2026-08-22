@@ -132,7 +132,7 @@ export default function ChatPage() {
                       className={cn(
                         'size-11 rounded-full flex items-center justify-center text-sm font-bold',
                         isOnline
-                          ? 'bg-[var(--nc-900)] text-white'
+                          ? 'bg-[var(--nc-900)] text-[var(--nc-0)]'
                           : 'bg-[var(--nc-300)] text-[var(--nc-600)]'
                       )}
                     >
@@ -193,7 +193,7 @@ function EmptyPane() {
       </p>
       <Link
         to="/search"
-        className="mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-white text-sm font-medium hover:bg-[var(--nc-800)] transition-colors"
+        className="mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-sm font-medium hover:bg-[var(--nc-800)] transition-colors"
       >
         Find a ride
       </Link>

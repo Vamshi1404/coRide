@@ -17,11 +17,11 @@ export default function NotFound() {
           This page doesn't exist — it may have moved, or the link was wrong.
         </p>
         <div className="mt-8 flex items-center justify-center gap-3">
-          <Button asChild className="bg-[var(--nc-900)] text-white hover:bg-[var(--nc-800)] cursor-pointer">
-            <Link to="/">Back home</Link>
+          <Button render={<Link to="/" />} className="bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] cursor-pointer">
+            Back home
           </Button>
-          <Button asChild variant="outline" className="border-[var(--nc-400)] text-[var(--nc-600)] cursor-pointer">
-            <Link to="/search">Find a ride</Link>
+          <Button render={<Link to="/search" />} variant="outline" className="border-[var(--nc-400)] text-[var(--nc-600)] cursor-pointer">
+            Find a ride
           </Button>
         </div>
       </div>

@@ -69,8 +69,8 @@ export default function ConfirmRide() {
           <AlertTriangle size={28} className="mx-auto text-[var(--nc-accent)]" />
           <h1 className="mt-4 text-xl font-bold text-[var(--nc-900)]">Ride not found</h1>
           <p className="mt-1.5 text-sm text-[var(--nc-500)]">It may have been cancelled or removed.</p>
-          <Button asChild variant="outline" className="mt-6 border-[var(--nc-400)] text-[var(--nc-600)] cursor-pointer">
-            <Link to="/search"><ArrowLeft size={16} className="mr-2" />Back to Search</Link>
+          <Button render={<Link to="/search" />} variant="outline" className="mt-6 border-[var(--nc-400)] text-[var(--nc-600)] cursor-pointer">
+            <ArrowLeft size={16} className="mr-2" />Back to Search
           </Button>
         </div>
       </div>
@@ -84,8 +84,8 @@ export default function ConfirmRide() {
           <RouteIcon size={28} className="mx-auto text-[var(--nc-accent)]" />
           <h1 className="mt-4 text-xl font-bold text-[var(--nc-900)]">This is your ride</h1>
           <p className="mt-1.5 text-sm text-[var(--nc-500)]">Manage requests and status from the ride page.</p>
-          <Button asChild className="mt-6 bg-[var(--nc-900)] text-white hover:bg-[var(--nc-800)] cursor-pointer">
-            <Link to={`/rides/${ride.id}`}>Open ride</Link>
+          <Button render={<Link to={`/rides/${ride.id}`} />} className="mt-6 bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] cursor-pointer">
+            Open ride
           </Button>
         </div>
       </div>
@@ -230,7 +230,7 @@ export default function ConfirmRide() {
               <Button
                 onClick={() => requestMutation.mutate()}
                 disabled={requestMutation.isPending}
-                className="w-full bg-[var(--nc-900)] text-white hover:bg-[var(--nc-800)] cursor-pointer h-12 text-base"
+                className="w-full bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] cursor-pointer h-12 text-base"
               >
                 {requestMutation.isPending ? (
                   <span className="flex items-center gap-2">

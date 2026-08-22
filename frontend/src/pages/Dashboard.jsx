@@ -109,7 +109,7 @@ export default function Dashboard() {
                 action={
                   <button
                     onClick={() => navigate('/search')}
-                    className="mt-4 px-4 py-2 rounded-full bg-[var(--nc-900)] text-white text-sm font-medium hover:bg-[var(--nc-800)] transition-colors cursor-pointer"
+                    className="mt-4 px-4 py-2 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-sm font-medium hover:bg-[var(--nc-800)] transition-colors cursor-pointer"
                   >
                     Search routes
                   </button>
@@ -149,7 +149,7 @@ export default function Dashboard() {
                     </button>
                     <Link
                       to={`/chat/${ride.id}`}
-                      className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[var(--nc-900)] text-white text-xs font-semibold hover:bg-[var(--nc-accent)] transition-colors"
+                      className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-xs font-semibold hover:bg-[var(--nc-accent)] transition-colors"
                     >
                       <MessageCircle size={13} />
                       Chat
@@ -221,15 +221,15 @@ function ActionCard({ to, icon: Icon, title, desc, cta, accent }) {
       <div
         className={cn(
           'size-11 rounded-[12px] flex items-center justify-center mb-4',
-          accent ? 'bg-white/10' : 'bg-[var(--nc-300)]'
+          accent ? 'bg-[var(--nc-0)]/10' : 'bg-[var(--nc-300)]'
         )}
       >
         <Icon size={20} className={accent ? 'text-[var(--nc-accent)]' : 'text-[var(--nc-600)]'} />
       </div>
-      <h3 className={cn('font-semibold text-lg', accent ? 'text-white' : 'text-[var(--nc-900)]')}>
+      <h3 className={cn('font-semibold text-lg', accent ? 'text-[var(--nc-0)]' : 'text-[var(--nc-900)]')}>
         {title}
       </h3>
-      <p className={cn('mt-1 text-sm', accent ? 'text-white/70' : 'text-[var(--nc-500)]')}>{desc}</p>
+      <p className={cn('mt-1 text-sm', accent ? 'text-[var(--nc-0)]/70' : 'text-[var(--nc-500)]')}>{desc}</p>
       <span
         className={cn(
           'mt-4 inline-flex items-center gap-1.5 text-sm font-semibold',

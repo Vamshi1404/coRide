@@ -156,17 +156,13 @@ export default function NocturneHome() {
           <RouteHero className="hero-route max-w-3xl mx-auto my-8" />
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <MagneticButton asChild size="lg" className="hero-cta bg-[var(--nc-900)] text-white hover:bg-[var(--nc-800)] px-8 text-base cursor-pointer">
-              <Link to="/search">
-                <MapPin size={18} className="mr-2" />
-                Find a Ride
-              </Link>
+            <MagneticButton render={<Link to="/search" />} size="lg" className="hero-cta bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] px-8 text-base cursor-pointer">
+              <MapPin size={18} className="mr-2" />
+              Find a Ride
             </MagneticButton>
-            <MagneticButton asChild variant="outline" size="lg" className="hero-cta border-[var(--nc-400)] text-[var(--nc-700)] hover:bg-[var(--nc-200)] px-8 text-base cursor-pointer">
-              <Link to="/offer-ride">
-                <Navigation size={18} className="mr-2" />
-                Offer a Ride
-              </Link>
+            <MagneticButton render={<Link to="/offer-ride" />} variant="outline" size="lg" className="hero-cta border-[var(--nc-400)] text-[var(--nc-700)] hover:bg-[var(--nc-200)] px-8 text-base cursor-pointer">
+              <Navigation size={18} className="mr-2" />
+              Offer a Ride
             </MagneticButton>
           </div>
         </div>
@@ -280,11 +276,9 @@ export default function NocturneHome() {
           <p className="nc-stagger-child text-[var(--nc-500)] text-lg max-w-xl mx-auto">
             Create a free account — offer seats on your drive or find one heading your way.
           </p>
-          <MagneticButton asChild size="lg" className="bg-[var(--nc-900)] text-white hover:bg-[var(--nc-800)] px-10 text-base cursor-pointer">
-            <Link to="/register">
-              Get Started
-              <ArrowRight size={18} className="ml-2" />
-            </Link>
+          <MagneticButton render={<Link to="/register" />} size="lg" className="bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] px-10 text-base cursor-pointer">
+            Get Started
+            <ArrowRight size={18} className="ml-2" />
           </MagneticButton>
         </div>
       </Section>
