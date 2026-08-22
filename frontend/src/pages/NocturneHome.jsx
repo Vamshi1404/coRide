@@ -1,13 +1,15 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
 import { MagneticButton } from '@/components/nocturne/magnetic-button'
 import { RouteHero } from '@/components/nocturne/route-hero'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
 import { useReducedMotion } from '@/lib/motion/MotionProvider'
+import { gsap, useGSAP, ScrollTrigger } from '@/lib/gsapSetup'
 import { cn } from '@/lib/utils'
 import {
   Navigation, Shield, Clock, MapPin, Zap, ArrowRight,
-  Leaf, Users, TrendingUp, ChevronRight
+  Leaf, Users, Star,
 } from 'lucide-react'
 
 function Section({ children, className }) {
@@ -19,18 +21,6 @@ function Section({ children, className }) {
     >
       {children}
     </section>
-  )
-}
-
-function StatCard({ value, label, icon: Icon }) {
-  return (
-    <div className="nc-stagger-child text-center space-y-2">
-      <div className="mx-auto size-10 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] flex items-center justify-center">
-        <Icon size={18} className="text-[var(--nc-accent)]" />
-      </div>
-      <p className="text-[var(--nc-900)] text-2xl font-bold tabular-nums">{value}</p>
-      <p className="text-[var(--nc-500)] text-sm">{label}</p>
-    </div>
   )
 }
 
@@ -50,12 +40,15 @@ function FeatureCard({ icon: Icon, title, description }) {
 
 function RouteCard({ from, to, distance }) {
   return (
-    <div className="nc-stagger-child flex items-center gap-4 p-4 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] hover:border-[var(--nc-400)] transition-colors duration-200 group cursor-pointer">
+    <Link
+      to={`/search?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`}
+      className="nc-stagger-child flex items-center gap-4 p-4 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] hover:border-[var(--nc-accent)] transition-colors duration-200 group"
+    >
       <div className="flex items-center gap-2 flex-1 min-w-0">
         <div className="size-2 rounded-full bg-[var(--nc-accent)] shrink-0" />
         <span className="text-[var(--nc-800)] text-sm font-medium truncate">{from}</span>
       </div>
-      <div className="flex items-center gap-1.5 text-[var(--nc-400)]">
+      <div className="flex items-center gap-1.5 text-[var(--nc-400)]" aria-hidden="true">
         <div className="w-8 h-px bg-[var(--nc-400)]" />
         <ArrowRight size={12} />
         <div className="w-8 h-px bg-[var(--nc-400)]" />
@@ -64,8 +57,9 @@ function RouteCard({ from, to, distance }) {
         <span className="text-[var(--nc-800)] text-sm font-medium truncate">{to}</span>
         <div className="size-2 rounded-full bg-[var(--nc-500)] shrink-0" />
       </div>
-      <span className="text-[var(--nc-500)] text-xs tabular-nums shrink-0">{distance} km</span>
-    </div>
+      <span className="text-[var(--nc-500)] text-xs tabular-nums shrink-0 hidden sm:block">{distance} km</span>
+      <ArrowRight size={14} className="text-[var(--nc-500)] group-hover:text-[var(--nc-accent)] group-hover:translate-x-0.5 transition-all shrink-0" />
+    </Link>
   )
 }
 
@@ -92,15 +86,37 @@ const POPULAR_ROUTES = [
 
 export default function NocturneHome() {
   const reducedMotion = useReducedMotion()
+  const heroRef = useRef(null)
+
+  useGSAP(() => {
+    if (reducedMotion) return
+
+    const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
+    tl.from('.hero-badge', { autoAlpha: 0, y: 16, duration: 0.5 })
+      .from('.hero-line', { autoAlpha: 0, y: 34, duration: 0.8, stagger: 0.09 }, '-=0.25')
+      .from('.hero-sub', { autoAlpha: 0, y: 20, duration: 0.6 }, '-=0.45')
+      .from('.hero-route', { autoAlpha: 0, scale: 0.96, duration: 0.7 }, '-=0.35')
+      .from('.hero-cta', { autoAlpha: 0, y: 18, duration: 0.55, stagger: 0.08 }, '-=0.4')
+
+    ScrollTrigger.create({
+      trigger: heroRef.current,
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true,
+      animation: gsap.to('.hero-fade', {
+        autoAlpha: 0,
+        y: -60,
+        ease: 'none',
+      }),
+    })
+  }, { scope: heroRef })
 
   return (
-    <div className="min-h-screen bg-[var(--nc-50)]">
+    <div ref={heroRef}>
       {/* ─── Hero ─── */}
-      <section className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 overflow-hidden">
-        {/* Background gradient */}
+      <section className="relative min-h-[92vh] flex flex-col items-center justify-center px-6 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[var(--nc-0)] via-[var(--nc-50)] to-[var(--nc-50)]" />
 
-        {/* Particle field */}
         {!reducedMotion && (
           <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
             {Array.from({ length: 40 }).map((_, i) => (
@@ -121,38 +137,32 @@ export default function NocturneHome() {
           </div>
         )}
 
-        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8">
-          {/* Tagline */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] text-[var(--nc-600)] text-xs font-medium">
-            <span className="size-1.5 rounded-full bg-[var(--nc-accent)] animate-[livePulse_1.5s_ease-in-out_infinite]" />
+        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8 hero-fade">
+          <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] text-[var(--nc-600)] text-xs font-medium">
+            <span className="size-1.5 rounded-full bg-[var(--nc-accent)] animate-[livePulse_1.5s_ease-in-out_infinite]" aria-hidden="true" />
             Live now in Hyderabad
           </div>
 
-          {/* Headline */}
           <h1 className="text-[var(--nc-900)] text-5xl md:text-7xl font-bold tracking-[-0.03em] leading-[1.05]">
-            Ride together.
-            <br />
-            <span className="text-[var(--nc-accent)]">Move smarter.</span>
+            <span className="hero-line block">Ride together.</span>
+            <span className="hero-line block text-[var(--nc-accent)]">Move smarter.</span>
           </h1>
 
-          {/* Subhead */}
-          <p className="text-[var(--nc-600)] text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            Premium carpooling for professionals. Verified drivers, real-time tracking,
-            and a commute that costs less — for you and the planet.
+          <p className="hero-sub text-[var(--nc-600)] text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            Carpooling for professionals. Community-rated drivers, real-time GPS
+            tracking, and a commute that costs less — for you and the planet.
           </p>
 
-          {/* Living Route Visualization */}
-          <RouteHero className="max-w-3xl mx-auto my-8" />
+          <RouteHero className="hero-route max-w-3xl mx-auto my-8" />
 
-          {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <MagneticButton asChild size="lg" className="bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] px-8 text-base cursor-pointer">
+            <MagneticButton asChild size="lg" className="hero-cta bg-[var(--nc-900)] text-white hover:bg-[var(--nc-800)] px-8 text-base cursor-pointer">
               <Link to="/search">
                 <MapPin size={18} className="mr-2" />
                 Find a Ride
               </Link>
             </MagneticButton>
-            <MagneticButton asChild variant="outline" size="lg" className="border-[var(--nc-400)] text-[var(--nc-700)] hover:bg-[var(--nc-200)] px-8 text-base cursor-pointer">
+            <MagneticButton asChild variant="outline" size="lg" className="hero-cta border-[var(--nc-400)] text-[var(--nc-700)] hover:bg-[var(--nc-200)] px-8 text-base cursor-pointer">
               <Link to="/offer-ride">
                 <Navigation size={18} className="mr-2" />
                 Offer a Ride
@@ -162,56 +172,47 @@ export default function NocturneHome() {
         </div>
       </section>
 
-      {/* ─── Stats ─── */}
-      <Section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-8">
-          <StatCard value="18K+" label="Rides Completed" icon={TrendingUp} />
-          <StatCard value="4.9" label="Average Rating" icon={Shield} />
-          <StatCard value="214t" label="CO₂ Saved" icon={Leaf} />
-        </div>
-      </Section>
-
       {/* ─── Features ─── */}
       <Section className="py-20 px-6">
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center space-y-4">
             <h2 className="nc-stagger-child text-[var(--nc-900)] text-3xl md:text-4xl font-bold tracking-tight">
-              Built for professionals
+              Built for the daily commute
             </h2>
             <p className="nc-stagger-child text-[var(--nc-500)] text-lg max-w-xl mx-auto">
-              Every detail designed to make your commute effortless, safe, and sustainable.
+              Everything you need to share rides safely — nothing you don't.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             <FeatureCard
-              icon={Shield}
-              title="Verified Drivers"
-              description="Every driver passes background checks, license verification, and vehicle inspections before their first ride."
+              icon={Star}
+              title="Community ratings"
+              description="Drivers and passengers carry ratings from real rides. Choose your co-travellers with confidence."
             />
             <FeatureCard
               icon={Clock}
-              title="Real-Time Tracking"
-              description="Watch your driver approach in real-time. Live ETA, route progress, and instant notifications — no guessing."
+              title="Real-time tracking"
+              description="Once the ride starts, follow the driver's live GPS position and traffic-aware ETA on the map."
             />
             <FeatureCard
               icon={Users}
-              title="Community First"
-              description="Carpool with verified professionals heading your way. Chat, coordinate, and build your daily ride network."
+              title="In-app chat"
+              description="Coordinate pickup points and timing in the ride's own chat. Share your live location when it matters."
             />
             <FeatureCard
               icon={Zap}
-              title="Instant Booking"
-              description="One tap to request. Smart matching pairs you with drivers on your route in seconds, not minutes."
+              title="One-tap requests"
+              description="Found a ride? Request a seat instantly. The driver accepts, and you're on the manifest."
             />
             <FeatureCard
               icon={MapPin}
-              title="Hyderabad Coverage"
-              description="From Gachibowli to Secunderabad, Madhapur to Jubilee Hills — we cover every major corridor."
+              title="Hyderabad coverage"
+              description="From Gachibowli to Secunderabad, Madhapur to Jubilee Hills — every major corridor."
             />
             <FeatureCard
               icon={Leaf}
-              title="Eco-Conscious"
-              description="Every shared ride reduces emissions. Track your personal CO₂ savings and see your impact grow."
+              title="Fewer cars, cleaner air"
+              description="Every shared seat is one fewer car on the road at rush hour. Split fares, not the planet."
             />
           </div>
         </div>
@@ -225,7 +226,7 @@ export default function NocturneHome() {
               Popular routes
             </h2>
             <p className="nc-stagger-child text-[var(--nc-500)]">
-              Hyderabad's most commuted corridors
+              Hyderabad's most commuted corridors — tap one to search it
             </p>
           </div>
           <div className="space-y-3">
@@ -248,22 +249,22 @@ export default function NocturneHome() {
             <StepCard
               number="1"
               title="Search your route"
-              description="Enter your pickup and destination. We'll show you available rides from verified drivers heading your way."
+              description="Enter your pickup and destination. See open rides from drivers heading your way."
             />
             <StepCard
               number="2"
-              title="Book your seat"
-              description="Choose a ride, confirm your seat, and you're set. Payment is simple — pay directly to the driver."
+              title="Request your seat"
+              description="Pick a ride and send a request. The driver accepts, and your spot is confirmed."
             />
             <StepCard
               number="3"
               title="Track live"
-              description="Watch your driver approach in real-time. Chat directly, share your location, and arrive together."
+              description="On ride day, watch the driver's approach in real time. Chat directly, call if needed."
             />
             <StepCard
               number="4"
               title="Rate & repeat"
-              description="Rate your experience. Build trust in the community. Find your regular commute partners."
+              description="Pay the driver directly, rate the ride, and keep your daily commute partners."
             />
           </div>
         </div>
@@ -277,10 +278,9 @@ export default function NocturneHome() {
             <span className="text-[var(--nc-accent)]">reimagined</span>
           </h2>
           <p className="nc-stagger-child text-[var(--nc-500)] text-lg max-w-xl mx-auto">
-            Join thousands of professionals already saving time, money, and carbon
-            with every ride.
+            Create a free account — offer seats on your drive or find one heading your way.
           </p>
-          <MagneticButton asChild size="lg" className="bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] px-10 text-base cursor-pointer">
+          <MagneticButton asChild size="lg" className="bg-[var(--nc-900)] text-white hover:bg-[var(--nc-800)] px-10 text-base cursor-pointer">
             <Link to="/register">
               Get Started
               <ArrowRight size={18} className="ml-2" />
@@ -288,27 +288,6 @@ export default function NocturneHome() {
           </MagneticButton>
         </div>
       </Section>
-
-      {/* ─── Footer ─── */}
-      <footer className="border-t border-[var(--nc-300)] py-12 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2.5">
-            <div className="size-7 rounded-[8px] bg-[var(--nc-900)] flex items-center justify-center">
-              <Navigation size={14} className="text-[var(--nc-accent)]" />
-            </div>
-            <span className="text-[var(--nc-800)] font-bold tracking-tight">NOCTURNE</span>
-          </div>
-          <div className="flex items-center gap-8 text-[var(--nc-500)] text-sm">
-            <a href="#" className="hover:text-[var(--nc-800)] transition-colors">About</a>
-            <a href="#" className="hover:text-[var(--nc-800)] transition-colors">Safety</a>
-            <a href="#" className="hover:text-[var(--nc-800)] transition-colors">Privacy</a>
-            <a href="#" className="hover:text-[var(--nc-800)] transition-colors">Terms</a>
-          </div>
-          <p className="text-[var(--nc-500)] text-xs">
-            © 2026 Nocturne. Hyderabad, India.
-          </p>
-        </div>
-      </footer>
     </div>
   )
 }

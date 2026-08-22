@@ -4,7 +4,7 @@ A ride-sharing application connecting drivers and passengers with real-time chat
 
 ## Tech Stack
 
-- **Frontend:** React + Vite, Framer Motion, TomTom Maps SDK, react-hot-toast
+- **Frontend:** React + Vite, Tailwind CSS v4 + shadcn/ui, Motion (route transitions & micro-interactions), GSAP + ScrollTrigger (landing storytelling), Lenis smooth scroll, TanStack Query, react-hook-form + zod, TomTom Maps SDK, lucide-react
 - **Backend:** FastAPI (Python), asyncpg, JWT auth (bcrypt + HS256)
 - **Database:** PostgreSQL (via Supabase)
 
@@ -80,11 +80,13 @@ A ride-sharing application connecting drivers and passengers with real-time chat
 
 ### UI/UX
 
-- Page transitions with Framer Motion
-- Scroll-triggered reveal animations
-- Responsive navbar with mobile support
-- Custom CSS design system with CSS custom properties
-- Material Symbols icons throughout
+- NOCTURNE dark design system (monochrome scale + signal-orange accent) across every surface
+- Branded first-load preloader (once per session), skeleton screens for all data views
+- Route-level code splitting with Suspense + animated page transitions (Motion)
+- Scroll-triggered reveal animations and GSAP hero choreography on the landing page
+- Lenis smooth scrolling, magnetic buttons, reduced-motion fallbacks throughout
+- Responsive nav with mobile drawer, notification bell, and real empty/error states
+- lucide-react icons
 
 ## Getting Started
 

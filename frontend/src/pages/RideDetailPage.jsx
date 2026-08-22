@@ -1,357 +1,378 @@
-import { useRef, useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { gsap, useGSAP } from '../lib/gsapSetup'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { motion } from 'motion/react'
 import toast from 'react-hot-toast'
 import { api } from '../lib/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useRideStatus } from '../hooks/useRideStatus'
 import RequestButton from '../components/bookings/RequestButton'
 import RequestList from '../components/bookings/RequestList'
-import LiveTracker from '../components/map/LiveTracker'
 import RouteMap from '../components/maps/RouteMap'
-import { formatCurrency, formatRideTime, formatVehicleName, getDriverName } from '../lib/rideDisplay'
-import { Icon } from '../components/ui/icon'
+import {
+  formatCurrency, formatVehicleName, getDriverName, getInitials,
+} from '@/lib/rideDisplay'
+import { cn } from '@/lib/utils'
+import {
+  ChevronRight, Star, CarFront, MessageCircle, Navigation,
+  Play, CheckCircle2, Loader2, MapPin, Flag, CircleAlert,
+} from 'lucide-react'
 
-const STEP_ORDER = ['open', 'in_progress', 'completed']
-
-const STEP_CONFIG = {
-  open: { icon: 'event_available', label: 'Ride Scheduled' },
-  in_progress: { icon: 'electric_car', label: 'Ride in Progress' },
-  completed: { icon: 'flag', label: 'Completed' },
-}
-
-const getCurrentStep = (status) => {
-  const idx = STEP_ORDER.indexOf(status)
-  return idx >= 0 ? idx : -1
-}
+const STEPS = [
+  { key: 'open', label: 'Scheduled', icon: MapPin },
+  { key: 'in_progress', label: 'In progress', icon: Navigation },
+  { key: 'completed', label: 'Completed', icon: Flag },
+]
 
 export default function RideDetailPage() {
   const { id } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [ride, setRide] = useState(null)
-  const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
-  const [requests, setRequests] = useState([])
-  const pageRef = useRef(null)
-  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  const isDriver = ride?.owner_id === user?.id
+  const rideQuery = useQuery({
+    queryKey: ['ride', id],
+    queryFn: () => api.get(`/api/rides/${id}`),
+    refetchInterval: (q) => (q?.state?.data?.status === 'in_progress' ? 5000 : 15000),
+    retry: false,
+  })
 
-  const fetchData = async () => {
-    const data = await api.get(`/api/rides/${id}`)
-    setRide(data)
-    setLoading(false)
-  }
+  const ride = rideQuery.data
+  const isDriver = Boolean(ride && user && ride.owner_id === user.id)
 
-  const fetchRequests = async () => {
-    try {
-      const data = await api.get(`/api/requests/ride/${id}`)
-      setRequests(data || [])
-    } catch {
-      // silent - not the owner, or ride not found
-    }
-  }
+  // Driver-only: passenger requests, polled while open
+  const requestsQuery = useQuery({
+    queryKey: ['ride-requests', id],
+    queryFn: () => api.get(`/api/requests/ride/${id}`),
+    enabled: isDriver,
+    refetchInterval: (q) => {
+      const status = q?.state?.data
+      return Array.isArray(status) && status.some((r) => r.status === 'pending') ? 5000 : 15000
+    },
+  })
 
-  const { startRide, completeRide, cancelRide, updating } = useRideStatus(ride, fetchData)
+  const { startRide, completeRide, cancelRide, updating } = useRideStatus(ride, () =>
+    rideQuery.refetch()
+  )
 
-  useEffect(() => {
-    fetchData()
-  }, [id])
-
-  useEffect(() => {
-    if (!isDriver) return
-    fetchRequests()
-    const interval = setInterval(fetchRequests, 5000)
-    return () => clearInterval(interval)
-  }, [isDriver, id])
-
-  useGSAP(() => {
-    if (reducedMotion) return
-    gsap.from('.ride-detail-page > .ride-detail-header', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out' })
-    gsap.from('.ride-detail-left > *', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out', stagger: 0.1 })
-    gsap.from('.ride-detail-right > *', { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.out', stagger: 0.1 })
-  }, { scope: pageRef, dependencies: [ride] })
-
-  const handleCancel = async () => {
-    if (!ride.booking_id) return
-    if (!window.confirm('Are you sure you want to cancel this request?')) return
+  const handleCancelRequest = async () => {
+    if (!ride?.booking_id) return
+    if (!window.confirm('Cancel this seat request?')) return
     setCancelling(true)
     try {
       await api.patch(`/api/requests/${ride.booking_id}?status=cancelled`)
-      await fetchData()
+      await rideQuery.refetch()
     } catch (err) {
       toast.error(err.message)
     }
     setCancelling(false)
   }
 
-  const currentStep = getCurrentStep(ride?.status)
-  const canStart = isDriver && ride?.status === 'open'
-  const canComplete = isDriver && ride?.status === 'in_progress'
+  if (rideQuery.isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-24 md:pt-28 pb-16 space-y-5" aria-busy="true">
+        <div className="h-8 w-72 max-w-full rounded bg-[var(--nc-200)] animate-pulse" />
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 h-80 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] animate-pulse" />
+          <div className="space-y-4">
+            {[0, 1].map((i) => (
+              <div key={i} className="h-40 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
-  if (loading) return (
-    <div className="loading">
-      <div className="spinner spinner-lg" />
-      <span>Loading ride details...</span>
-    </div>
-  )
+  if (rideQuery.isError || !ride) {
+    return (
+      <div className="min-h-[60vh] pt-32 pb-16 px-6 flex items-center justify-center text-center">
+        <div>
+          <CircleAlert size={28} className="mx-auto text-[var(--nc-accent)]" />
+          <h1 className="mt-4 text-xl font-bold text-[var(--nc-900)]">Ride not found</h1>
+          <p className="mt-1.5 text-sm text-[var(--nc-500)]">It may have been cancelled or removed.</p>
+          <Link to="/my-rides" className="inline-block mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-white text-sm font-medium hover:bg-[var(--nc-800)] transition-colors">
+            My Rides
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
-  if (!ride) return (
-    <div className="empty-state">
-      <h3>Ride not found</h3>
-    </div>
-  )
+  const currentStep = STEPS.findIndex((s) => s.key === ride.status)
+  const isActive = ride.status === 'in_progress'
 
   return (
-    <div
-      className="ride-detail-page"
-      ref={pageRef}
-    >
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-24 md:pt-28 pb-16">
       {/* Header */}
-      <header className="ride-detail-header">
-        <div>
-          <nav className="ride-breadcrumb">
-            <button className="breadcrumb-link" onClick={() => navigate('/my-rides')}>My Rides</button>
-            <Icon name="chevron_right" className="breadcrumb-chevron" />
-            <span className="breadcrumb-current">#CR-{ride.id}-HYD</span>
+      <motion.header
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-8"
+      >
+        <div className="min-w-0">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-[var(--nc-500)] mb-2">
+            <Link to="/my-rides" className="hover:text-[var(--nc-accent)] transition-colors">My Rides</Link>
+            <ChevronRight size={12} />
+            <span className="truncate font-mono">#CR-{String(ride.id).slice(-6)}-HYD</span>
           </nav>
-          <h1 className="ride-detail-title">{ride.from_city} to {ride.to_city}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[var(--nc-900)] truncate">
+            {ride.from_city} <span className="text-[var(--nc-500)]">to</span> {ride.to_city}
+          </h1>
         </div>
-        <div className="ride-header-actions">
-          <span className="live-badge">
-            <span className="live-badge-dot" />
-            Live Tracking
-          </span>
-          <button className="share-btn" aria-label="Share ride">
-            <Icon name="share" />
-          </button>
-        </div>
-      </header>
 
-      {/* Main Grid */}
-      <div className="ride-detail-grid">
-        {/* Left Column: Map + Timeline */}
-        <div className="ride-detail-left">
-          {/* Map Section */}
-          <div className="ride-map-section">
+        <div className="flex items-center gap-3 shrink-0">
+          {isActive ? (
+            <Link
+              to={`/track/${ride.id}`}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--nc-accent-dim)] border border-[var(--nc-accent)]/50 text-sm font-semibold text-[var(--nc-accent)] hover:brightness-110 transition-all"
+            >
+              <span className="size-1.5 rounded-full bg-[var(--nc-accent)] animate-pulse" />
+              Live · Open tracker
+            </Link>
+          ) : (
+            <span className="px-4 py-2 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] text-xs font-medium text-[var(--nc-600)] capitalize">
+              {ride.status.replace('_', ' ')}
+            </span>
+          )}
+        </div>
+      </motion.header>
+
+      <div className="grid lg:grid-cols-3 gap-6 items-start">
+        {/* Left */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.05 }}
+          className="lg:col-span-2 space-y-5 min-w-0"
+        >
+          {/* Map */}
+          <div className="rounded-[14px] overflow-hidden border border-[var(--nc-300)] relative">
             <RouteMap
               from={{ lat: ride.from_lat, lng: ride.from_lng }}
               to={{ lat: ride.to_lat, lng: ride.to_lng }}
-              height={300}
+              height={320}
             />
-            <div className="ride-map-overlay-panel glass-panel">
-              <div className="map-overlay-item">
-                <span className="map-overlay-label">Estimated Arrival</span>
-                <span className="map-overlay-value">
-                  {ride.departure_time
-                    ? new Date(ride.departure_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
-                    : '--'}
-                </span>
-              </div>
-              <div className="map-overlay-divider" />
-              <div className="map-overlay-item">
-                <span className="map-overlay-label">Distance</span>
-                <span className="map-overlay-value">{ride.distance_km || '--'} km</span>
-              </div>
+            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-3 px-4 py-2.5 rounded-[12px] bg-[var(--nc-50)]/85 backdrop-blur-md border border-[var(--nc-300)]">
+              <OverlayStat label="Departure" value={ride.departure_time ? new Date(ride.departure_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : '—'} />
+              <div className="w-px h-7 bg-[var(--nc-300)]" />
+              <OverlayStat label="Distance" value={ride.distance_km != null ? `${Number(ride.distance_km).toFixed(1)} km` : '—'} />
+              <div className="w-px h-7 bg-[var(--nc-300)] hidden sm:block" />
+              <OverlayStat label="Seats left" value={String(ride.available_seats ?? '—')} className="hidden sm:block" />
             </div>
           </div>
 
-          {/* Journey Timeline */}
-          <div className="journey-timeline">
-            <h3 className="journey-timeline-title">Journey Timeline</h3>
-            <div className="timeline-steps">
-              {STEP_ORDER.map((step, idx) => {
-                const config = STEP_CONFIG[step]
-                const isCompleted = currentStep > idx
-                const isActive = currentStep === idx
-                const isFuture = currentStep < idx
-
+          {/* Timeline */}
+          <div className="p-5 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)]">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--nc-500)] mb-4">
+              Journey timeline
+            </h3>
+            <ol className="grid sm:grid-cols-3 gap-4">
+              {STEPS.map((step, idx) => {
+                const done = currentStep > idx || ride.status === 'cancelled'
+                const activeNow = currentStep === idx
                 return (
-                  <div
-                    key={step}
-                    className={`timeline-step ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''} ${isFuture ? 'future' : ''}`}
-                  >
-                    <div className={`timeline-step-icon ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}>
-                      {isCompleted ? (
-                        <Icon name="check" />
-                      ) : (
-                        <Icon name={config.icon} />
+                  <li key={step.key} className="flex sm:flex-col items-center sm:items-start gap-3">
+                    <span
+                      className={cn(
+                        'size-9 rounded-full flex items-center justify-center shrink-0 transition-colors',
+                        activeNow
+                          ? 'bg-[var(--nc-accent)] text-white'
+                          : done
+                            ? 'bg-[var(--nc-900)] text-white'
+                            : 'bg-[var(--nc-100)] border border-[var(--nc-400)] text-[var(--nc-500)]'
                       )}
-                    </div>
-                    <div className="timeline-step-info">
-                      <span className="timeline-step-label">{config.label}</span>
-                    <span className="timeline-step-time">
-                      {isActive ? 'Current stage' : isCompleted ? 'Done' : 'Upcoming'}
+                    >
+                      {activeNow ? <step.icon size={15} /> : <step.icon size={15} />}
                     </span>
+                    <div className="text-center sm:text-left">
+                      <p className={cn('text-sm font-semibold', activeNow ? 'text-[var(--nc-900)]' : done ? 'text-[var(--nc-700)]' : 'text-[var(--nc-500)]')}>
+                        {step.label}
+                      </p>
+                      <p className="text-[11px] text-[var(--nc-500)]">
+                        {activeNow ? 'Current stage' : done ? 'Done' : 'Upcoming'}
+                      </p>
                     </div>
-                  </div>
+                  </li>
                 )
               })}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Driver, Route, Actions */}
-        <aside className="ride-detail-right">
-          {/* Driver & Vehicle */}
-          <div className="detail-card">
-            <div className="driver-header">
-              <div className="driver-avatar-wrap">
-                <div className="driver-avatar">
-                  {getDriverName(ride).charAt(0).toUpperCase()}
-                </div>
-              </div>
-              <div className="driver-info">
-                <h2 className="driver-name">{getDriverName(ride)}</h2>
-                <div className="driver-rating-row">
-                  <Icon name="star" className="driver-rating-icon" />
-                  <span className="driver-rating-value">{ride.driver_avg_rating != null ? Number(ride.driver_avg_rating).toFixed(1) : 'No ratings yet'}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="driver-vehicle-card">
-              <Icon name="directions_car" className="driver-vehicle-icon" />
-              <div>
-                <p className="driver-vehicle-name">{formatVehicleName(ride)}</p>
-                {ride.vehicle_plate && <p className="driver-vehicle-plate">{ride.vehicle_plate}</p>}
-              </div>
-            </div>
-
-            <div className="driver-actions">
-              <button
-                className="driver-chat-btn"
-                onClick={() => navigate(`/chat/${ride.id}`)}
-              >
-                <Icon name="chat_bubble" />
-                {isDriver ? 'Chat with Passengers' : 'Chat with Driver'}
-              </button>
-            </div>
-
-            {!isDriver && (
-              <div style={{ marginTop: 12 }}>
-                <RequestButton ride={ride} onUpdate={fetchData} />
-              </div>
-            )}
-
-            {canStart && (
-              <button
-                className="btn-success"
-                onClick={startRide}
-                disabled={updating}
-                style={{ marginTop: 12, width: '100%' }}
-              >
-                {updating ? 'Starting...' : 'Start Ride'}
-              </button>
-            )}
-
-            {canComplete && (
-              <button
-                className="btn-success"
-                onClick={completeRide}
-                disabled={updating}
-                style={{ marginTop: 12, width: '100%' }}
-              >
-                {updating ? 'Completing...' : 'Complete Ride'}
-              </button>
-            )}
+            </ol>
           </div>
 
-          {/* Route Details */}
-          <div className="detail-card">
-            <h3 className="detail-card-title">Route Details</h3>
-            <div className="route-detail-lines">
-              <div className="route-detail-point">
-                <div className="route-detail-dot route-dot-pickup" />
-                <div>
-                  <span className="route-point-label">Pickup Location</span>
-                  <span className="route-point-address">{ride.from_city}</span>
-                </div>
+          {/* Live tracking promo while active */}
+          {isActive && (
+            <Link
+              to={`/track/${ride.id}`}
+              className="group flex items-center gap-4 p-5 rounded-[14px] bg-[var(--nc-900)] hover:bg-[var(--nc-800)] transition-colors"
+            >
+              <span className="relative flex size-3 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--nc-accent)] opacity-60" />
+                <span className="relative inline-flex rounded-full size-3 bg-[var(--nc-accent)]" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold text-sm">This ride is live</p>
+                <p className="text-white/60 text-xs mt-0.5">
+                  Follow the driver's GPS position and traffic-aware ETA in real time.
+                </p>
               </div>
-              <div className="route-detail-point">
-                <div className="route-detail-dot route-dot-dropoff" />
-                <div>
-                  <span className="route-point-label">Drop-off Location</span>
-                  <span className="route-point-address">{ride.to_city}</span>
-                </div>
-              </div>
-            </div>
-            <div className="route-fare-row">
-              <div>
-                <span className="route-fare-label">Estimated Fare</span>
-                <span className="route-fare-value">{formatCurrency(ride.final_cost ?? ride.price_per_seat)}</span>
-              </div>
-              <span className="route-corp-badge">{formatRideTime(ride.departure_time)}</span>
-            </div>
-          </div>
-
-          {/* Live Tracking */}
-          {ride.status === 'in_progress' && (
-            <div className="detail-card">
-              <h3 className="detail-card-title">Live Tracking</h3>
-              <LiveTracker ride={ride} />
-            </div>
+              <Navigation size={18} className="text-[var(--nc-accent)] group-hover:translate-x-0.5 transition-transform shrink-0" />
+            </Link>
           )}
 
-          {/* Passenger Requests (driver only) */}
+          {/* Driver requests (driver view) */}
           {isDriver && (
-            <div className="detail-card">
-              <h3 className="detail-card-title">Passenger Requests</h3>
+            <div className="p-5 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)]">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--nc-500)] mb-3">
+                Passenger requests
+              </h3>
               <RequestList
-                requests={requests}
+                requests={requestsQuery.data}
                 ride={ride}
-                onUpdate={() => { fetchData(); fetchRequests() }}
+                onUpdate={() => {
+                  rideQuery.refetch()
+                  requestsQuery.refetch()
+                }}
               />
             </div>
           )}
+        </motion.div>
 
-          {/* Cancel Button */}
-          {!isDriver && ride.booking_id && (
-            <button
-              className="cancel-request-btn"
-              onClick={handleCancel}
-              disabled={cancelling}
-            >
-              <Icon name="cancel" />
-              {cancelling ? 'Cancelling...' : 'Cancel Request'}
-            </button>
-          )}
-
-          {isDriver && (ride.status === 'open' || ride.status === 'in_progress') && (
-            <button
-              className="cancel-request-btn"
-              onClick={cancelRide}
-              disabled={updating}
-            >
-              <Icon name="cancel" />
-              {updating ? 'Cancelling...' : 'Cancel Ride'}
-            </button>
-          )}
-
-          {/* Safety Section */}
-          <section className="safety-section">
-            <h3 className="safety-section-title">Ride Experience & Safety</h3>
-            <div className="safety-grid">
-              <div className="safety-card">
-                <Icon name="gpp_good" className="safety-card-icon" />
-                <h4 className="safety-card-title">Safety Shield</h4>
-                <p className="safety-card-desc">Your ride is protected with real-time GPS monitoring and SOS support.</p>
+        {/* Right */}
+        <motion.aside
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.1 }}
+          className="space-y-5 lg:sticky lg:top-24"
+        >
+          {/* Driver card */}
+          <div className="p-5 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)]">
+            <div className="flex items-center gap-3.5">
+              <div className="size-12 rounded-full bg-[var(--nc-300)] flex items-center justify-center text-base font-bold text-[var(--nc-700)] shrink-0">
+                {getInitials(getDriverName(ride))}
               </div>
-              <div className="safety-card">
-                <Icon name="air" className="safety-card-icon" />
-                <h4 className="safety-card-title">Climate Preferences</h4>
-                <p className="safety-card-desc">Pre-set to 22&deg;C. Air purifier active for your comfort.</p>
-              </div>
-              <div className="safety-card">
-                <Icon name="support_agent" className="safety-card-icon" />
-                <h4 className="safety-card-title">Concierge Support</h4>
-                <p className="safety-card-desc">24/7 priority support available for any route adjustments.</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] uppercase tracking-wide text-[var(--nc-500)]">
+                  {isDriver ? 'You are the driver' : 'Your driver'}
+                </p>
+                <p className="font-semibold text-[var(--nc-800)] truncate">{getDriverName(ride)}</p>
+                <p className="text-xs text-[var(--nc-500)] flex items-center gap-1 mt-0.5 tabular-nums">
+                  <Star size={11} className="fill-current text-[var(--nc-accent)]" />
+                  {ride.driver_avg_rating ? Number(ride.driver_avg_rating).toFixed(1) : 'New driver'}
+                  {ride.driver_total_ratings > 0 && (
+                    <span className="ml-0.5">({ride.driver_total_ratings})</span>
+                  )}
+                </p>
               </div>
             </div>
-          </section>
-        </aside>
+
+            <div className="mt-4 flex items-center gap-3 p-3 rounded-[12px] bg-[var(--nc-100)] border border-[var(--nc-300)]">
+              <CarFront size={18} className="text-[var(--nc-accent)] shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-[var(--nc-800)] truncate">{formatVehicleName(ride)}</p>
+                {ride.vehicle_plate && (
+                  <p className="text-xs text-[var(--nc-500)] font-mono">{ride.vehicle_plate}</p>
+                )}
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate(`/chat/${ride.id}`)}
+              className="mt-4 w-full h-11 rounded-full bg-[var(--nc-900)] text-white text-sm font-semibold hover:bg-[var(--nc-800)] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              <MessageCircle size={15} />
+              {isDriver ? 'Chat with passengers' : 'Chat with driver'}
+            </button>
+
+            {!isDriver && (
+              <div className="mt-3">
+                <RequestButton ride={ride} onUpdate={() => rideQuery.refetch()} />
+              </div>
+            )}
+
+            {!isDriver && ride.booking_id && ride.booking_status !== 'accepted' && (
+              <button
+                onClick={handleCancelRequest}
+                disabled={cancelling}
+                className="mt-2 w-full h-10 text-sm font-medium text-[var(--nc-500)] hover:text-[var(--nc-accent)] transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {cancelling ? 'Cancelling…' : 'Withdraw my request'}
+              </button>
+            )}
+
+            {isDriver && ride.status === 'open' && (
+              <>
+                <button
+                  onClick={startRide}
+                  disabled={updating}
+                  className="mt-3 w-full h-11 rounded-full bg-[var(--nc-accent)] text-white text-sm font-semibold hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {updating ? <Loader2 size={15} className="animate-spin" /> : <Play size={15} />}
+                  Start ride
+                </button>
+                <button
+                  onClick={cancelRide}
+                  disabled={updating}
+                  className="mt-2 w-full h-10 text-sm font-medium text-[var(--nc-500)] hover:text-[var(--nc-accent)] transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  Cancel ride
+                </button>
+              </>
+            )}
+
+            {isDriver && isActive && (
+              <>
+                <button
+                  onClick={completeRide}
+                  disabled={updating}
+                  className="mt-3 w-full h-11 rounded-full bg-[var(--nc-accent)] text-white text-sm font-semibold hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {updating ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+                  Complete ride
+                </button>
+                <button
+                  onClick={cancelRide}
+                  disabled={updating}
+                  className="mt-2 w-full h-10 text-sm font-medium text-[var(--nc-500)] hover:text-[var(--nc-accent)] transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  Cancel ride
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Fare card */}
+          <div className="p-5 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)]">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-wide text-[var(--nc-500)]">Fare per seat</p>
+                <p className="text-2xl font-bold text-[var(--nc-900)] tabular-nums mt-0.5">
+                  {formatCurrency(ride.final_cost)}
+                </p>
+              </div>
+              <span className="text-xs text-[var(--nc-500)] tabular-nums text-right">
+                {new Date(ride.departure_time).toLocaleDateString('en-IN', {
+                  weekday: 'short', day: 'numeric', month: 'short',
+                })}
+              </span>
+            </div>
+            <ul className="mt-4 space-y-2 text-xs text-[var(--nc-500)] leading-relaxed">
+              <li>· Pay the driver directly at pickup — cash or UPI.</li>
+              <li>· Requests are free to withdraw until accepted.</li>
+              <li>· Rate your co-travellers after the ride.</li>
+            </ul>
+          </div>
+        </motion.aside>
       </div>
+    </div>
+  )
+}
+
+function OverlayStat({ label, value, className }) {
+  return (
+    <div className={`min-w-0 ${className || ''}`}>
+      <p className="text-[9px] uppercase tracking-wide text-[var(--nc-500)]">{label}</p>
+      <p className="text-sm font-bold text-[var(--nc-900)] tabular-nums truncate">{value}</p>
     </div>
   )
 }

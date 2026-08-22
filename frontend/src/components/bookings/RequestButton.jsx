@@ -1,15 +1,14 @@
-import { useRef, useState, useEffect } from 'react'
-import { gsap, useGSAP } from '../../lib/gsapSetup'
+import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import { Loader2 } from 'lucide-react'
 import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
+import { cn } from '@/lib/utils'
 
 export default function RequestButton({ ride, onUpdate }) {
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [existing, setExisting] = useState(null)
-  const rootRef = useRef(null)
-  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   useEffect(() => {
     if (ride?.booking_status) {
@@ -18,17 +17,6 @@ export default function RequestButton({ ride, onUpdate }) {
       setExisting(null)
     }
   }, [ride])
-
-  useGSAP(() => {
-    if (reducedMotion || !rootRef.current) return
-    gsap.from(rootRef.current, {
-      autoAlpha: 0,
-      y: 10,
-      scale: existing?.status === 'accepted' ? 0.6 : 1,
-      duration: 0.3,
-      ease: existing?.status === 'accepted' ? 'back.out(1.7)' : 'power2.out',
-    })
-  }, { scope: rootRef, dependencies: [existing, ride] })
 
   if (!ride) return null
 
@@ -43,12 +31,10 @@ export default function RequestButton({ ride, onUpdate }) {
       toast.error('Add your phone number in Profile before requesting.')
       return
     }
-
     setLoading(true)
     try {
-      const data = await api.post(`/api/requests/ride/${ride.id}`)
+      await api.post(`/api/requests/ride/${ride.id}`)
       toast.success('Request sent!')
-      setExisting(data)
       onUpdate?.()
     } catch (err) {
       toast.error(err.message)
@@ -61,7 +47,6 @@ export default function RequestButton({ ride, onUpdate }) {
     try {
       await api.patch(`/api/requests/${existing.id}?status=cancelled`)
       toast.success('Request cancelled.')
-      setExisting(null)
       onUpdate?.()
     } catch (err) {
       toast.error(err.message)
@@ -69,30 +54,29 @@ export default function RequestButton({ ride, onUpdate }) {
     setLoading(false)
   }
 
+  const base =
+    'w-full h-11 rounded-full font-semibold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer'
+
   if (existing?.status === 'accepted') {
     return (
-      <span ref={rootRef} className="badge badge-success">
-        You're In
+      <span className={cn(base, 'bg-[var(--nc-accent-dim)] text-[var(--nc-accent)] border border-[var(--nc-accent)]/50 cursor-default')} aria-live="polite">
+        Seat confirmed ✓
       </span>
     )
   }
 
   if (existing?.status === 'pending') {
     return (
-      <button
-        ref={rootRef}
-        className="btn-secondary"
-        onClick={cancelRequest}
-        disabled={loading}
-      >
-        {loading ? 'Cancelling...' : 'Cancel Request'}
+      <button onClick={cancelRequest} disabled={loading} className={cn(base, 'border border-[var(--nc-400)] text-[var(--nc-600)] hover:bg-[var(--nc-300)] disabled:opacity-60')}>
+        {loading && <Loader2 size={15} className="animate-spin" />}
+        {loading ? 'Cancelling…' : 'Cancel request'}
       </button>
     )
   }
 
   if (existing?.status === 'rejected') {
     return (
-      <span ref={rootRef} className="badge badge-error">
+      <span className={cn(base, 'bg-transparent border border-dashed border-[var(--nc-400)] text-[var(--nc-500)] cursor-default')}>
         Request declined
       </span>
     )
@@ -100,33 +84,29 @@ export default function RequestButton({ ride, onUpdate }) {
 
   if (!isOpen) {
     return (
-      <span ref={rootRef} className="badge">
-        {ride.status === 'completed' ? 'Completed' : 'In Progress'}
+      <span className={cn(base, 'bg-[var(--nc-100)] border border-[var(--nc-300)] text-[var(--nc-500)] cursor-default')}>
+        {ride.status === 'completed' ? 'Ride completed' : 'Ride in progress'}
       </span>
     )
   }
 
   if (isFull) {
     return (
-      <span ref={rootRef} className="badge badge-error">
-        Fully Booked
+      <span className={cn(base, 'bg-[var(--nc-100)] border border-[var(--nc-300)] text-[var(--nc-500)] cursor-default')}>
+        Fully booked
       </span>
     )
   }
 
   return (
-    <button
-      ref={rootRef}
-      className="btn-primary"
-      onClick={handleRequest}
-      disabled={loading}
-    >
+    <button onClick={handleRequest} disabled={loading} className={cn(base, 'bg-[var(--nc-accent)] text-white hover:brightness-110 active:scale-[0.98] disabled:opacity-60')}>
       {loading ? (
-        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <span className="spinner" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
-          Sending...
-        </span>
-      ) : 'Request Seat'}
+        <>
+          <Loader2 size={15} className="animate-spin" /> Sending…
+        </>
+      ) : (
+        'Request seat'
+      )}
     </button>
   )
 }

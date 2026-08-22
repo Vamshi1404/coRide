@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
-import { gsap, useGSAP } from '../../lib/gsapSetup'
 import toast from 'react-hot-toast'
 import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
-import { Icon } from '../../components/ui/icon'
-
-function getInitials(name) {
-  if (!name) return '?'
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-}
+import { getInitials } from '@/lib/rideDisplay'
+import { cn } from '@/lib/utils'
+import {
+  ArrowLeft, Phone, MapPin, Send, Loader2, MapPinned, ExternalLink,
+  Clock, CheckCheck,
+} from 'lucide-react'
 
 const isLocationMsg = (text) => text?.startsWith('https://www.google.com/maps')
 
@@ -26,9 +25,8 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
   const bottomRef = useRef(null)
   const lastIdRef = useRef(null)
   const convStatus = conversation?.status_text || ''
-  const rootRef = useRef(null)
-  const animatedIdsRef = useRef(new Set())
-  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const areaRef = useRef(null)
+  const userScrolledUpRef = useRef(false)
 
   useEffect(() => {
     if (conversation?.name || conversation?.driver_name) {
@@ -39,9 +37,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
         .then((ride) => {
           const name =
             ride?.driver_name ||
-            ride?.driver?.name ||
             ride?.passenger_name ||
-            ride?.user?.name ||
             ''
           if (name) setConvName(name)
           if (ride?.driver_phone) setDriverPhone(ride.driver_phone)
@@ -50,31 +46,15 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
     }
   }, [rideId, conversation])
 
-  useGSAP(() => {
-    if (reducedMotion) return
-    const rows = rootRef.current?.querySelectorAll('.chat-msg-row') || []
-    rows.forEach((row) => {
-      const id = row.getAttribute('data-msg-id')
-      if (id && !animatedIdsRef.current.has(id)) {
-        animatedIdsRef.current.add(id)
-        gsap.from(row, { autoAlpha: 0, y: 12, scale: 0.95, duration: 0.2, ease: 'power2.out' })
-      }
-    })
-  }, { scope: rootRef, dependencies: [messages] })
-
-  const areaRef = useRef(null)
-  const userScrolledUpRef = useRef(false)
-
   useEffect(() => {
     if (!rideId) return
     setMessages([])
     setLoading(true)
     lastIdRef.current = null
-    animatedIdsRef.current = new Set()
     loadMessages(true)
     const interval = setInterval(() => loadMessages(false), 3000)
     return () => clearInterval(interval)
-  }, [rideId])
+  }, [rideId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadMessages = async (isInitial = false) => {
     try {
@@ -86,7 +66,6 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
           const newMsgs = data.filter((m) => !existingIds.has(m.id))
           if (newMsgs.length > 0) {
             lastIdRef.current = data[data.length - 1].id
-            // Replace any temp message if matched
             const filteredPrev = prev.filter((m) => !String(m.id).startsWith('temp-'))
             return [...filteredPrev, ...newMsgs]
           }
@@ -119,7 +98,6 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
     const tempId = `temp-${Date.now()}`
     const tempMsg = {
       id: tempId,
-      ride_id: rideId,
       sender_id: user?.id,
       sender_name: user?.name,
       content: payload.slice(0, 500),
@@ -127,11 +105,9 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
       pending: true,
     }
 
-    // Optimistic UI update
     setMessages((prev) => [...prev, tempMsg])
     if (messageContent === content) setContent('')
     userScrolledUpRef.current = false
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
 
     setSending(true)
     try {
@@ -190,7 +166,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
     const isToday = d.toDateString() === today.toDateString()
     const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
     if (isToday) return `Today, ${time}`
-    return d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' }) + `, ${time}`
+    return `${d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' })}, ${time}`
   }
 
   const showTimestamp = (msg, idx) => {
@@ -198,45 +174,63 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
     const prev = messages[idx - 1]
     const currDate = new Date(msg.created_at || Date.now())
     const prevDate = new Date(prev.created_at || Date.now())
-    return (currDate - prevDate) > 300000
+    return currDate - prevDate > 300000
   }
 
-  if (loading && messages.length === 0) return (
-    <div className="chat-loading">
-      <span className="spinner" />
-      <span style={{ marginLeft: 8 }}>Loading messages...</span>
-    </div>
-  )
+  if (loading && messages.length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center gap-3 text-[var(--nc-500)]" aria-busy="true">
+        <Loader2 size={18} className="animate-spin" />
+        <span className="text-sm">Loading messages…</span>
+      </div>
+    )
+  }
 
   return (
-    <div className="chat-window-full" ref={rootRef}>
-      <header className="chat-window-header">
-        <div className="chat-header-left">
+    <div className="h-full flex flex-col min-h-0">
+      {/* Header */}
+      <header className="shrink-0 flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--nc-300)] bg-[var(--nc-100)]">
+        <div className="flex items-center gap-3 min-w-0">
           {onBack && (
-            <button className="chat-back-btn" title="Back to conversations" onClick={onBack}>
-              <Icon name="arrow_back" />
+            <button
+              onClick={onBack}
+              aria-label="Back to conversations"
+              className="md:hidden size-9 shrink-0 rounded-full flex items-center justify-center text-[var(--nc-700)] hover:bg-[var(--nc-200)] cursor-pointer"
+            >
+              <ArrowLeft size={18} />
             </button>
           )}
-          <div className="chat-header-avatar">{getInitials(convName)}</div>
-          <div>
-            <h2 className="chat-header-name">{convName || 'Loading...'}</h2>
-            <div className="chat-header-status-row">
-              <span className="chat-header-status-dot" />
-              <span className="chat-header-status-text">{convStatus || 'Online'}</span>
-            </div>
+          <div className="size-10 shrink-0 rounded-full bg-[var(--nc-900)] flex items-center justify-center text-sm font-bold text-white">
+            {getInitials(convName)}
+          </div>
+          <div className="min-w-0">
+            <h2 className="font-semibold text-[var(--nc-900)] truncate">{convName || 'Chat'}</h2>
+            <p className="text-[11px] text-[var(--nc-500)] flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-[var(--nc-accent)] animate-pulse" />
+              {convStatus || 'Ride chat'}
+            </p>
           </div>
         </div>
-        <div className="chat-header-actions">
-          <button className="chat-header-btn" title="Call Driver" onClick={handleCall}>
-            <Icon name="call" />
-          </button>
-        </div>
+        <button
+          onClick={handleCall}
+          title={driverPhone ? `Call ${convName}` : 'Phone number unavailable'}
+          aria-label="Call"
+          className="size-9 shrink-0 rounded-full border border-[var(--nc-300)] text-[var(--nc-600)] hover:border-[var(--nc-accent)] hover:text-[var(--nc-accent)] transition-colors flex items-center justify-center cursor-pointer"
+        >
+          <Phone size={16} />
+        </button>
       </header>
 
-      <div className="chat-messages-area" ref={areaRef} onScroll={handleScrollArea}>
+      {/* Messages */}
+      <div
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-1 min-h-0"
+        ref={areaRef}
+        onScroll={handleScrollArea}
+        data-lenis-prevent
+      >
         {messages.length === 0 && (
-          <div className="empty-text" style={{ textAlign: 'center', padding: 40 }}>
-            No messages yet. Say hello!
+          <div className="h-full flex items-center justify-center">
+            <p className="text-sm text-[var(--nc-500)]">No messages yet — say hello!</p>
           </div>
         )}
 
@@ -245,99 +239,124 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
           return (
             <div key={msg.id}>
               {showTimestamp(msg, idx) && (
-                <div className="chat-timestamp-sep">
-                  <span>{formatTime(msg.created_at)}</span>
+                <div className="flex justify-center my-3">
+                  <span className="px-3 py-1 rounded-full bg-[var(--nc-200)] text-[11px] text-[var(--nc-500)] tabular-nums">
+                    {formatTime(msg.created_at)}
+                  </span>
                 </div>
               )}
-              <div
-                className={`chat-msg-row ${isMine ? 'mine' : 'theirs'}`}
-                data-msg-id={msg.id}
-              >
+              <div className={cn('flex gap-2 max-w-[85%] items-end', isMine ? 'ml-auto flex-row-reverse' : 'mr-auto')}>
                 {!isMine && (
-                  <div className="chat-msg-avatar-sm">{getInitials(msg.sender_name || convName)}</div>
+                  <div className="size-7 shrink-0 rounded-full bg-[var(--nc-300)] flex items-center justify-center text-[10px] font-bold text-[var(--nc-600)]">
+                    {getInitials(msg.sender_name || convName)}
+                  </div>
                 )}
-                <div className="chat-msg-content">
-                  <div className={`chat-msg-bubble ${isMine ? 'mine' : 'theirs'}`}>
-                  {isLocationMsg(msg.content) ? (
-                    <a href={msg.content} target="_blank" rel="noreferrer" className="chat-location-card">
-                      <div className="chat-location-map-preview">
-                        <Icon name="location_on" className="chat-location-pin" />
-                      </div>
-                      <div className="chat-location-info">
-                        <span className="chat-location-title">Shared Location</span>
-                        <span className="chat-location-sub">Tap to open in Google Maps</span>
-                      </div>
-                      <Icon name="open_in_new" className="chat-location-arrow" />
-                    </a>
-                  ) : (
-                    <p className="chat-msg-text">{msg.content}</p>
-                  )}
-                </div>
-                <div className="chat-msg-meta">
-                  <span className="chat-msg-time">
-                    {msg.created_at
-                      ? new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
-                      : ''}
-                  </span>
-                  {isMine && (
-                    <Icon name={msg.pending ? 'schedule' : 'done_all'} className="chat-msg-read" style={{ opacity: msg.pending ? 0.5 : 1 }} />
-                  )}
+                <div className="min-w-0">
+                  <div
+                    className={cn(
+                      'px-3.5 py-2.5 rounded-[14px] shadow-sm',
+                      isMine
+                        ? 'bg-[var(--nc-accent)] text-white rounded-br-[4px]'
+                        : 'bg-[var(--nc-200)] border border-[var(--nc-300)] text-[var(--nc-800)] rounded-bl-[4px]'
+                    )}
+                  >
+                    {isLocationMsg(msg.content) ? (
+                      <a
+                        href={msg.content}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={cn(
+                          'flex items-center gap-2.5 p-2.5 rounded-[10px] min-w-[190px]',
+                          isMine ? 'bg-black/15' : 'bg-[var(--nc-accent-dim)]'
+                        )}
+                      >
+                        <span className={cn(
+                          'size-8 shrink-0 rounded-[8px] flex items-center justify-center',
+                          isMine ? 'bg-white/20' : 'bg-[var(--nc-accent)] text-white'
+                        )}>
+                          <MapPin size={14} />
+                        </span>
+                        <span className="min-w-0">
+                          <span className={cn('block text-xs font-bold', isMine ? 'text-white' : 'text-[var(--nc-800)]')}>
+                            Shared location
+                          </span>
+                          <span className={cn('block text-[11px]', isMine ? 'text-white/80' : 'text-[var(--nc-500)]')}>
+                            Tap to open in Google Maps
+                          </span>
+                        </span>
+                        <ExternalLink size={13} className={cn('shrink-0 ml-auto', isMine ? 'text-white/80' : 'text-[var(--nc-500)]')} />
+                      </a>
+                    ) : (
+                      <p className="text-sm leading-relaxed break-words">{msg.content}</p>
+                    )}
+                  </div>
+                  <div className={cn('flex items-center gap-1 mt-1 px-1', isMine && 'justify-end')}>
+                    <span className="text-[10px] text-[var(--nc-500)] tabular-nums flex items-center gap-1">
+                      {msg.pending && <Clock size={9} />}
+                      {msg.created_at
+                        ? new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+                        : ''}
+                    </span>
+                    {isMine && !msg.pending && <CheckCheck size={12} className="text-[var(--nc-accent)]" />}
+                  </div>
                 </div>
               </div>
             </div>
-            </div>
           )
         })}
-
         <div ref={bottomRef} />
       </div>
 
-      <footer className="chat-input-footer">
-        <div className="chat-quick-actions">
-          <button
-            className="quick-action-chip"
-            onClick={shareLocation}
-            disabled={sharingLocation}
-          >
-            <Icon name="location_on" />
-            {sharingLocation ? 'Getting location...' : 'Share Location'}
-          </button>
-          <button
-            className="quick-action-chip"
-            onClick={() => setContent('Please wait for 5 mins, I am on my way!')}
-          >
-            ⏱ Wait for 5 mins
-          </button>
-          <button
-            className="quick-action-chip"
-            onClick={() => setContent('Where are you?')}
-          >
-            📍 Where are you?
-          </button>
+      {/* Composer */}
+      <footer className="shrink-0 px-4 pt-2 pb-4 border-t border-[var(--nc-300)] bg-[var(--nc-100)]">
+        <div className="flex gap-2 pb-2 overflow-x-auto scrollbar-hide">
+          <QuickChip onClick={shareLocation} disabled={sharingLocation} icon={<MapPinned size={13} />}>
+            {sharingLocation ? 'Locating…' : 'Share location'}
+          </QuickChip>
+          <QuickChip onClick={() => setContent('Please wait for 5 mins, I am on my way!')}>
+            Wait 5 mins
+          </QuickChip>
+          <QuickChip onClick={() => setContent('Where are you?')}>
+            Where are you?
+          </QuickChip>
         </div>
 
-        <div className="chat-input-row-full">
-          <div className="chat-input-wrap">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 flex items-center bg-[var(--nc-200)] border border-[var(--nc-300)] rounded-full px-4 transition-colors focus-within:border-[var(--nc-accent)]">
             <input
               type="text"
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type a secure message..."
+              placeholder="Type a message…"
               maxLength={500}
-              className="chat-text-input"
+              aria-label="Message"
+              className="flex-1 h-11 bg-transparent text-sm text-[var(--nc-800)] placeholder:text-[var(--nc-500)] outline-none"
             />
           </div>
           <button
-            className="chat-send-btn"
-            onClick={send}
+            onClick={() => send()}
             disabled={sending || !content.trim()}
             aria-label="Send message"
+            className="size-11 shrink-0 rounded-full bg-[var(--nc-900)] text-white hover:bg-[var(--nc-accent)] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center justify-center"
           >
-            <Icon name="send" filled />
+            {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
           </button>
         </div>
       </footer>
     </div>
+  )
+}
+
+function QuickChip({ children, icon, onClick, disabled }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-transparent border border-[var(--nc-accent)]/40 text-[var(--nc-accent)] text-xs font-medium hover:bg-[var(--nc-accent-dim)] transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
+    >
+      {icon}
+      {children}
+    </button>
   )
 }

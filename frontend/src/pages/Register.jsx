@@ -1,228 +1,176 @@
-import { useRef, useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { gsap, useGSAP } from '../lib/gsapSetup'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { motion } from 'motion/react'
+import { useAuth } from '../contexts/AuthContext'
 import { api } from '../lib/api'
-import { Button } from '../components/ui/button'
-import { Icon } from '../components/ui/icon'
-import AuthVisual from '../components/auth/AuthVisual'
+import { Navigation, Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react'
+
+const schema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Enter a valid email'),
+  phone: z
+    .string()
+    .regex(/^[0-9+\-\s]{8,15}$/, 'Enter a valid phone number'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+})
 
 export default function Register() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
   const navigate = useNavigate()
-  const containerRef = useRef(null)
-  const toastRef = useRef(null)
+  const { login } = useAuth()
+  const [showPassword, setShowPassword] = useState(false)
+  const [success, setSuccess] = useState(false)
 
-  useEffect(() => {
-    if (success) {
-      const t = setTimeout(() => navigate('/login'), 2000)
-      return () => clearTimeout(t)
-    }
-  }, [success, navigate])
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: { name: '', email: '', phone: '', password: '' },
+  })
 
-  useGSAP(() => {
-    const mm = gsap.matchMedia()
-
-    mm.add('(prefers-reduced-motion: reduce)', () => {
-      gsap.set('.auth-left-content > *, .auth-form-panel', { clearProps: 'all' })
-    })
-
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
-      tl.from('.auth-route-art', { autoAlpha: 0, duration: 0.9 })
-        .from('.auth-logo', { autoAlpha: 0, x: -20, duration: 0.6 }, '-=0.4')
-        .from('.auth-route-chips > *', { autoAlpha: 0, y: 12, stagger: 0.08, duration: 0.4 }, '-=0.3')
-        .from('.auth-stats > *', { autoAlpha: 0, y: 16, stagger: 0.08, duration: 0.5 }, '-=0.25')
-        .from('.auth-left-heading', { autoAlpha: 0, y: 30, duration: 0.6 })
-        .from('.auth-left-sub', { autoAlpha: 0, duration: 0.6 })
-        .from('.auth-form-panel', { autoAlpha: 0, x: 20, duration: 0.5 }, '-=0.3')
-    })
-
-    return () => mm.revert()
-  }, { scope: containerRef })
-
-  useGSAP(() => {
-    if (success && toastRef.current) {
-      gsap.fromTo(
-        toastRef.current,
-        { autoAlpha: 0, y: 20 },
-        { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.5 }
-      )
-    }
-  }, { scope: toastRef, dependencies: [success] })
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    if (!name.trim() || !email.trim() || !phone.trim() || !password) {
-      setError('Please fill in all fields.')
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.')
-      return
-    }
-    setLoading(true)
+  const onSubmit = async (values) => {
     try {
       await api.post('/api/auth/signup', {
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
-        password,
+        name: values.name.trim(),
+        email: values.email.trim(),
+        phone: values.phone.trim(),
+        password: values.password,
       })
+      // Auto sign-in after signup for a seamless first-run
+      try {
+        const data = await api.post('/api/auth/login', {
+          email: values.email.trim(),
+          password: values.password,
+        })
+        login(data.token, data.user)
+        navigate('/dashboard')
+        return
+      } catch {
+        // fall through to the success screen if auto-login fails
+      }
       setSuccess(true)
+      setTimeout(() => navigate('/login'), 2200)
     } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+      setError('root', { message: err?.message || 'Signup failed' })
     }
   }
 
   return (
-    <div className="auth-split" ref={containerRef}>
-      <div className="auth-split-left auth-left-primary">
-        <div className="auth-left-bg">
-          <img src="/images/login-bg.jpg" alt="" />
-        </div>
-        <div className="auth-left-overlay" />
-        <div className="auth-left-content">
-          <div className="auth-logo">
-            <Icon name="directions_car" className="auth-logo-icon" />
-            <span className="auth-logo-text">CoRide</span>
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 sm:px-6 pt-16 pb-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-md"
+      >
+        <div className="text-center mb-8">
+          <div className="mx-auto size-12 rounded-[14px] bg-[var(--nc-900)] flex items-center justify-center">
+            <Navigation size={22} className="text-[var(--nc-accent)]" />
           </div>
-
-          <AuthVisual />
-
-          <div>
-            <h1 className="auth-left-heading">
-              Elevate Your Daily Commute
-            </h1>
-            <p className="auth-left-sub">
-              Join an exclusive network of urban professionals for reliable, premium ride-sharing across Hyderabad.
-            </p>
-
-          </div>
-        </div>
-      </div>
-
-      <div className="auth-split-right">
-        <div className="auth-form-panel">
-          <div className="auth-mobile-logo">
-            <Icon name="directions_car" />
-            <span>CoRide</span>
-          </div>
-
-          <h2 className="auth-form-title">Create Account</h2>
-          <p className="auth-form-subtitle">Start your journey with CoRide.</p>
-
-          {error && (
-            <div className="error-box">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} noValidate>
-            <div className="auth-field">
-              <label className="auth-label" htmlFor="name">Full Name</label>
-              <div className="input-wrap">
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  autoComplete="name"
-                />
-              </div>
-            </div>
-
-            <div className="auth-field">
-              <label className="auth-label" htmlFor="email">Corporate Email</label>
-              <div className="input-wrap">
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="john.doe@company.com"
-                  autoComplete="email"
-                />
-              </div>
-            </div>
-
-            <div className="auth-field">
-              <label className="auth-label" htmlFor="phone">Phone Number</label>
-              <div className="input-wrap">
-                <span className="input-prefix">+91</span>
-                <input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="98765 43210"
-                  autoComplete="tel"
-                  className="has-prefix"
-                />
-              </div>
-            </div>
-
-            <div className="auth-field">
-              <label className="auth-label" htmlFor="password">Password</label>
-              <div className="input-wrap">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  className="input-icon-btn"
-                  onClick={() => setShowPassword((p) => !p)}
-                  tabIndex={-1}
-                >
-                  <Icon name={showPassword ? 'visibility' : 'visibility_off'} />
-                </button>
-              </div>
-            </div>
-
-            <Button type="submit" className="auth-submit" disabled={loading}>
-              {loading ? (
-                <span className="spinner" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
-              ) : (
-                <>
-                  Create Account
-                  <Icon name="arrow_forward" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          <p className="auth-footer-text">
-            Already have an account? <Link to="/login">Login</Link>
+          <h1 className="mt-5 text-2xl font-bold tracking-tight text-[var(--nc-900)]">
+            Join CoRide
+          </h1>
+          <p className="mt-1.5 text-sm text-[var(--nc-500)]">
+            One account to ride and to drive
           </p>
         </div>
-      </div>
 
-      {success && (
-        <div className="auth-toast" ref={toastRef}>
-          <div className="auth-toast-icon">
-            <Icon name="check_circle" />
-          </div>
-          <div>
-            <p className="auth-toast-title">Registration Successful</p>
-            <p className="auth-toast-desc">Welcome to CoRide.</p>
-          </div>
-        </div>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="p-6 sm:p-7 rounded-[16px] bg-[var(--nc-200)] border border-[var(--nc-300)] shadow-[0_12px_40px_rgba(0,0,0,0.35)]"
+        >
+          {success ? (
+            <div className="py-8 text-center">
+              <CheckCircle2 size={36} className="mx-auto text-[var(--nc-accent)]" />
+              <p className="mt-4 font-semibold text-[var(--nc-900)]">Account created</p>
+              <p className="mt-1 text-sm text-[var(--nc-500)]">Redirecting you to sign in…</p>
+            </div>
+          ) : (
+            <>
+              {errors.root && (
+                <div role="alert" className="mb-4 px-3.5 py-2.5 rounded-[10px] bg-[var(--nc-accent-dim)] border border-[var(--nc-accent)]/50 text-sm text-[var(--nc-accent)]">
+                  {errors.root.message}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <Field label="Full name" error={errors.name}>
+                  <input {...register('name')} autoComplete="name" placeholder="Arjun Mehta" className={inputCls(errors.name)} />
+                </Field>
+                <Field label="Email" error={errors.email}>
+                  <input {...register('email')} type="email" autoComplete="email" placeholder="you@example.com" className={inputCls(errors.email)} />
+                </Field>
+                <Field label="Phone" error={errors.phone}>
+                  <input {...register('phone')} type="tel" autoComplete="tel" placeholder="+91 98765 43210" className={inputCls(errors.phone)} />
+                </Field>
+                <Field label="Password" error={errors.password}>
+                  <div className="relative">
+                    <input
+                      {...register('password')}
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      placeholder="At least 6 characters"
+                      className={`${inputCls(errors.password)} pr-11`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nc-500)] hover:text-[var(--nc-800)] cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </Field>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="mt-6 w-full h-12 rounded-full bg-[var(--nc-accent)] text-white font-semibold text-sm hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+                Create account
+              </button>
+
+              <p className="mt-5 text-center text-sm text-[var(--nc-500)]">
+                Already have an account?{' '}
+                <Link to="/login" className="font-semibold text-[var(--nc-accent)] hover:underline">
+                  Sign in
+                </Link>
+              </p>
+            </>
+          )}
+        </form>
+      </motion.div>
+    </div>
+  )
+}
+
+function Field({ label, error, children }) {
+  return (
+    <div>
+      <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--nc-500)] mb-1.5">
+        {label}
+      </label>
+      {children}
+      {error && (
+        <p className="mt-1.5 text-xs text-[var(--nc-accent)]" role="alert">
+          {error.message}
+        </p>
       )}
     </div>
   )
+}
+
+function inputCls(error) {
+  return `w-full h-11 px-4 rounded-[12px] bg-[var(--nc-100)] border ${
+    error ? 'border-[var(--nc-accent)]' : 'border-[var(--nc-300)]'
+  } text-sm text-[var(--nc-800)] placeholder:text-[var(--nc-500)] outline-none focus:border-[var(--nc-accent)] transition-colors`
 }

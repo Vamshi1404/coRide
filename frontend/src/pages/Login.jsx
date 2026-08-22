@@ -1,175 +1,149 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { gsap, useGSAP } from '../lib/gsapSetup'
-import { api } from '../lib/api'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { motion } from 'motion/react'
+import { toast } from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
-import { Button } from '../components/ui/button'
-import { Icon } from '../components/ui/icon'
-import AuthVisual from '../components/auth/AuthVisual'
+import { api } from '../lib/api'
+import { Navigation, Eye, EyeOff, Loader2 } from 'lucide-react'
+
+const schema = z.object({
+  email: z.string().email('Enter a valid email'),
+  password: z.string().min(1, 'Password is required'),
+})
 
 export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [remember, setRemember] = useState(false)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
   const navigate = useNavigate()
-  const containerRef = useRef(null)
+  const { login } = useAuth()
+  const [showPassword, setShowPassword] = useState(false)
 
-  useGSAP(() => {
-    const mm = gsap.matchMedia()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: { email: '', password: '' },
+  })
 
-    mm.add('(prefers-reduced-motion: reduce)', () => {
-      gsap.set('.auth-left-content > *, .auth-form-panel', { clearProps: 'all' })
-    })
-
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
-      tl.from('.auth-route-art', { autoAlpha: 0, duration: 1 })
-        .from('.auth-logo', { autoAlpha: 0, x: -20, duration: 0.7 })
-        .from('.auth-left-heading', { autoAlpha: 0, y: 32, duration: 0.7 }, '-=0.25')
-        .from('.auth-left-sub', { autoAlpha: 0, duration: 0.6 }, '-=0.3')
-        .from('.auth-route-chips > *', { autoAlpha: 0, y: 12, stagger: 0.08, duration: 0.4 }, '-=0.2')
-        .from('.auth-stats > *', { autoAlpha: 0, y: 16, stagger: 0.08, duration: 0.5 }, '-=0.25')
-        .from('.auth-form-panel', { autoAlpha: 0, x: 24, duration: 0.6 }, '-=0.35')
-    })
-
-    return () => mm.revert()
-  }, { scope: containerRef })
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    if (!email.trim() || !password.trim()) {
-      setError('Please fill in all fields.')
-      return
-    }
-    setLoading(true)
+  const onSubmit = async (values) => {
     try {
-      const data = await api.post('/api/auth/login', { email: email.trim(), password })
+      const data = await api.post('/api/auth/login', {
+        email: values.email.trim(),
+        password: values.password,
+      })
       login(data.token, data.user)
       navigate('/dashboard')
     } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
+      setError('root', { message: err?.message || 'Login failed' })
     }
   }
 
   return (
-    <div className="auth-split" ref={containerRef}>
-      <div className="auth-split-left">
-        <div className="auth-left-bg">
-          <img src="/images/login-bg.jpg" alt="" />
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 sm:px-6 pt-16 pb-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-md"
+      >
+        <div className="text-center mb-8">
+          <div className="mx-auto size-12 rounded-[14px] bg-[var(--nc-900)] flex items-center justify-center">
+            <Navigation size={22} className="text-[var(--nc-accent)]" />
+          </div>
+          <h1 className="mt-5 text-2xl font-bold tracking-tight text-[var(--nc-900)]">
+            Welcome back
+          </h1>
+          <p className="mt-1.5 text-sm text-[var(--nc-500)]">
+            Sign in to manage your rides
+          </p>
         </div>
-        <div className="auth-left-overlay" />
-        <div className="auth-left-content">
-          <div className="auth-logo">
-            <Icon name="directions_car" className="auth-logo-icon" />
-            <span className="auth-logo-text">CoRide</span>
-          </div>
 
-          <AuthVisual />
-
-          <div>
-            <h1 className="auth-left-heading">
-              Elevate Your Daily Commute
-            </h1>
-            <p className="auth-left-sub">
-              Experience the gold standard in corporate ride-sharing. Designed for professionals, refined for Hyderabad.
-            </p>
-          </div>
-
-        </div>
-      </div>
-
-      <div className="auth-split-right">
-        <div className="auth-form-panel">
-          <div className="auth-mobile-logo">
-            <Icon name="directions_car" />
-            <span>CoRide</span>
-          </div>
-
-          <h2 className="auth-form-title">Welcome Back</h2>
-          <p className="auth-form-subtitle">Please enter your details to access your dashboard.</p>
-
-          {error && (
-            <div className="error-box">
-              {error}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="p-6 sm:p-7 rounded-[16px] bg-[var(--nc-200)] border border-[var(--nc-300)] shadow-[0_12px_40px_rgba(0,0,0,0.35)]"
+        >
+          {errors.root && (
+            <div role="alert" className="mb-4 px-3.5 py-2.5 rounded-[10px] bg-[var(--nc-accent-dim)] border border-[var(--nc-accent)]/50 text-sm text-[var(--nc-accent)]">
+              {errors.root.message}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} noValidate>
-            <div className="auth-field">
-              <label className="auth-label" htmlFor="email">EMAIL ADDRESS</label>
-              <div className="input-wrap">
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="executive@company.com"
-                  autoComplete="email"
-                />
-                <Icon name="mail" className="input-icon" />
-              </div>
-            </div>
+          <div className="space-y-4">
+            <Field label="Email" error={errors.email}>
+              <input
+                {...register('email')}
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                className={inputCls(errors.email)}
+              />
+            </Field>
 
-            <div className="auth-field">
-              <label className="auth-label" htmlFor="password">PASSWORD</label>
-              <div className="input-wrap">
+            <Field label="Password" error={errors.password}>
+              <div className="relative">
                 <input
-                  id="password"
+                  {...register('password')}
                   type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
                   autoComplete="current-password"
+                  placeholder="••••••••"
+                  className={`${inputCls(errors.password)} pr-11`}
                 />
                 <button
                   type="button"
-                  className="input-icon-btn"
-                  onClick={() => setShowPassword((p) => !p)}
-                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nc-500)] hover:text-[var(--nc-800)] cursor-pointer"
                 >
-                  <Icon name={showPassword ? 'visibility' : 'visibility_off'} />
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-            </div>
+            </Field>
+          </div>
 
-            <div className="auth-options">
-              <label className="auth-checkbox">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                />
-                <span className="auth-checkbox-mark">
-                  <Icon name="check" />
-                </span>
-                <span className="auth-checkbox-label">Remember me</span>
-              </label>
-            </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="mt-6 w-full h-12 rounded-full bg-[var(--nc-accent)] text-white font-semibold text-sm hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+            Sign in
+          </button>
 
-            <Button type="submit" className="auth-submit" disabled={loading}>
-              {loading ? (
-                <span className="spinner" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
-              ) : (
-                <>
-                  Sign In
-                  <Icon name="arrow_forward" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          <p className="auth-footer-text">
-            Don't have an account? <Link to="/register">Sign up</Link>
+          <p className="mt-5 text-center text-sm text-[var(--nc-500)]">
+            New to CoRide?{' '}
+            <Link to="/register" className="font-semibold text-[var(--nc-accent)] hover:underline">
+              Create an account
+            </Link>
           </p>
-        </div>
-      </div>
+        </form>
+      </motion.div>
     </div>
   )
+}
+
+function Field({ label, error, children }) {
+  return (
+    <div>
+      <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--nc-500)] mb-1.5">
+        {label}
+      </label>
+      {children}
+      {error && (
+        <p className="mt-1.5 text-xs text-[var(--nc-accent)]" role="alert">
+          {error.message}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function inputCls(error) {
+  return `w-full h-11 px-4 rounded-[12px] bg-[var(--nc-100)] border ${
+    error ? 'border-[var(--nc-accent)]' : 'border-[var(--nc-300)]'
+  } text-sm text-[var(--nc-800)] placeholder:text-[var(--nc-500)] outline-none focus:border-[var(--nc-accent)] transition-colors`
 }
