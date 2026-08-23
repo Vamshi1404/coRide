@@ -52,7 +52,7 @@ export function AppNav() {
 
   return (
     <header className="nav" data-scrolled={scrolled || drawerOpen}>
-      <div className="container nav__inner">
+      <div className="container-wide nav__inner">
         <Link to="/" className="nav__brand" aria-label="CoRide home">
           <span className="nav__brand-mark" aria-hidden="true">
             <Navigation size={16} />

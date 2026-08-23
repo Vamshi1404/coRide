@@ -170,9 +170,9 @@
   --p-dur-hero: 1200ms;
 
   /* 1.10 Layout */
-  --p-container-max: 1200px;
-  --p-container-wide: 1400px;
-  --p-container-narrow: 720px;
+  --p-container-max: 1400px;
+  --p-container-wide: 1600px;
+  --p-container-narrow: 900px;
   --p-container-prose: 65ch;
   --p-nav-height: 72px;
   --p-breakpoint-gutter: clamp(20px, 5vw, 80px);

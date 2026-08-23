@@ -8,7 +8,13 @@ import {
 } from '@/lib/rideDisplay'
 import {
   CalendarDays, ArrowRight, SearchX, History, ChevronRight,
+  MapPin, Navigation, Users,
 } from 'lucide-react'
+
+const TABS = [
+  { id: 'upcoming', label: 'Upcoming' },
+  { id: 'history', label: 'History' },
+]
 
 export default function MyRides() {
   const [tab, setTab] = useState('upcoming')
@@ -30,134 +36,135 @@ export default function MyRides() {
     .filter((r) => r.status === 'completed')
     .sort((a, b) => new Date(b.departure_time ?? 0) - new Date(a.departure_time ?? 0))
 
+  const counts = { upcoming: upcoming.length, history: history.length }
+
   return (
-    <div className="page page--narrow">
+    <div className="page">
       <header className="page-head">
         <h1 className="page-title">My rides</h1>
         <p className="page-sub">Your scheduled commutes and travel history.</p>
       </header>
 
-      {/* Tabs */}
-      <div
-        role="tablist"
-        aria-label="Ride lists"
-        className="tabs rides-tabs tabs--block"
-      >
-        {[
-          { id: 'upcoming', label: `Upcoming${loading ? '' : ` (${upcoming.length})`}` },
-          { id: 'history', label: `History${loading ? '' : ` (${history.length})`}` },
-        ].map((t) => (
+      {/* Segmented control */}
+      <div className="rides-segment" role="tablist" aria-label="Ride lists">
+        {TABS.map((t) => (
           <button
             key={t.id}
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
-            className={`tab${tab === t.id ? ' is-active' : ''}`}
+            className={`rides-segment__btn${tab === t.id ? ' is-active' : ''}`}
           >
             {tab === t.id && (
               <motion.span
-                layoutId="rides-tab-pill"
-                className="tab__pill"
-                transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                layoutId="rides-seg-pill"
+                className="rides-segment__pill"
+                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               />
             )}
-            <span>{t.label}</span>
+            <span className="rides-segment__label">
+              {t.label}
+              {!loading && <span className="rides-segment__count">{counts[t.id]}</span>}
+            </span>
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="results-stack" aria-busy="true">
-          {[0, 1].map((i) => (
+        <div className="rides-grid" aria-busy="true">
+          {[0, 1, 2].map((i) => (
             <div key={i} className="skel-card" aria-hidden="true">
-              <div className="skel skel--line sm" style={{ width: 140 }} />
-              <div className="skel-row">
-                <span className="skel skel--circle" style={{ width: 15, height: 15 }} />
+              <div className="skel skel--line" style={{ width: 120 }} />
+              <div className="skel-row" style={{ marginTop: 12 }}>
+                <span className="skel skel--circle" style={{ width: 14, height: 14 }} />
                 <div className="skel skel--line" style={{ flex: 1 }} />
               </div>
-              <div className="skel skel--line" style={{ width: '60%' }} />
-              <div className="skel-row">
-                <span className="skel skel--circle" style={{ width: 40, height: 40 }} />
-                <div className="stack stack--gap-sm" style={{ flex: 1 }}>
-                  <div className="skel skel--line" style={{ width: 110 }} />
-                  <div className="skel skel--line sm" style={{ width: 150 }} />
+              <div className="skel skel--line" style={{ width: '55%', marginTop: 10 }} />
+              <div className="skel-row" style={{ marginTop: 14 }}>
+                <span className="skel skel--circle" style={{ width: 36, height: 36 }} />
+                <div style={{ flex: 1 }}>
+                  <div className="skel skel--line" style={{ width: 100 }} />
+                  <div className="skel skel--line sm" style={{ width: 140, marginTop: 6 }} />
                 </div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <>
-          {/* Upcoming */}
-          <AnimatePresence mode="wait" initial={false}>
-            {tab === 'upcoming' && (
-              <motion.div
-                key="upcoming"
-                initial={reduced ? false : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.22 }}
-              >
-                {upcoming.length === 0 ? (
-                  <EmptyState
-                    icon={SearchX}
-                    title="No upcoming rides"
-                    body="Find a seat on a route you need, or offer your own."
-                    cta={{ label: 'Find a ride', to: '/search' }}
-                  />
-                ) : (
-                  <ul className="results-stack" style={{ listStyle: 'none', padding: 0 }}>
-                    {upcoming.map((ride) => (
-                      <li key={`${ride.user_role}-${ride.id}`}>
-                        <UpcomingCard ride={ride} onOpen={() => navigate(`/rides/${ride.id}`)} />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </motion.div>
-            )}
+        <AnimatePresence mode="wait" initial={false}>
+          {tab === 'upcoming' && (
+            <motion.div
+              key="upcoming"
+              initial={reduced ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2 }}
+            >
+              {upcoming.length === 0 ? (
+                <EmptyState
+                  icon={SearchX}
+                  title="No upcoming rides"
+                  body="Find a seat on a route you need, or offer your own ride to fellow Hyderabad commuters."
+                  cta={{ label: 'Find a ride', to: '/search' }}
+                />
+              ) : (
+                <div className="rides-grid">
+                  {upcoming.map((ride) => (
+                    <UpcomingCard
+                      key={`${ride.user_role}-${ride.id}`}
+                      ride={ride}
+                      onOpen={() => navigate(`/rides/${ride.id}`)}
+                    />
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
 
-            {/* History */}
-            {tab === 'history' && (
-              <motion.div
-                key="history"
-                initial={reduced ? false : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.22 }}
-              >
-                {history.length === 0 ? (
-                  <EmptyState
-                    icon={History}
-                    title="No history yet"
-                    body="Completed rides will show up here with their details."
-                  />
-                ) : (
-                  <ul className="history-stack" style={{ listStyle: 'none', padding: 0 }}>
-                    {history.map((ride) => (
-                      <li key={`${ride.user_role}-${ride.id}`}>
-                        <button
-                          type="button"
-                          onClick={() => navigate(`/rides/${ride.id}`)}
-                          className="row-item row-item--clickable"
-                        >
-                          <div className="row-item__body">
-                            <p className="row-item__title">{ride.from_city} → {ride.to_city}</p>
-                            <p className="row-item__sub tabular">
-                              {formatRideDateTime(ride.departure_time)} · as {ride.user_role}
-                            </p>
-                          </div>
-                          <span className="badge badge--completed">Completed</span>
-                          <ChevronRight size={16} aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </>
+          {tab === 'history' && (
+            <motion.div
+              key="history"
+              initial={reduced ? false : { opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2 }}
+            >
+              {history.length === 0 ? (
+                <EmptyState
+                  icon={History}
+                  title="No history yet"
+                  body="Completed rides will appear here with route details and ratings."
+                />
+              ) : (
+                <div className="rides-list">
+                  {history.map((ride) => (
+                    <button
+                      key={`${ride.user_role}-${ride.id}`}
+                      type="button"
+                      onClick={() => navigate(`/rides/${ride.id}`)}
+                      className="ride-row"
+                    >
+                      <div className="ride-row__route">
+                        <span className="ride-row__city">{ride.from_city}</span>
+                        <ArrowRight size={12} className="ride-row__arrow" aria-hidden="true" />
+                        <span className="ride-row__city">{ride.to_city}</span>
+                      </div>
+                      <div className="ride-row__meta">
+                        <span className="ride-row__date tabular">
+                          <CalendarDays size={12} aria-hidden="true" />
+                          {formatRideDateTime(ride.departure_time)}
+                        </span>
+                        <span className="ride-row__role">{ride.user_role}</span>
+                      </div>
+                      <span className="badge badge--completed">Completed</span>
+                      <ChevronRight size={14} className="ride-row__chevron" aria-hidden="true" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
     </div>
   )
@@ -169,62 +176,62 @@ function UpcomingCard({ ride, onOpen }) {
 
   return (
     <div
-      className="card card--interactive ride-card"
+      className="ride-card"
       onClick={onOpen}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen()}
     >
-      {/* Status row */}
-      <div className="ride-card__status">
-        <span className={`badge ${confirmed ? 'badge--neutral' : 'badge--pending'} badge--lg`}>
-          {confirmed ? 'Confirmed' : 'Pending approval'}
+      {/* Top: status + date */}
+      <div className="ride-card__top">
+        <span className={`badge ${confirmed ? 'badge--neutral' : 'badge--pending'}`}>
+          {confirmed ? 'Confirmed' : 'Pending'}
         </span>
         {ride.status === 'in_progress' && (
           <span className="live-now"><span className="live-now__dot" aria-hidden="true" />LIVE</span>
         )}
-        <span className="ride-card__when tabular">
+        <span className="ride-card__date tabular">
           <CalendarDays size={12} aria-hidden="true" />
           {formatRideDateTime(ride.departure_time)}
         </span>
       </div>
 
-      {/* Route */}
-      <div className="vroute ride-card__vroute">
-        <div className="vroute__point">
-          <span className="vroute__mark"><span className="vroute__dot" /></span>
-          <span>
-            <span className="vroute__name">{ride.from_city}</span><br />
-            <span className="vroute__sub">Pickup</span>
-          </span>
+      {/* Route visualization */}
+      <div className="ride-card__route">
+        <div className="ride-card__route-point">
+          <span className="ride-card__route-dot" />
+          <div>
+            <span className="ride-card__route-city">{ride.from_city}</span>
+            <span className="ride-card__route-label">Pickup</span>
+          </div>
         </div>
-        <span className="vroute__stem ride-card__stem" aria-hidden="true" />
-        <div className="vroute__point vroute__point--dest">
-          <span className="vroute__mark"><span className="vroute__dot" /></span>
-          <span>
-            <span className="vroute__name">{ride.to_city}</span><br />
-            <span className="vroute__sub">Drop-off</span>
-          </span>
+        <div className="ride-card__route-line" aria-hidden="true" />
+        <div className="ride-card__route-point ride-card__route-point--dest">
+          <span className="ride-card__route-dot" />
+          <div>
+            <span className="ride-card__route-city">{ride.to_city}</span>
+            <span className="ride-card__route-label">Drop-off</span>
+          </div>
         </div>
       </div>
 
-      {/* Driver + vehicle + CTA */}
+      {/* Footer: driver + vehicle + action */}
       <div className="ride-card__foot">
-        <span className="avatar avatar--md" style={{ position: 'relative', flexShrink: 0 }}>
-          {getInitials(getDriverName(ride))}
-          {confirmed && <span className="avatar__dot" aria-hidden="true" />}
-        </span>
-        <div className="ride-card__who">
-          <p className="ride-card__who-label">{isDriving ? 'You are driving' : 'Your driver'}</p>
-          <p className="ride-card__who-name">{isDriving ? 'Your vehicle' : getDriverName(ride)}</p>
-          <p className="ride-card__vehicle">
-            {formatVehicleName(ride)}
-            {ride.vehicle_plate && <span className="mono">· {ride.vehicle_plate}</span>}
-          </p>
+        <div className="ride-card__driver">
+          <span className="avatar avatar--sm">
+            {getInitials(getDriverName(ride))}
+            {confirmed && <span className="avatar__dot" aria-hidden="true" />}
+          </span>
+          <div className="ride-card__driver-info">
+            <span className="ride-card__driver-label">{isDriving ? 'You are driving' : getDriverName(ride)}</span>
+            <span className="ride-card__vehicle">
+              {formatVehicleName(ride)}
+              {ride.vehicle_plate && <span className="mono"> · {ride.vehicle_plate}</span>}
+            </span>
+          </div>
         </div>
-        <span className="btn btn--primary btn--sm" aria-hidden="true">
-          Details
-          <ArrowRight size={13} />
+        <span className="ride-card__cta">
+          Details <ArrowRight size={13} />
         </span>
       </div>
     </div>

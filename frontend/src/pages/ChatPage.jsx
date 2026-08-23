@@ -155,9 +155,11 @@ export default function ChatPage() {
 function EmptyPane() {
   return (
     <div className="chat-empty">
-      <span className="chat-empty__mark"><MessageCircle size={26} aria-hidden="true" /></span>
-      <h2 className="page-title" style={{ fontSize: 'var(--p-text-xl)' }}>Your ride conversations</h2>
-      <p className="page-sub" style={{ maxWidth: '34ch', fontSize: 'var(--fs-small)' }}>
+      <div className="chat-empty__visual" aria-hidden="true">
+        <MessageCircle size={32} />
+      </div>
+      <h2 className="chat-empty__title">Your ride conversations</h2>
+      <p className="chat-empty__body">
         Coordinate pickups, share your live location, and stay in sync with your driver or passengers.
       </p>
       <Link to="/search" className="btn btn--primary btn--md" style={{ marginTop: 'var(--p-space-lg)' }}>

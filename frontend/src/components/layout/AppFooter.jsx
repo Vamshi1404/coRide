@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Navigation, Heart } from 'lucide-react'
+import { Navigation, Heart, ExternalLink } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
 export function AppFooter() {
@@ -8,7 +8,7 @@ export function AppFooter() {
 
   return (
     <footer className="footer">
-      <div className="container footer__inner">
+      <div className="container-wide footer__inner">
         <div className="footer__brand">
           <Link to="/" className="nav__brand" aria-label="CoRide home">
             <span className="nav__brand-mark" aria-hidden="true">
@@ -37,6 +37,7 @@ export function AppFooter() {
                 <li><FooterLink to="/search">Find a ride</FooterLink></li>
                 <li><FooterLink to="/offer-ride">Offer a ride</FooterLink></li>
                 <li><FooterLink to="/my-rides">My rides</FooterLink></li>
+                <li><FooterLink to="/chats">Chats</FooterLink></li>
               </>
             ) : (
               <>
@@ -59,18 +60,19 @@ export function AppFooter() {
         <div className="footer__col">
           <h4>City</h4>
           <ul>
-            <li><span className="footer-city-note">Hyderabad, IN</span></li>
+            <li><span className="footer-city-note">Hyderabad, India</span></li>
             <li><span className="footer-city-note">Gachibowli · HITEC City</span></li>
             <li><span className="footer-city-note">Secunderabad · Madhapur</span></li>
+            <li><span className="footer-city-note">Kondapur · Financial District</span></li>
           </ul>
         </div>
       </div>
 
       <div className="footer__bottom">
-        <div className="container footer__bottom-inner">
+        <div className="container-wide footer__bottom-inner">
           <p>© {year} CoRide. All rights reserved.</p>
           <p className="footer__made">
-            Made with <Heart size={12} aria-hidden="true" /> for fewer empty seats
+            Built with <Heart size={11} aria-hidden="true" /> in Hyderabad
           </p>
         </div>
       </div>

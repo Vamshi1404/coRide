@@ -10,7 +10,7 @@ import {
 import { AddressInput } from '@/components/nocturne/AddressInput'
 import {
   Search, Navigation, Clock, Users, Star, ArrowRight, Route as RouteLine,
-  SearchX, AlertTriangle,
+  SearchX, AlertTriangle, ChevronDown,
 } from 'lucide-react'
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
@@ -63,22 +63,16 @@ export default function SearchRides() {
     setParams({ from_city: r.from, to_city: r.to, date: '' })
   }
 
-  const SEARCH_HERO = 'https://commons.wikimedia.org/wiki/Special:FilePath/Hyderabad_skyline.jpg?width=1600'
-
   return (
     <div className="page">
-      {/* Hero banner */}
-      <div className="search-hero">
-        <img src={SEARCH_HERO} alt="" aria-hidden="true" />
-        <div className="search-hero__overlay" />
-        <div className="search-hero__content">
-          <h1 className="page-title" style={{ color: 'var(--text-strong)' }}>Find your ride</h1>
-          <p className="page-sub" style={{ color: 'var(--text-secondary)' }}>Open seats leaving from Hyderabad. Request instantly, split the fare.</p>
-        </div>
-      </div>
+      <header className="page-head">
+        <h1 className="page-title">Find your ride</h1>
+        <p className="page-sub">Open seats leaving from Hyderabad. Request instantly, split the fare.</p>
+      </header>
 
-      <form onSubmit={submit} className="search-panel" aria-label="Search rides">
-        <div className="search-grid">
+      {/* Search form — mobility product style */}
+      <form onSubmit={submit} className="search-form-card" aria-label="Search rides">
+        <div className="search-route-visual">
           <AddressInput
             id="search-from"
             label="From"
@@ -86,7 +80,11 @@ export default function SearchRides() {
             onChange={(v) => setForm((f) => ({ ...f, from: v }))}
             placeholder="Leaving from"
           />
-          <span className="search-divider" aria-hidden="true" />
+          <div className="search-route-connector" aria-hidden="true">
+            <span className="search-route-connector__line" />
+            <ChevronDown size={16} className="search-route-connector__icon" />
+            <span className="search-route-connector__line" />
+          </div>
           <AddressInput
             id="search-to"
             label="To"
@@ -94,33 +92,36 @@ export default function SearchRides() {
             onChange={(v) => setForm((f) => ({ ...f, to: v }))}
             placeholder="Where to?"
           />
-          <span className="search-divider" aria-hidden="true" />
-          <div className="search-dates">
-            <div className="field field--date">
-              <label htmlFor="search-date" className="field__label">Date</label>
-              <input
-                id="search-date"
-                type="date"
-                min={todayISO()}
-                value={form.date}
-                onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                className="input"
-              />
-            </div>
+        </div>
+
+        <div className="search-form-extras">
+          <div className="field">
+            <label htmlFor="search-date" className="field__label">Date</label>
+            <input
+              id="search-date"
+              type="date"
+              min={todayISO()}
+              value={form.date}
+              onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+              className="input"
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end' }}>
             <button
               type="submit"
               disabled={query.isFetching}
-              className="search-submit"
-              aria-label="Search"
-              style={{ marginTop: 'auto' }}
+              className="btn btn--primary btn--md"
+              style={{ width: '100%' }}
             >
-              <Search size={18} />
+              <Search size={16} aria-hidden="true" />
+              Search rides
             </button>
           </div>
         </div>
 
-        <div className="chips-row">
-          {POPULAR_ROUTES.slice(0, 8).map((r) => (
+        {/* Popular routes */}
+        <div className="chips-row" style={{ marginTop: 'var(--p-space-md)' }}>
+          {POPULAR_ROUTES.slice(0, 6).map((r) => (
             <button
               key={`${r.from}-${r.to}`}
               type="button"
@@ -133,6 +134,7 @@ export default function SearchRides() {
         </div>
       </form>
 
+      {/* Results toolbar */}
       <div className="results-toolbar">
         <p className="results-count" aria-live="polite">
           {query.isLoading
@@ -161,38 +163,59 @@ export default function SearchRides() {
         )}
       </div>
 
+      {/* Loading */}
       {query.isLoading && (
-        <div className="results-stack" aria-busy="true">
-          {[0, 1, 2].map((i) => (
-            <RideCardSkeleton key={i} />
+        <div className="results-grid" aria-busy="true">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="skel-card" aria-hidden="true">
+              <div className="skel skel--line" style={{ width: 80 }} />
+              <div className="skel-row" style={{ marginTop: 10 }}>
+                <span className="skel skel--circle" style={{ width: 6 }} />
+                <div className="skel skel--line" style={{ flex: 1 }} />
+                <span className="skel skel--circle" style={{ width: 6 }} />
+              </div>
+              <div className="skel-row" style={{ marginTop: 14 }}>
+                <span className="skel skel--circle" style={{ width: 32 }} />
+                <div style={{ flex: 1 }}>
+                  <div className="skel skel--line" style={{ width: 100 }} />
+                  <div className="skel skel--line sm" style={{ width: 80, marginTop: 4 }} />
+                </div>
+              </div>
+              <div className="skel-row" style={{ marginTop: 12, justifyContent: 'space-between' }}>
+                <div className="skel skel--line" style={{ width: 60 }} />
+                <div className="skel skel--block" style={{ width: 80, height: 28 }} />
+              </div>
+            </div>
           ))}
         </div>
       )}
 
+      {/* Error */}
       {query.isError && <ErrorState onRetry={() => query.refetch()} />}
 
+      {/* Empty */}
       {!query.isLoading && !query.isError && rides.length === 0 && (
         <EmptyState hasQuery={hasQuery} />
       )}
 
+      {/* Results grid — 2 columns */}
       {!query.isLoading && !query.isError && sorted.length > 0 && (
-        <motion.ul
-          className="results-stack"
-          style={{ listStyle: 'none', padding: 0 }}
+        <motion.div
+          className="results-grid"
           initial={reduced ? false : 'hidden'}
           animate="show"
-          variants={{ show: { transition: { staggerChildren: 0.06 } } }}
+          variants={{ show: { transition: { staggerChildren: 0.05 } } }}
         >
           {sorted.map((ride) => (
-            <motion.li
+            <motion.div
               key={ride.id}
-              variants={reduced ? {} : { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}
-              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              variants={reduced ? {} : { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             >
               <RideResultCard ride={ride} onSelect={() => navigate(`/confirm/${ride.id}`)} />
-            </motion.li>
+            </motion.div>
           ))}
-        </motion.ul>
+        </motion.div>
       )}
     </div>
   )
@@ -204,50 +227,63 @@ function RideResultCard({ ride, onSelect }) {
 
   return (
     <div
-      className="result-card"
+      className="result-card-v2"
       onClick={onSelect}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onSelect()}
     >
-      <div className="routeline result-card__routeline">
-        <span className="routeline__node routeline__node--origin" aria-hidden="true" />
-        <span className="routeline__label">{ride.from_city}</span>
-        <span className="routeline__connector" aria-hidden="true"><Navigation size={10} /></span>
-        <span className="routeline__label" style={{ textAlign: 'right' }}>{ride.to_city}</span>
-        <span className="routeline__node routeline__node--dest" aria-hidden="true" />
+      {/* Departure time — dominant */}
+      <div className="result-card-v2__time">
+        {formatRideTime(ride.departure_time)}
       </div>
 
-      <div className="result-card__driver">
-        <span className="avatar avatar--md" aria-hidden="true">{initials}</span>
-        <div className="result-card__driver-info">
-          <p className="row-item__title">{getDriverName(ride)}</p>
-          <p className="row-item__sub">{formatVehicleName(ride)}</p>
-        </div>
+      {/* Route */}
+      <div className="result-card-v2__route">
+        <span className="result-card-v2__route-dot" />
+        <span>{ride.from_city}</span>
+        <ArrowRight size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+        <span className="result-card-v2__route-dot result-card-v2__route-dot--dest" />
+        <span>{ride.to_city}</span>
+      </div>
+
+      {/* Driver */}
+      <div className="result-card-v2__driver">
+        <span className="avatar avatar--sm">{initials}</span>
+        <span className="result-card-v2__driver-name">{getDriverName(ride)}</span>
         {rating && (
-          <span className="rating-chip tabular">
-            <Star size={12} aria-hidden="true" style={{ fill: 'currentColor' }} />
+          <span className="result-card-v2__driver-rating tabular">
+            <Star size={11} aria-hidden="true" style={{ fill: 'currentColor' }} />
             {rating}
           </span>
         )}
       </div>
 
-      <div className="result-card__meta-wrap">
-        <div className="result-card__foot" style={{ marginTop: 'var(--p-space-lg)', paddingTop: 'var(--p-space-md)', borderTop: '1px solid var(--divider)' }}>
-          <div className="result-card__meta" style={{ margin: 0, padding: 0, border: 'none' }}>
-            <span><Clock size={12} aria-hidden="true" />{formatRideTime(ride.departure_time)}</span>
-            {ride.available_seats != null && (
-              <span><Users size={12} aria-hidden="true" />{ride.available_seats} left</span>
-            )}
-            {ride.distance_km != null && (
-              <span className="hide-sm"><RouteLine size={12} aria-hidden="true" />{Number(ride.distance_km).toFixed(0)} km</span>
-            )}
-          </div>
-          <div className="row-item__actions">
-            <span className="result-card__price">{formatCurrency(ride.final_cost)}</span>
-            <span className="result-card__go" aria-hidden="true"><ArrowRight size={14} /></span>
-          </div>
-        </div>
+      {/* Meta row */}
+      <div className="result-card-v2__meta">
+        {ride.available_seats != null && (
+          <span className="result-card-v2__meta-item">
+            <Users size={12} aria-hidden="true" />
+            {ride.available_seats} seats
+          </span>
+        )}
+        {ride.distance_km != null && (
+          <span className="result-card-v2__meta-item hide-sm">
+            <RouteLine size={12} aria-hidden="true" />
+            {Number(ride.distance_km).toFixed(0)} km
+          </span>
+        )}
+        <span className="result-card-v2__meta-item">
+          {formatVehicleName(ride)}
+        </span>
+      </div>
+
+      {/* Footer: price + CTA */}
+      <div className="result-card-v2__foot">
+        <span className="result-card-v2__price">{formatCurrency(ride.final_cost)}</span>
+        <span className="btn btn--primary btn--sm">
+          Book <ArrowRight size={13} />
+        </span>
       </div>
     </div>
   )
@@ -284,31 +320,6 @@ function ErrorState({ onRetry }) {
         <button type="button" onClick={onRetry} className="btn btn--primary btn--md">
           Try again
         </button>
-      </div>
-    </div>
-  )
-}
-
-function RideCardSkeleton() {
-  return (
-    <div className="skel-card" aria-hidden="true">
-      <div className="skel-row">
-        <span className="skel skel--circle" style={{ width: 10, height: 10 }} />
-        <div className="skel skel--line" style={{ width: 96 }} />
-        <div className="skel skel--line sm" style={{ flex: 1 }} />
-        <div className="skel skel--line" style={{ width: 80 }} />
-        <span className="skel skel--circle" style={{ width: 10, height: 10 }} />
-      </div>
-      <div className="skel-row">
-        <span className="skel skel--circle avatar avatar--md" style={{ width: 44, height: 44 }} />
-        <div className="stack stack--gap-sm" style={{ flex: 1 }}>
-          <div className="skel skel--line" style={{ width: 130 }} />
-          <div className="skel skel--line sm" style={{ width: 90 }} />
-        </div>
-      </div>
-      <div className="skel-row" style={{ justifyContent: 'space-between', paddingTop: 8 }}>
-        <div className="skel skel--line lg" style={{ width: 64 }} />
-        <div className="skel skel--block" style={{ width: 96, height: 34 }} />
       </div>
     </div>
   )
