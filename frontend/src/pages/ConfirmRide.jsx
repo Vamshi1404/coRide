@@ -7,6 +7,7 @@ import { SafetyChecklist } from '@/components/nocturne/safety-checklist'
 import { FareCounter } from '@/components/nocturne/fare-counter'
 import { LiveChip } from '@/components/nocturne/live-indicators'
 import { Button } from '@/components/ui/Button'
+import RouteMap from '@/components/maps/RouteMap'
 import { useAuth } from '@/contexts/AuthContext'
 import { api } from '@/lib/api'
 import { formatRideDateTime, formatCurrency } from '@/lib/rideDisplay'
@@ -149,16 +150,23 @@ export default function ConfirmRide() {
 
       <div className="confirm-grid">
         <div className="confirm-main">
-          {/* Route visual */}
-          <div className="route-art-frame card card--flush" style={{ boxShadow: 'none', background: 'none', border: 'none', padding: 0 }}>
-            <svg viewBox="0 0 400 200" className="route-art" role="img" aria-label={`Route from ${ride.from_city} to ${ride.to_city}`} fill="none">
-              <path d="M 40 160 Q 120 40, 200 100 T 360 60" stroke="var(--border-strong)" strokeWidth="2" strokeDasharray="6 4" opacity="0.5" />
-              <path d="M 40 160 Q 120 40, 200 100 T 360 60" stroke="var(--accent-solid)" strokeWidth="2.5" strokeLinecap="round" />
-              <circle cx="40" cy="160" r="6" fill="var(--accent-solid)" />
-              <circle cx="360" cy="60" r="6" fill="var(--text-muted)" />
-              <text x="40" y="182" textAnchor="middle">{truncate(ride.from_city, 16)}</text>
-              <text x="360" y="46" textAnchor="middle">{truncate(ride.to_city, 16)}</text>
-            </svg>
+          {/* Route map */}
+          <div className="map-frame" style={{ height: 260, borderRadius: 'var(--p-radius-lg)', overflow: 'hidden', position: 'relative' }}>
+            <RouteMap
+              from={ride.from_lat != null && ride.from_lng != null ? { lat: ride.from_lat, lng: ride.from_lng } : null}
+              to={ride.to_lat != null && ride.to_lng != null ? { lat: ride.to_lat, lng: ride.to_lng } : null}
+              height={260}
+            />
+            <div className="map-overlaybar">
+              <OverlayStat label="From" value={ride.from_city} />
+              <span className="ostat-divider" aria-hidden="true" />
+              <OverlayStat label="To" value={ride.to_city} />
+              <span className="ostat-divider hide-sm-divider" aria-hidden="true" />
+              <OverlayStat
+                label="Distance"
+                value={ride.distance_km != null ? `${Number(ride.distance_km).toFixed(0)} km` : '—'}
+              />
+            </div>
           </div>
 
           {/* Route details */}
@@ -286,7 +294,11 @@ function Meta({ label, value }) {
   )
 }
 
-function truncate(str, n) {
-  if (!str) return ''
-  return str.length > n ? `${str.slice(0, n - 1)}…` : str
+function OverlayStat({ label, value }) {
+  return (
+    <div className="ostat">
+      <p className="ostat__label">{label}</p>
+      <p className="ostat__value">{value}</p>
+    </div>
+  )
 }
