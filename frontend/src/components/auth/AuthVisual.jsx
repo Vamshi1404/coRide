@@ -1,7 +1,7 @@
 import { Navigation } from 'lucide-react'
 
-/* Verified: real Charminar photo via Wikimedia Commons FilePath redirect */
-const CHARMINAR = 'https://commons.wikimedia.org/wiki/Special:FilePath/CHARMINAR,_Hyderabad_01.jpg?width=800'
+/* Verified: Birla Mandir sunset via Wikimedia Commons — distinct from landing Charminar */
+const CHARMINAR = 'https://commons.wikimedia.org/wiki/Special:FilePath/Birla_Mandir_in_Hyderabad,_2015.JPG?width=800'
 
 export default function AuthVisual() {
   return (

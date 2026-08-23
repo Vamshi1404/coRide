@@ -9,5 +9,5 @@
 @import './styles/pages.css';
 @import './styles/states.css';
 
-/* Fonts — Clash Display (display) + Inter (body) + JetBrains Mono (data) */
-@import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Fonts — Plus Jakarta Sans (UI) + Fraunces (display) + JetBrains Mono (data) */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=JetBrains+Mono:wght@400;500&display=swap');

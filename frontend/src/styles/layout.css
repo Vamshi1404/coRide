@@ -73,6 +73,22 @@
   transition: color var(--dur-fast) var(--ease-standard), background-color var(--dur-fast) var(--ease-standard);
   white-space: nowrap;
 }
+.nav__link::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 0;
+  height: 2px;
+  background: var(--accent-solid);
+  border-radius: 1px;
+  transform: translateX(-50%);
+  transition: width 250ms var(--ease-standard);
+}
+.nav__link:hover::after,
+.nav__link.is-active::after {
+  width: 60%;
+}
 .nav__link:hover { color: var(--text-strong); background: oklch(1 0 0 / 0.05); }
 .nav__link.is-active { color: var(--nav-item-fg-active); }
 .nav__pill {

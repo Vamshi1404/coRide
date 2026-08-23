@@ -14,8 +14,11 @@ import {
 
 const DASH_IMAGES = {
   hero: 'https://commons.wikimedia.org/wiki/Special:FilePath/CHARMINAR,_Hyderabad_01.jpg?width=800',
-  offer: 'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?w=800',
-  tip: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hyderabad_skyline.jpg?width=800',
+  offer: 'https://images.pexels.com/photos/12354645/pexels-photo-12354645.jpeg?w=800&fit=crop&auto=compress',
+  tip: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hussain_sagar_sunset.jpg?width=800',
+  golconda: 'https://commons.wikimedia.org/wiki/Special:FilePath/Golconda_Fort,_Hyderabad.jpg?width=800',
+  birla: 'https://commons.wikimedia.org/wiki/Special:FilePath/Birla_Mandir_in_Hyderabad,_2015.JPG?width=800',
+  buddha: 'https://commons.wikimedia.org/wiki/Special:FilePath/Buddha_statue_11102016.jpg?width=800',
 }
 
 /* Verified: dusk highway traffic loop (Pexels, 4.6 MB SD variant) */

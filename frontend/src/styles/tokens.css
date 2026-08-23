@@ -108,8 +108,8 @@
   --p-shadow-focus: 0 0 0 3px oklch(0.65 0.22 35 / 0.28);
 
   /* 1.8 Typography primitives */
-  --p-font-display: 'Clash Display', 'Plus Jakarta Sans', system-ui, sans-serif;
-  --p-font-sans: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
+  --p-font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --p-font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
     'Segoe UI', Roboto, sans-serif;
   --p-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
     'Liberation Mono', monospace;
@@ -294,13 +294,20 @@
   --z-preloader: 1000;
 
   /* 2.11 Motion semantics */
+  --ease-entrance: var(--p-ease-out);
+  --ease-exit: var(--p-ease-in);
   --ease-standard: var(--p-ease-out);
   --ease-soft: var(--p-ease-in-out);
   --ease-bounce: var(--p-ease-back);
+  --ease-spring: linear(0,0.006,0.025 2.8%,0.101 6.1%,0.539 18.9%,0.721 25.3%,0.849 31.5%,0.937 38.1%,0.968 41.8%,0.991 46.8%,1.006 51.9%,1.015 58.2%,1.017 64.9%,1.001 80.7%,1);
   --dur-fast: var(--p-dur-fast);
   --dur-base: var(--p-dur-base);
   --dur-slow: var(--p-dur-slow);
   --dur-reveal: var(--p-dur-reveal);
+  --dist-xs: 4px;
+  --dist-sm: 8px;
+  --dist-md: 16px;
+  --dist-lg: 32px;
 }
 
 /* Light theme */

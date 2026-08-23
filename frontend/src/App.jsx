@@ -111,22 +111,22 @@ export default function App() {
           <Suspense fallback={<PageSkeleton />}>
             <AnimatePresence mode="wait" initial={false} onExitComplete={scrollToTop}>
               <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<PageTransition><NocturneHome /></PageTransition>} />
+                <Route path="/" element={<PageTransition locationKey={location.pathname}><NocturneHome /></PageTransition>} />
                 <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
                 <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
-                <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
-                <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
-                <Route path="/dashboard" element={<ProtectedRoute><PageTransition><Dashboard /></PageTransition></ProtectedRoute>} />
-                <Route path="/search" element={<ProtectedRoute><PageTransition><SearchRides /></PageTransition></ProtectedRoute>} />
-                <Route path="/confirm/:rideId" element={<ProtectedRoute><PageTransition><ConfirmRide /></PageTransition></ProtectedRoute>} />
-                <Route path="/track/:rideId" element={<ProtectedRoute><PageTransition><TrackRide /></PageTransition></ProtectedRoute>} />
-                <Route path="/offer-ride" element={<ProtectedRoute><PageTransition><OfferRide /></PageTransition></ProtectedRoute>} />
-                <Route path="/my-rides" element={<ProtectedRoute><PageTransition><MyRides /></PageTransition></ProtectedRoute>} />
-                <Route path="/rides/:id" element={<ProtectedRoute><PageTransition><RideDetailPage /></PageTransition></ProtectedRoute>} />
+                <Route path="/privacy-policy" element={<PageTransition locationKey={location.pathname}><PrivacyPolicy /></PageTransition>} />
+                <Route path="/terms-of-service" element={<PageTransition locationKey={location.pathname}><TermsOfService /></PageTransition>} />
+                <Route path="/dashboard" element={<ProtectedRoute><PageTransition locationKey={location.pathname}><Dashboard /></PageTransition></ProtectedRoute>} />
+                <Route path="/search" element={<ProtectedRoute><PageTransition locationKey={location.pathname}><SearchRides /></PageTransition></ProtectedRoute>} />
+                <Route path="/confirm/:rideId" element={<ProtectedRoute><PageTransition locationKey={location.pathname}><ConfirmRide /></PageTransition></ProtectedRoute>} />
+                <Route path="/track/:rideId" element={<ProtectedRoute><PageTransition locationKey={location.pathname}><TrackRide /></PageTransition></ProtectedRoute>} />
+                <Route path="/offer-ride" element={<ProtectedRoute><PageTransition locationKey={location.pathname}><OfferRide /></PageTransition></ProtectedRoute>} />
+                <Route path="/my-rides" element={<ProtectedRoute><PageTransition locationKey={location.pathname}><MyRides /></PageTransition></ProtectedRoute>} />
+                <Route path="/rides/:id" element={<ProtectedRoute><PageTransition locationKey={location.pathname}><RideDetailPage /></PageTransition></ProtectedRoute>} />
                 <Route path="/chats" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
                 <Route path="/chat/:rideId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><PageTransition><ProfilePage /></PageTransition></ProtectedRoute>} />
-                <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+                <Route path="/profile" element={<ProtectedRoute><PageTransition locationKey={location.pathname}><ProfilePage /></PageTransition></ProtectedRoute>} />
+                <Route path="*" element={<PageTransition locationKey={location.pathname}><NotFound /></PageTransition>} />
               </Routes>
             </AnimatePresence>
           </Suspense>

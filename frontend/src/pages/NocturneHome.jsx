@@ -10,18 +10,75 @@ import {
   TrendingUp, Heart, Globe,
 } from 'lucide-react'
 
-/* ── Verified media: real Hyderabad imagery (Wikimedia Commons) + Pexels ── */
+/* ── Verified high-quality media: diverse real Hyderabad locations ──────── */
+
+/* Magnetic button: subtle cursor-proximity pull (Awwwards SOTY micro-interaction) */
+function MagneticButton({ children, strength = 0.3 }) {
+  const ref = useRef(null)
+  const handleMove = (e) => {
+    const el = ref.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const x = (e.clientX - rect.left - rect.width / 2) * strength
+    const y = (e.clientY - rect.top - rect.height / 2) * strength
+    el.style.transform = `translate(${x}px, ${y}px)`
+  }
+  const handleLeave = () => { ref.current.style.transform = 'translate(0, 0)' }
+  return (
+    <span
+      ref={ref}
+      className="magnetic-wrap"
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+    >
+      {children}
+    </span>
+  )
+}
+
+/* Kinetic text: per-character stagger reveal (Awwwards SOTY type) */
+function KineticText({ text, className = '', staggerMs = 40 }) {
+  return (
+    <span className={`kinetic-text ${className}`} aria-label={text}>
+      {Array.from(text).map((ch, i) => (
+        <span
+          key={i}
+          className="kinetic-char"
+          style={{ animationDelay: `${i * staggerMs}ms` }}
+          aria-hidden="true"
+        >
+          {ch === ' ' ? '\u00A0' : ch}
+        </span>
+      ))}
+    </span>
+  )
+}
 const MEDIA = {
   heroVideo: 'https://videos.pexels.com/video-files/2103099/2103099-hd_1920_1080_30fps.mp4',
   heroPoster: 'https://commons.wikimedia.org/wiki/Special:FilePath/CHARMINAR,_Hyderabad_01.jpg?width=1600',
-  skyline: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hyderabad_skyline.jpg?width=1200',
-  charminar: 'https://commons.wikimedia.org/wiki/Special:FilePath/Charminar,_Hyderabad,_Telangana.jpg?width=800',
-  meccamasjid: 'https://commons.wikimedia.org/wiki/Special:FilePath/Mecca_Masjid_Hyderabad.JPG?width=800',
+  // Route cards — 6 distinct real locations
+  golconda: 'https://commons.wikimedia.org/wiki/Special:FilePath/Golconda_Fort,_Hyderabad.jpg?width=1200',
+  birla: 'https://commons.wikimedia.org/wiki/Special:FilePath/Birla_Mandir_in_Hyderabad,_2015.JPG?width=1200',
+  hussainsagar: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hussain_sagar_sunset.jpg?width=1200',
+  buddha: 'https://commons.wikimedia.org/wiki/Special:FilePath/Buddha_statue_11102016.jpg?width=1200',
+  meccamasjid: 'https://commons.wikimedia.org/wiki/Special:FilePath/Mecca_Masjid_Hyderabad.JPG?width=1200',
+  charminarNight: 'https://images.pexels.com/photos/9025814/pexels-photo-9025814.jpeg?w=1200&fit=crop&auto=compress',
+  // Feature + section imagery
   highway: 'https://images.pexels.com/photos/1173777/pexels-photo-1173777.jpeg?w=1200',
   commuters: 'https://images.pexels.com/photos/3727464/pexels-photo-3727464.jpeg?w=800',
   carInterior: 'https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg?w=800',
-  traffic: 'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?w=1200',
+  // Parallax + CTA emotional close
+  sunsetHero: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hussain_sagar_sunset.jpg?width=1600',
 }
+
+const ROUTE_CARDS = [
+  { from: 'Golconda', to: 'HITEC City', dist: 22, img: MEDIA.golconda },
+  { from: 'Birla Mandir', to: 'Financial District', dist: 14, img: MEDIA.birla },
+  { from: 'Hussain Sagar', to: 'Gachibowli', dist: 11, img: MEDIA.hussainsagar },
+  { from: 'Buddha Statue', to: 'Secunderabad', dist: 18, img: MEDIA.buddha },
+  { from: 'Laad Bazaar', to: 'Madhapur', dist: 13, img: MEDIA.meccamasjid },
+  { from: 'Charminar', to: 'Kondapur', dist: 15, img: MEDIA.charminarNight },
+]
 
 const POPULAR_ROUTES = [
   { from: 'Gachibowli', to: 'HITEC City', distance: 7.2 },
@@ -178,10 +235,14 @@ export default function NocturneHome() {
           </p>
 
           <h1 className="hero-title">
-            <span className="hero-line">Ride</span>
-            <span className="hero-line hero-line--accent">together.</span>
+            <span className="hero-line">
+              <KineticText text="Ride" staggerMs={60} />
+            </span>
+            <span className="hero-line hero-line--accent">
+              <KineticText text="together." staggerMs={50} />
+            </span>
             <span className="hero-line" style={{ fontSize: '0.55em', color: 'var(--text-secondary)', fontWeight: 400 }}>
-              Move smarter.
+              <KineticText text="Move smarter." staggerMs={30} />
             </span>
           </h1>
 
@@ -208,14 +269,18 @@ export default function NocturneHome() {
           </div>
 
           <div className="hero-cta-row">
-            <Link to="/search" className="btn btn--accent btn--xl hero-cta">
-              <MapPin size={19} aria-hidden="true" />
-              Find a Ride
-            </Link>
-            <Link to="/offer-ride" className="btn btn--outline btn--xl hero-cta">
-              <Navigation size={19} aria-hidden="true" />
-              Offer a Ride
-            </Link>
+            <MagneticButton>
+              <Link to="/search" className="btn btn--accent btn--xl hero-cta">
+                <MapPin size={19} aria-hidden="true" />
+                Find a Ride
+              </Link>
+            </MagneticButton>
+            <MagneticButton>
+              <Link to="/offer-ride" className="btn btn--outline btn--xl hero-cta">
+                <Navigation size={19} aria-hidden="true" />
+                Offer a Ride
+              </Link>
+            </MagneticButton>
           </div>
 
           <div className="hero-scroll" aria-hidden="true">
@@ -350,15 +415,28 @@ export default function NocturneHome() {
         </div>
         <div className="route-gallery">
           <div className="route-gallery__track scrollbar-none">
-            {POPULAR_ROUTES.map((route, i) => (
-              <Link
-                key={`${route.from}-${route.to}`}
-                to={`/search?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}`}
-                className="route-gallery__card"
-              >
-                <div className="route-gallery__card-img">
+            {ROUTE_CARDS.map((route) => {
+              const handleTilt = (e) => {
+                const rect = e.currentTarget.getBoundingClientRect()
+                const x = (e.clientX - rect.left) / rect.width - 0.5
+                const y = (e.clientY - rect.top) / rect.height - 0.5
+                e.currentTarget.style.transform = `perspective(600px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) scale(1.02)`
+              }
+              const resetTilt = (e) => {
+                e.currentTarget.style.transform = 'perspective(600px) rotateY(0) rotateX(0) scale(1)'
+              }
+              return (
+                <Link
+                  key={`${route.from}-${route.to}`}
+                  to={`/search?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}`}
+                  className="route-gallery__card"
+                  onMouseMove={handleTilt}
+                  onMouseLeave={resetTilt}
+                  style={{ transition: 'transform 300ms var(--ease-soft)', transformStyle: 'preserve-3d' }}
+                >
+                  <div className="route-gallery__card-img">
                   <img
-                    src={[MEDIA.skyline, MEDIA.charminar, MEDIA.meccamasjid][i % 3]}
+                    src={route.img}
                     alt={`${route.from} to ${route.to}`}
                     loading="lazy"
                   />
@@ -367,10 +445,11 @@ export default function NocturneHome() {
                   <span className="route-gallery__card-route">
                     {route.from} → {route.to}
                   </span>
-                  <span className="route-gallery__card-dist">{route.distance} km</span>
+                  <span className="route-gallery__card-dist">{route.dist} km</span>
                 </div>
               </Link>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -409,7 +488,7 @@ export default function NocturneHome() {
               number="04"
               title="Rate & repeat"
               description="Pay the driver directly, rate the ride, and keep your daily commute partners."
-              image={MEDIA.sunset}
+              image={MEDIA.charminarNight}
               delay={450}
             />
           </div>
@@ -452,7 +531,7 @@ export default function NocturneHome() {
 
       {/* ═══ Chapter 8 · CTA with parallax background ═══ */}
       <section className="cta-section parallax-section">
-        <div className="parallax-img" style={{ backgroundImage: `url(${MEDIA.skyline})` }} />
+        <div className="parallax-img" style={{ backgroundImage: `url(${MEDIA.sunsetHero})` }} />
         <div className="cta-overlay">
           <div className="container">
             <ScrollReveal animation="reveal-scale" className="cta-content">

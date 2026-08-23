@@ -87,7 +87,7 @@ A ride-sharing application connecting drivers and passengers with real-time chat
 - Branded first-load preloader (once per session), skeleton screens for all data views
 - Route-level code splitting with Suspense + animated page transitions (Motion)
 - Scroll-triggered reveal animations and GSAP hero choreography on the landing page
-- Lenis smooth scrolling, magnetic buttons, reduced-motion fallbacks throughout
+- Lenis smooth scrolling and reduced-motion fallbacks throughout
 - Responsive nav with mobile drawer, notification bell (type-colored icons per event), and real empty/error states
 - Segmented controls for vehicle type selection, booking flow stepper, route progress bar
 - lucide-react icons
