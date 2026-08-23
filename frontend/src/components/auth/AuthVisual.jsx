@@ -1,14 +1,23 @@
 import { Navigation } from 'lucide-react'
 
-const AUTH_IMAGE = 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1200&q=80'
+/* Real Hyderabad images from Wikimedia Commons */
+const CHARMINAR = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/CHARMINAR%2C_Hyderabad_01.jpg/800px-CHARMINAR%2C_Hyderabad_01.jpg'
 
 export default function AuthVisual() {
   return (
     <div className="auth-visual">
-      <div className="auth-visual__img">
-        <img src={AUTH_IMAGE} alt="" aria-hidden="true" />
-      </div>
-      <div className="auth-visual__overlay" />
+      <div
+        className="auth-visual__img"
+        style={{
+          backgroundImage: `url(${CHARMINAR})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          position: 'absolute',
+          inset: 0,
+          filter: 'saturate(0.6) brightness(0.35)',
+        }}
+        aria-hidden="true"
+      />
       <div className="auth-visual__content">
         <div className="auth-visual__brandline">
           <span className="auth-card__mark" aria-hidden="true">

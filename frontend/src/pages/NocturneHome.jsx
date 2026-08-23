@@ -2,30 +2,26 @@ import { useRef, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useReducedMotion } from '@/lib/motion/MotionProvider'
 import { gsap, useGSAP, ScrollTrigger } from '@/lib/gsapSetup'
-import { ScrollReveal, StaggerReveal, CountUp, MagneticWrapper } from '@/components/ui/ScrollReveal'
+import { ScrollReveal } from '@/components/ui/ScrollReveal'
 import { ParallaxImage, ScrollRevealImage, ScrollVideo, HoverZoomImage } from '@/components/ui/MediaComponents'
 import {
-  Navigation, Clock, MapPin, Zap, ArrowRight, ArrowUpRight,
+  Navigation, Clock, MapPin, Zap, ArrowRight,
   Leaf, Users, Star, ShieldCheck, ChevronDown, Search,
-  Sparkles, TrendingUp, Heart, Globe,
+  TrendingUp, Heart, Globe,
 } from 'lucide-react'
 
-/* ── Unsplash/Pexels media URLs for rich content ─────────────────── */
+/* ── Real Hyderabad images (Wikimedia Commons / Pexels) ─────────── */
 const MEDIA = {
-  heroVideo: 'https://videos.pexels.com/video-files/3753569/3753569-uhd_2560_1440_30fps.mp4',
-  heroPoster: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1920&q=80',
-  feature1: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80',
-  feature2: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80',
-  feature3: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80',
-  feature4: 'https://images.unsplash.com/photo-1494515843206-f3117d3f51b7?w=800&q=80',
-  city1: 'https://images.unsplash.com/photo-1563344234-4f2b01a5bb58?w=1200&q=80',
-  city2: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&q=80',
-  city3: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80',
-  carInterior: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80',
-  community: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80',
-  route: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1200&q=80',
-  appMockup: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&q=80',
-  green: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
+  heroVideo: 'https://videos.pexels.com/video-files/3192473/3192473-hd_1920_1080_30fps.mp4',
+  heroPoster: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/CHARMINAR%2C_Hyderabad_01.jpg/1200px-CHARMINAR%2C_Hyderabad_01.jpg',
+  gachibowli: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hyderabad_skyline.jpg/1200px-Hyderabad_skyline.jpg',
+  hitec: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hyderabad_skyline.jpg/1200px-Hyderabad_skyline.jpg',
+  secunderabad: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hyderabad_skyline.jpg/1200px-Hyderabad_skyline.jpg',
+  highway: 'https://images.pexels.com/photos/1173777/pexels-photo-1173777.jpeg?w=1200',
+  commuters: 'https://images.pexels.com/photos/3727464/pexels-photo-3727464.jpeg?w=800',
+  carInterior: 'https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg?w=800',
+  traffic: 'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?w=1200',
+  sunset: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Hyderabad_Skyline.jpg/1200px-Hyderabad_Skyline.jpg',
 }
 
 const POPULAR_ROUTES = [
@@ -176,37 +172,11 @@ export default function NocturneHome() {
           <div className="hero-video-overlay" />
         </div>
 
-        {/* Animated gradient mesh */}
-        <div className="hero-gradient" aria-hidden="true" />
-
-        {/* Particles */}
-        {!reducedMotion && (
-          <div className="hero-particles" aria-hidden="true">
-            {Array.from({ length: 50 }).map((_, i) => (
-              <span
-                key={i}
-                className="particle"
-                style={{
-                  width: `${1 + Math.random() * 3}px`,
-                  height: `${1 + Math.random() * 3}px`,
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  opacity: 0.04 + Math.random() * 0.08,
-                  animation: `particle-drift ${8 + Math.random() * 20}s linear infinite`,
-                  animationDelay: `${-Math.random() * 15}s`,
-                }}
-              />
-            ))}
-          </div>
-        )}
-
         <div className="hero-core">
-          <MagneticWrapper strength={0.15}>
-            <p className="hero-badge">
-              <span className="hero-badge__dot" aria-hidden="true" />
-              Live now in Hyderabad
-            </p>
-          </MagneticWrapper>
+          <p className="hero-badge">
+            <span className="hero-badge__dot" aria-hidden="true" />
+            Live now in Hyderabad
+          </p>
 
           <h1 className="hero-title">
             <span className="hero-line">Ride</span>
@@ -303,7 +273,7 @@ export default function NocturneHome() {
               </div>
             </ScrollReveal>
             <ScrollRevealImage
-              src={MEDIA.community}
+              src={MEDIA.commuters}
               alt="Professionals sharing a ride together"
               className="split-image clip-reveal"
             />
@@ -325,14 +295,14 @@ export default function NocturneHome() {
               icon={Star}
               title="Community ratings"
               description="Drivers and passengers carry ratings from real rides. Choose your co-travellers with confidence."
-              image={MEDIA.feature1}
+              image={MEDIA.commuters}
               delay={0}
             />
             <FeatureBento
               icon={Clock}
               title="Real-time tracking"
               description="Follow the driver's live GPS position and traffic-aware ETA on the map."
-              image={MEDIA.feature2}
+              image={MEDIA.highway}
               delay={100}
               wide
             />
@@ -340,7 +310,7 @@ export default function NocturneHome() {
               icon={Users}
               title="In-app chat"
               description="Coordinate pickup points and timing. Share your live location when it matters."
-              image={MEDIA.community}
+              image={MEDIA.commuters}
               delay={200}
             />
             <FeatureBento
@@ -356,7 +326,7 @@ export default function NocturneHome() {
 
       {/* ═══ Chapter 4 · Parallax image break ═══ */}
       <section className="parallax-section parallax-break">
-        <div className="parallax-img" style={{ backgroundImage: `url(${MEDIA.route})` }} />
+        <div className="parallax-img" style={{ backgroundImage: `url(${MEDIA.traffic})` }} />
         <div className="parallax-break__overlay">
           <div className="container">
             <ScrollReveal animation="reveal-up">
@@ -388,7 +358,7 @@ export default function NocturneHome() {
                 className="route-gallery__card"
               >
                 <div className="route-gallery__card-img">
-                  <img src={MEDIA[`city${(i % 3) + 1}`]} alt={`${route.from} to ${route.to}`} loading="lazy" />
+                  <img src={i % 2 === 0 ? MEDIA.gachibowli : MEDIA.hitec} alt={`${route.from} to ${route.to}`} loading="lazy" />
                 </div>
                 <div className="route-gallery__card-body">
                   <span className="route-gallery__card-route">
@@ -415,28 +385,28 @@ export default function NocturneHome() {
               number="01"
               title="Search your route"
               description="Enter your pickup and destination. See open rides from drivers heading your way."
-              image={MEDIA.feature2}
+              image={MEDIA.highway}
               delay={0}
             />
             <StepVisual
               number="02"
               title="Request your seat"
               description="Pick a ride and send a request. The driver accepts, and your spot is confirmed."
-              image={MEDIA.feature1}
+              image={MEDIA.commuters}
               delay={150}
             />
             <StepVisual
               number="03"
               title="Track live"
               description="On ride day, watch the driver's approach in real time. Chat directly, call if needed."
-              image={MEDIA.appMockup}
+              image={MEDIA.carInterior}
               delay={300}
             />
             <StepVisual
               number="04"
               title="Rate & repeat"
               description="Pay the driver directly, rate the ride, and keep your daily commute partners."
-              image={MEDIA.green}
+              image={MEDIA.sunset}
               delay={450}
             />
           </div>
@@ -479,11 +449,10 @@ export default function NocturneHome() {
 
       {/* ═══ Chapter 8 · CTA with parallax background ═══ */}
       <section className="cta-section parallax-section">
-        <div className="parallax-img" style={{ backgroundImage: `url(${MEDIA.city3})` }} />
+        <div className="parallax-img" style={{ backgroundImage: `url(${MEDIA.sunset})` }} />
         <div className="cta-overlay">
           <div className="container">
             <ScrollReveal animation="reveal-scale" className="cta-content">
-              <Sparkles size={32} className="cta-icon" />
               <h2 className="cta-title">
                 Your commute, <span className="text-gradient">reimagined</span>
               </h2>

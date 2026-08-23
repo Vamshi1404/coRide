@@ -13,9 +13,9 @@ import {
 } from 'lucide-react'
 
 const DASH_IMAGES = {
-  hero: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80',
-  offer: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80',
-  tip: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80',
+  hero: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/CHARMINAR%2C_Hyderabad_01.jpg/800px-CHARMINAR%2C_Hyderabad_01.jpg',
+  offer: 'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?w=800',
+  tip: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hyderabad_skyline.jpg/800px-Hyderabad_skyline.jpg',
 }
 
 const getGreeting = () => {
@@ -259,8 +259,17 @@ function ScrollReideTip() {
   return (
     <ScrollReveal animation="reveal-up" delay={350}>
       <div className="dash-tip-card">
-        <div className="dash-tip-card__img">
-          <img src={DASH_IMAGES.offer} alt="" aria-hidden="true" loading="lazy" />
+        <div className="dash-tip-card__img" style={{ overflow: 'hidden', borderRadius: 'var(--radius-card)' }}>
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster={DASH_IMAGES.offer}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          >
+            <source src="https://videos.pexels.com/video-files/3192473/3192473-hd_1920_1080_30fps.mp4" type="video/mp4" />
+          </video>
         </div>
         <div className="dash-tip-card__body">
           <h4 className="dash-tip-card__title">Driving somewhere?</h4>
