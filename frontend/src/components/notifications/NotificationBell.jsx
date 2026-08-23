@@ -102,7 +102,7 @@ export default function NotificationBell() {
           if (newN.length > 0) {
             lastIdRef.current = newN[newN.length - 1].id
             newN.forEach((n) => {
-              toast(n.title, { icon: '📬' })
+              toast(n.title, { icon: <Bell size={16} /> })
               if (COMPLETED_RIDE_TYPES.has(n.type) && n.related_ride_id) {
                 triggerRating(n.related_ride_id)
               }

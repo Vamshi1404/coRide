@@ -22,14 +22,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <AuthProvider>
             <MotionProvider>
               <App />
-            <Toaster
+              <Toaster
               position="top-right"
               toastOptions={{
                 duration: 3000,
                 style: {
-                  background: 'var(--nc-200, #1c1c1f)',
-                  color: 'var(--nc-800, #ececee)',
-                  border: '1px solid var(--nc-300, #2a2a2e)',
+                  background: 'var(--bg-overlay)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-default)',
                   fontFamily: "'Plus Jakarta Sans', sans-serif",
                   borderRadius: '14px',
                   padding: '12px 16px',
@@ -37,10 +37,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   boxShadow: '0 12px 32px -8px rgba(0,0,0,0.5)',
                 },
                 success: {
-                  iconTheme: { primary: '#ff4d1c', secondary: '#1c1c1f' },
+                  iconTheme: { primary: 'var(--accent-solid)', secondary: 'var(--bg-overlay)' },
                 },
                 error: {
-                  iconTheme: { primary: '#ff4d1c', secondary: '#1c1c1f' },
+                  iconTheme: { primary: 'var(--accent-solid)', secondary: 'var(--bg-overlay)' },
                 },
               }}
             />

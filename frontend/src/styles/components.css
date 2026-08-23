@@ -147,8 +147,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
   border-radius: var(--p-radius-circle);
   border: 1px solid var(--border-default);
@@ -177,7 +177,7 @@
 }
 .icon-btn--solid:hover { background: var(--accent-solid); color: var(--accent-on); border-color: transparent; }
 
-.icon-btn--sm { width: 32px; height: 32px; }
+.icon-btn--sm { width: 44px; height: 44px; }
 
 /* ════════════════════════════════════════════════════════════════════
    3 · FORM FIELDS — label always visible, ring scoped to the field
@@ -310,8 +310,8 @@ select.input option {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--p-radius-circle);
   color: var(--text-muted);
   cursor: pointer;
@@ -464,8 +464,8 @@ select.input option {
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
+  gap: 4px;
+  padding: 4px 12px;
   border-radius: var(--radius-chip);
   font-size: var(--badge-size);
   font-weight: var(--p-weight-bold);
@@ -496,7 +496,7 @@ select.input option {
 .badge--accent    { color: var(--accent-text);      background: var(--accent-tint);         border-color: var(--p-accent-300); }
 
 .badge--live .badge__dot { animation: livePulse 1.5s ease-in-out infinite; }
-.badge--lg { font-size: var(--p-text-xs); padding: 5px 13px; }
+.badge--lg { font-size: var(--p-text-xs); padding: 4px 12px; }
 
 /* ════════════════════════════════════════════════════════════════════
    7 · AVATAR — initials disc in three sizes + optional presence dot
@@ -565,7 +565,7 @@ select.input option {
   padding-block: var(--p-space-xs);
 }
 .star {
-  font-size: 34px;
+  font-size: 32px;
   line-height: 1;
   cursor: pointer;
   color: var(--p-mono-350);
@@ -705,13 +705,13 @@ select.input option {
   height: 6px;
   background: var(--bg-subtle);
   border-radius: var(--p-radius-pill);
-  overflow: hidden;
 }
 .progress__bar {
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, var(--accent-solid), var(--p-accent-500));
-  transition: width 700ms var(--ease-standard);
+  transform-origin: left center;
+  transition: transform 700ms var(--ease-standard);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -800,8 +800,8 @@ select.input option {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: var(--p-radius-circle);
   background: transparent;
@@ -817,7 +817,7 @@ select.input option {
   position: absolute;
   top: 1px;
   right: 0;
-  min-width: 17px;
+  min-width: 16px;
   height: 17px;
   padding: 0 4px;
   display: flex;
@@ -1037,7 +1037,7 @@ select.input option {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   color: var(--p-mono-450);
 }
 .routeline__connector::before,
@@ -1160,7 +1160,7 @@ select.input option {
   height: 16px;
   border-radius: var(--p-radius-circle);
   background: var(--status-live);
-  border: 3px solid #ffffff;
+  border: 3px solid var(--text-on-accent);
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.55);
 }
 .driver-marker--pulse { animation: pulse-ring 2.2s ease-out infinite; }
@@ -1407,7 +1407,7 @@ select.input option {
   overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   padding: var(--p-space-lg) var(--p-space-lg);
 }
 
@@ -1462,7 +1462,7 @@ select.input option {
 .bubble--out {
   background: var(--chat-bubble-out);
   border-bottom-right-radius: 6px;
-  color: #ffffff;
+  color: var(--text-on-accent);
   box-shadow: 0 4px 14px rgba(255, 77, 28, 0.25);
 }
 .bubble__pending { opacity: 0.75; }
@@ -1479,7 +1479,7 @@ select.input option {
   transition: transform var(--dur-fast) var(--ease-standard);
 }
 .loc-card:hover { transform: translateY(-1px); }
-.loc-card--out { background: rgba(0, 0, 0, 0.18); color: #fff; }
+.loc-card--out { background: rgba(0, 0, 0, 0.18); color: var(--text-on-accent); }
 .loc-card--in { background: var(--accent-tint); }
 .loc-card__pin {
   display: grid;
@@ -1489,7 +1489,7 @@ select.input option {
   flex-shrink: 0;
   border-radius: var(--p-radius-sm);
 }
-.loc-card--out .loc-card__pin { background: rgba(255, 255, 255, 0.22); color: #fff; }
+.loc-card--out .loc-card__pin { background: rgba(255, 255, 255, 0.22); color: var(--text-on-accent); }
 .loc-card--in .loc-card__pin { background: var(--accent-solid); color: var(--accent-on); }
 .loc-card__title { display: block; font-size: var(--p-text-xs); font-weight: var(--p-weight-bold); }
 .loc-card__sub { display: block; font-size: 11px; opacity: 0.8; }
@@ -1503,9 +1503,10 @@ select.input option {
 .quick-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex-shrink: 0;
-  padding: 6px 12px;
+  min-height: 44px;
+  padding: 8px 16px;
   border-radius: var(--radius-chip);
   border: 1px solid var(--p-accent-300);
   background: transparent;
@@ -1692,7 +1693,7 @@ select.input option {
   align-items: center;
   justify-content: center;
   gap: var(--p-space-xs);
-  min-height: 40px;
+  min-height: 44px;
   padding-inline: var(--p-space-md);
   border: 1px solid transparent;
   border-radius: calc(var(--radius-field) - 3px);
@@ -1852,7 +1853,7 @@ select.input option {
   background: linear-gradient(135deg, #ffffff, #fdf3ef);
 }
 
-:root[data-theme='light'] ::selection { background: var(--accent-solid); color: #fff; }
+:root[data-theme='light'] ::selection { background: var(--accent-solid); color: var(--text-on-accent); }
 :root[data-theme='light'] ::-webkit-calendar-picker-indicator,
 :root[data-theme='light'] ::-webkit-time-picker-indicator { filter: none; }
 
@@ -1889,7 +1890,7 @@ select.input option {
   padding-left: var(--p-space-lg);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   list-style: disc;
 }
 .form-summary__list a,

@@ -42,6 +42,7 @@ export default function RequestButton({ ride, onUpdate }) {
   }
 
   const cancelRequest = async () => {
+    if (!window.confirm('Cancel this seat request?')) return
     setLoading(true)
     try {
       await api.patch(`/api/requests/${existing.id}?status=cancelled`)

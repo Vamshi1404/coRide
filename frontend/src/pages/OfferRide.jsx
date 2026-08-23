@@ -206,11 +206,11 @@ export default function OfferRide() {
           )}
 
           <div className="field-grid">
-            <Field label="Departure date" error={errors.departure_date} htmlFor="offer-date">
-              <input id="offer-date" type="date" min={todayISO()} {...register('departure_date')} className={`input${errors.departure_date ? ' is-invalid' : ''}`} />
+            <Field label="Departure date" error={errors.departure_date} htmlFor="offer-date" required>
+              <input id="offer-date" type="date" min={todayISO()} {...register('departure_date')} className={`input${errors.departure_date ? ' is-invalid' : ''}`} aria-describedby={errors.departure_date ? 'offer-date-error' : undefined} />
             </Field>
-            <Field label="Departure time" error={errors.departure_time} htmlFor="offer-time">
-              <input id="offer-time" type="time" {...register('departure_time')} className={`input${errors.departure_time ? ' is-invalid' : ''}`} />
+            <Field label="Departure time" error={errors.departure_time} htmlFor="offer-time" required>
+              <input id="offer-time" type="time" {...register('departure_time')} className={`input${errors.departure_time ? ' is-invalid' : ''}`} aria-describedby={errors.departure_time ? 'offer-time-error' : undefined} />
             </Field>
           </div>
 
@@ -222,12 +222,12 @@ export default function OfferRide() {
                 ))}
               </select>
             </Field>
-            <Field label="Fare per seat (₹)" error={errors.final_cost} htmlFor="offer-fare">
-              <input id="offer-fare" type="number" min="0" step="10" placeholder="e.g. 150" {...register('final_cost')} className={`input${errors.final_cost ? ' is-invalid' : ''}`} />
+            <Field label="Fare per seat (₹)" error={errors.final_cost} htmlFor="offer-fare" required>
+              <input id="offer-fare" type="number" min="0" step="10" placeholder="e.g. 150" {...register('final_cost')} className={`input${errors.final_cost ? ' is-invalid' : ''}`} aria-describedby={errors.final_cost ? 'offer-fare-error' : undefined} />
             </Field>
           </div>
 
-          <Field label="Vehicle" error={errors.vehicle_id} htmlFor="offer-vehicle">
+          <Field label="Vehicle" error={errors.vehicle_id} htmlFor="offer-vehicle" required>
             <div className="vehicle-row">
               <select
                 id="offer-vehicle"
@@ -275,12 +275,13 @@ export default function OfferRide() {
   )
 }
 
-function Field({ label, error, children, htmlFor }) {
+function Field({ label, error, children, htmlFor, required }) {
+  const errorId = htmlFor ? `${htmlFor}-error` : undefined
   return (
     <div className={`field${error ? ' field--invalid' : ''}`}>
-      <label htmlFor={htmlFor} className="field__label">{label}</label>
+      <label htmlFor={htmlFor} className={`field__label${required ? ' is-required' : ''}`}>{label}</label>
       {children}
-      {error && <FieldError msg={error.message} />}
+      {error && <p id={errorId} className="field__error" role="alert">{error.message}</p>}
     </div>
   )
 }

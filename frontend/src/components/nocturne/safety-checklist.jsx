@@ -47,7 +47,7 @@ export function SafetyChecklist({ className }) {
           const isComplete = completedItems.includes(item.id)
           const Icon = item.icon
           return (
-            <li key={item.id} className="row-item" style={{ background: 'transparent', border: 'none', padding: 0, opacity: isComplete ? 1 : 0.4, transition: 'opacity 300ms ease' }}>
+            <li key={item.id} className="row-item" style={{ background: 'transparent', border: 'none', padding: 0, opacity: isComplete ? 1 : 0.4, transition: 'opacity var(--dur-slow) ease' }}>
               <span
                 aria-hidden="true"
                 style={{
@@ -61,13 +61,13 @@ export function SafetyChecklist({ className }) {
                   border: `1px solid ${isComplete ? 'var(--text-strong)' : 'var(--border-strong)'}`,
                   background: isComplete ? 'var(--text-strong)' : 'transparent',
                   color: isComplete ? 'var(--bg-page)' : 'transparent',
-                  transition: 'all 300ms ease',
+                  transition: 'all var(--dur-slow) ease',
                 }}
               >
                 <Check size={12} strokeWidth={3} />
               </span>
               <Icon size={14} aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-              <span style={{ fontSize: 'var(--fs-small)', color: isComplete ? 'var(--text-primary)' : 'var(--text-muted)', transition: 'color 300ms ease' }}>
+              <span style={{ fontSize: 'var(--fs-small)', color: isComplete ? 'var(--text-primary)' : 'var(--text-muted)', transition: 'color var(--dur-slow) ease' }}>
                 {item.label}
               </span>
             </li>

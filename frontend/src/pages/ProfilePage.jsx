@@ -88,7 +88,7 @@ export default function ProfilePage() {
 
           <form onSubmit={handleSubmit} noValidate className="stack stack--gap-lg" style={{ marginTop: 'var(--p-space-md)' }}>
             <div className="field">
-              <label htmlFor="pf-name" className="field__label">Full name</label>
+              <label htmlFor="pf-name" className="field__label is-required">Full name</label>
               <input
                 id="pf-name"
                 type="text"

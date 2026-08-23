@@ -73,7 +73,7 @@ export default function Login() {
               </div>
             )}
 
-            <Field label="Email" error={errors.email}>
+            <Field label="Email" error={errors.email} required>
               <input
                 {...register('email')}
                 id="login-email"
@@ -81,10 +81,11 @@ export default function Login() {
                 autoComplete="email"
                 placeholder="you@example.com"
                 className={`input${errors.email ? ' is-invalid' : ''}`}
+                aria-describedby={errors.email ? 'login-email-error' : undefined}
               />
             </Field>
 
-            <Field label="Password" error={errors.password}>
+            <Field label="Password" error={errors.password} errorId="login-password-error" required>
               <div className="input-wrap">
                 <input
                   {...register('password')}
@@ -94,6 +95,7 @@ export default function Login() {
                   placeholder="••••••••"
                   className={`input${errors.password ? ' is-invalid' : ''}`}
                   style={{ paddingRight: '44px' }}
+                  aria-describedby={errors.password ? 'login-password-error' : undefined}
                 />
                 <button
                   type="button"
@@ -122,14 +124,15 @@ export default function Login() {
   )
 }
 
-function Field({ label, error, children }) {
+function Field({ label, error, children, required, errorId }) {
   const inputId = children?.props?.id
+  const errorElId = errorId || (inputId ? `${inputId}-error` : undefined)
   return (
     <div className={`field${error ? ' field--invalid' : ''}`}>
-      <label htmlFor={inputId} className="field__label">{label}</label>
+      <label htmlFor={inputId} className={`field__label${required ? ' is-required' : ''}`}>{label}</label>
       {children}
       {error && (
-        <p className="field__error" role="alert">{error.message}</p>
+        <p id={errorElId} className="field__error" role="alert">{error.message}</p>
       )}
     </div>
   )

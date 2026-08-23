@@ -70,17 +70,17 @@ export default function AddVehicle({ onSaved, onSkip }) {
 
       <form onSubmit={handleSubmit} noValidate className="stack stack--gap-lg" style={{ marginTop: 'var(--p-space-xl)' }}>
         <div className="field">
-          <label htmlFor="veh-brand" className="field__label">Brand</label>
-          <input id="veh-brand" type="text" value={form.brand} onChange={update('brand')} placeholder="e.g. Maruti Suzuki" className="input" />
+          <label htmlFor="veh-brand" className="field__label is-required">Brand</label>
+          <input id="veh-brand" type="text" value={form.brand} onChange={update('brand')} placeholder="e.g. Maruti Suzuki" className="input" aria-describedby={error ? 'veh-error' : undefined} />
         </div>
 
         <div className="field">
-          <label htmlFor="veh-model" className="field__label">Model</label>
+          <label htmlFor="veh-model" className="field__label is-required">Model</label>
           <input id="veh-model" type="text" value={form.model} onChange={update('model')} placeholder="e.g. Swift" className="input" />
         </div>
 
         <div className="field">
-          <label htmlFor="veh-reg" className="field__label">Registration number</label>
+          <label htmlFor="veh-reg" className="field__label is-required">Registration number</label>
           <input id="veh-reg" type="text" value={form.reg_no} onChange={update('reg_no')} placeholder="e.g. TS 01 AB 1234" className="input" />
         </div>
 

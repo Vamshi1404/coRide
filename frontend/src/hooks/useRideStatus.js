@@ -29,6 +29,7 @@ export function useRideStatus(ride, onUpdate) {
 
   const cancelRide = async () => {
     if (!ride) return
+    if (!window.confirm('Are you sure you want to cancel this ride? This cannot be undone.')) return
     setUpdating(true)
     try {
       await api.patch(`/api/rides/${ride.id}/status?status=cancelled`)

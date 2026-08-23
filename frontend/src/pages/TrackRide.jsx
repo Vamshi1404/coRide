@@ -197,7 +197,7 @@ export default function TrackRide() {
                 <strong>{Math.round(progress * 100)}%</strong>
               </div>
               <div className="progress" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100}>
-                <div className="progress__bar" style={{ width: `${progress * 100}%` }} />
+                <div className="progress__bar" style={{ transform: `scaleX(${progress})` }} />
               </div>
               {isDriver && gps && (
                 <p className="gps-live-note">

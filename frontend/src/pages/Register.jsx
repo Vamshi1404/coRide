@@ -100,17 +100,18 @@ export default function Register() {
                   </div>
                 )}
 
-                <Field label="Full name" error={errors.name}>
+                <Field label="Full name" error={errors.name} required>
                   <input
                     {...register('name')}
                     id="reg-name"
                     autoComplete="name"
                     placeholder="Arjun Mehta"
                     className={`input${errors.name ? ' is-invalid' : ''}`}
+                    aria-describedby={errors.name ? 'reg-name-error' : undefined}
                   />
                 </Field>
 
-                <Field label="Email" error={errors.email}>
+                <Field label="Email" error={errors.email} required>
                   <input
                     {...register('email')}
                     id="reg-email"
@@ -118,10 +119,11 @@ export default function Register() {
                     autoComplete="email"
                     placeholder="you@example.com"
                     className={`input${errors.email ? ' is-invalid' : ''}`}
+                    aria-describedby={errors.email ? 'reg-email-error' : undefined}
                   />
                 </Field>
 
-                <Field label="Phone" error={errors.phone}>
+                <Field label="Phone" error={errors.phone} required>
                   <input
                     {...register('phone')}
                     id="reg-phone"
@@ -129,10 +131,11 @@ export default function Register() {
                     autoComplete="tel"
                     placeholder="+91 98765 43210"
                     className={`input${errors.phone ? ' is-invalid' : ''}`}
+                    aria-describedby={errors.phone ? 'reg-phone-error' : undefined}
                   />
                 </Field>
 
-                <Field label="Password" error={errors.password}>
+                <Field label="Password" error={errors.password} required>
                   <div className="input-wrap">
                     <input
                       {...register('password')}
@@ -142,6 +145,7 @@ export default function Register() {
                       placeholder="At least 6 characters"
                       className={`input${errors.password ? ' is-invalid' : ''}`}
                       style={{ paddingRight: '44px' }}
+                      aria-describedby={errors.password ? 'reg-password-error' : undefined}
                     />
                     <button
                       type="button"
@@ -174,14 +178,15 @@ export default function Register() {
   )
 }
 
-function Field({ label, error, children }) {
+function Field({ label, error, children, required }) {
   const inputId = children?.props?.id
+  const errorId = inputId ? `${inputId}-error` : undefined
   return (
     <div className={`field${error ? ' field--invalid' : ''}`}>
-      <label htmlFor={inputId} className="field__label">{label}</label>
+      <label htmlFor={inputId} className={`field__label${required ? ' is-required' : ''}`}>{label}</label>
       {children}
       {error && (
-        <p className="field__error" role="alert">{error.message}</p>
+        <p id={errorId} className="field__error" role="alert">{error.message}</p>
       )}
     </div>
   )
