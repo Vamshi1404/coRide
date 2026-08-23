@@ -4,10 +4,19 @@ import { motion, useReducedMotion } from 'motion/react'
 import { useAuth } from '@/contexts/AuthContext'
 import { api } from '@/lib/api'
 import { formatRideDateTime } from '@/lib/rideDisplay'
+import { ScrollReveal, CountUp } from '@/components/ui/ScrollReveal'
+import { ParallaxImage } from '@/components/ui/MediaComponents'
 import {
   Search, CarFront, ArrowRight, ArrowUpRight, MessageCircle,
   Navigation, Star, CheckCircle2, CalendarX2, Route as RouteIcon,
+  TrendingUp, Leaf, MapPin,
 } from 'lucide-react'
+
+const DASH_IMAGES = {
+  hero: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80',
+  offer: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80',
+  tip: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80',
+}
 
 const getGreeting = () => {
   const h = new Date().getHours()
@@ -70,93 +79,146 @@ export default function Dashboard() {
         </p>
       </motion.header>
 
+      {/* Stats row */}
+      <ScrollReveal animation="reveal-up" className="dash-stats-row">
+        <div className="dash-stat-card">
+          <span className="dash-stat-card__icon" style={{ background: 'var(--accent-tint)', color: 'var(--accent-text)' }}>
+            <CheckCircle2 size={18} />
+          </span>
+          <div>
+            <p className="dash-stat-card__value">
+              <CountUp target={user?.completed_rides ?? 0} />
+            </p>
+            <p className="dash-stat-card__label">Completed</p>
+          </div>
+        </div>
+        <div className="dash-stat-card">
+          <span className="dash-stat-card__icon" style={{ background: 'var(--status-open-bg)', color: 'var(--status-open)' }}>
+            <Star size={18} />
+          </span>
+          <div>
+            <p className="dash-stat-card__value">
+              {user?.total_ratings ? Number(user.avg_rating).toFixed(1) : '—'}
+            </p>
+            <p className="dash-stat-card__label">Rating</p>
+          </div>
+        </div>
+        <div className="dash-stat-card">
+          <span className="dash-stat-card__icon" style={{ background: 'var(--status-progress-bg)', color: 'var(--status-progress)' }}>
+            <TrendingUp size={18} />
+          </span>
+          <div>
+            <p className="dash-stat-card__value">
+              <CountUp target={activeRides.length} />
+            </p>
+            <p className="dash-stat-card__label">Active rides</p>
+          </div>
+        </div>
+        <div className="dash-stat-card">
+          <span className="dash-stat-card__icon" style={{ background: 'var(--p-green-tint)', color: 'var(--p-green-500)' }}>
+            <Leaf size={18} />
+          </span>
+          <div>
+            <p className="dash-stat-card__value">
+              <CountUp target={user?.completed_rides ? Math.round(user.completed_rides * 2.3) : 0} suffix=" kg" />
+            </p>
+            <p className="dash-stat-card__label">CO₂ saved</p>
+          </div>
+        </div>
+      </ScrollReveal>
+
       {/* Bento actions */}
       <div className="dash-actions">
-        <ActionCard
-          to="/search"
-          icon={Search}
-          title="Find a Ride"
-          desc="Join a carpool heading your way."
-          cta="Explore routes"
-        />
-        <ActionCard
-          to="/offer-ride"
-          icon={CarFront}
-          title="Offer a Ride"
-          desc="Share your drive, split the cost."
-          cta="Post your trip"
-          accent
-        />
+        <ScrollReveal animation="reveal-up" delay={0}>
+          <Link to="/search" className="action-card">
+            <span className="action-card__icon"><Search size={20} aria-hidden="true" /></span>
+            <h2 className="action-card__title">Find a Ride</h2>
+            <p className="action-card__desc">Join a carpool heading your way.</p>
+            <span className="action-card__cta">Explore routes <ArrowRight size={14} aria-hidden="true" /></span>
+          </Link>
+        </ScrollReveal>
+        <ScrollReveal animation="reveal-up" delay={100}>
+          <Link to="/offer-ride" className="action-card action-card--accent">
+            <span className="action-card__icon"><CarFront size={20} aria-hidden="true" /></span>
+            <h2 className="action-card__title">Offer a Ride</h2>
+            <p className="action-card__desc">Share your drive, split the cost.</p>
+            <span className="action-card__cta">Post your trip <ArrowRight size={14} aria-hidden="true" /></span>
+          </Link>
+        </ScrollReveal>
       </div>
 
       <div className="dash-cols" style={{ marginTop: 'var(--p-space-3xl)' }}>
         <div className="dash-sections">
           {/* Next commute */}
-          <section aria-label="Next commute">
-            <h2 className="section-head">Next commute</h2>
-            {loading ? (
-              <SkeletonCard />
-            ) : nextRide ? (
-              <NextCommuteCard ride={nextRide} onOpen={() => navigate(`/rides/${nextRide.id}`)} />
-            ) : (
-              <EmptyCard
-                icon={RouteIcon}
-                title="Nothing scheduled yet"
-                body="Search for a ride or offer one — your next trip will show up here."
-                action={
-                  <div className="state__actions">
-                    <button type="button" onClick={() => navigate('/search')} className="btn btn--primary btn--md">
-                      Search routes
-                    </button>
-                  </div>
-                }
-              />
-            )}
-          </section>
+          <ScrollReveal animation="reveal-up" delay={200}>
+            <section aria-label="Next commute">
+              <h2 className="section-head">Next commute</h2>
+              {loading ? (
+                <SkeletonCard />
+              ) : nextRide ? (
+                <NextCommuteCard ride={nextRide} onOpen={() => navigate(`/rides/${nextRide.id}`)} />
+              ) : (
+                <EmptyCard
+                  icon={RouteIcon}
+                  title="Nothing scheduled yet"
+                  body="Search for a ride or offer one — your next trip will show up here."
+                  action={
+                    <div className="state__actions">
+                      <button type="button" onClick={() => navigate('/search')} className="btn btn--primary btn--md">
+                        Search routes
+                      </button>
+                    </div>
+                  }
+                />
+              )}
+            </section>
+          </ScrollReveal>
 
           {/* Active rides */}
           {activeRides.length > 0 && (
-            <section aria-label="Active rides">
-              <h2 className="section-head" style={{ color: 'var(--text-strong)', fontSize: 'var(--p-text-lg)', letterSpacing: 'var(--p-tracking-tight)', textTransform: 'none' }}>
-                Active rides
-                <span aria-hidden="true" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-solid)', display: 'inline-block', animation: 'livePulse 1.5s ease-in-out infinite' }} />
-              </h2>
-              <ul className="row-list" style={{ listStyle: 'none', padding: 0 }}>
-                {activeRides.map((ride) => (
-                  <li key={`${ride.role}-${ride.id}`}>
-                    <div className="row-item">
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/rides/${ride.id}`)}
-                        className="row-item__body row-item--clickable"
-                        style={{ border: 'none', background: 'none', padding: 0, borderRadius: 0 }}
-                      >
-                        <p className="row-item__title">
-                          {ride.from_city} → {ride.to_city}
-                          <span className={`badge ${ride.status === 'in_progress' ? 'badge--live' : 'badge--neutral'}`} style={{ marginLeft: 8 }}>
-                            {ride.status.replace('_', ' ')}
-                          </span>
-                        </p>
-                        <p className="row-item__sub">
-                          {formatRideDateTime(ride.departure_time)} · as {ride.role}
-                        </p>
-                      </button>
-                      <div className="row-item__actions">
-                        <Link to={`/chat/${ride.id}`} className="btn btn--primary btn--sm">
-                          <MessageCircle size={13} aria-hidden="true" />
-                          Chat
-                        </Link>
-                        {ride.status === 'in_progress' && (
-                          <Link to={`/track/${ride.id}`} className="icon-btn" aria-label="Track live">
-                            <Navigation size={14} />
+            <ScrollReveal animation="reveal-up" delay={300}>
+              <section aria-label="Active rides">
+                <h2 className="section-head" style={{ color: 'var(--text-strong)', fontSize: 'var(--p-text-lg)', letterSpacing: 'var(--p-tracking-tight)', textTransform: 'none' }}>
+                  Active rides
+                  <span aria-hidden="true" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-solid)', display: 'inline-block', animation: 'livePulse 1.5s ease-in-out infinite', marginLeft: 8 }} />
+                </h2>
+                <ul className="row-list" style={{ listStyle: 'none', padding: 0 }}>
+                  {activeRides.map((ride) => (
+                    <li key={`${ride.role}-${ride.id}`}>
+                      <div className="row-item">
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/rides/${ride.id}`)}
+                          className="row-item__body row-item--clickable"
+                          style={{ border: 'none', background: 'none', padding: 0, borderRadius: 0 }}
+                        >
+                          <p className="row-item__title">
+                            {ride.from_city} → {ride.to_city}
+                            <span className={`badge ${ride.status === 'in_progress' ? 'badge--live' : 'badge--neutral'}`} style={{ marginLeft: 8 }}>
+                              {ride.status.replace('_', ' ')}
+                            </span>
+                          </p>
+                          <p className="row-item__sub">
+                            {formatRideDateTime(ride.departure_time)} · as {ride.role}
+                          </p>
+                        </button>
+                        <div className="row-item__actions">
+                          <Link to={`/chat/${ride.id}`} className="btn btn--primary btn--sm">
+                            <MessageCircle size={13} aria-hidden="true" />
+                            Chat
                           </Link>
-                        )}
+                          {ride.status === 'in_progress' && (
+                            <Link to={`/track/${ride.id}`} className="icon-btn" aria-label="Track live">
+                              <Navigation size={14} />
+                            </Link>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </ScrollReveal>
           )}
 
           {/* Quick links */}
@@ -166,34 +228,52 @@ export default function Dashboard() {
           </nav>
         </div>
 
-        {/* Sidebar stats — real user fields only */}
+        {/* Sidebar */}
         <aside className="dash-aside stack stack--gap-md">
-          <div className="card card--inset">
-            <h3 className="card__title">Your record</h3>
-            <div className="stat-tiles">
-              <Stat icon={CheckCircle2} value={user?.completed_rides ?? 0} label="Completed" />
-              <Stat icon={CalendarX2} value={user?.cancelled_rides ?? 0} label="Cancelled" />
-              <Stat
-                icon={Star}
-                value={user?.total_ratings ? Number(user.avg_rating).toFixed(1) : '—'}
-                label="Rating"
-              />
-            </div>
-          </div>
+          {/* Driving tip with image */}
+          <ScrollReideTip />
 
-          <div className="aside-tip">
-            <h4 className="aside-tip__title">Driving somewhere?</h4>
-            <p className="aside-tip__body">
-              Post your trip before you leave — passengers heading your way will request a seat and
-              share the fuel cost.
-            </p>
-            <Link to="/offer-ride" className="link-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 'var(--p-text-xs)', marginTop: 'var(--p-space-sm)' }}>
-              Offer a ride <ArrowUpRight size={12} aria-hidden="true" />
-            </Link>
-          </div>
+          {/* Popular route suggestion */}
+          <ScrollReveal animation="reveal-up" delay={400}>
+            <div className="dash-route-suggestion">
+              <div className="dash-route-suggestion__img">
+                <img src={DASH_IMAGES.tip} alt="" aria-hidden="true" loading="lazy" />
+              </div>
+              <div className="dash-route-suggestion__body">
+                <MapPin size={14} style={{ color: 'var(--accent-text)' }} />
+                <p className="dash-route-suggestion__title">Gachibowli → HITEC City</p>
+                <p className="dash-route-suggestion__sub">7.2 km · Most popular route</p>
+                <Link to="/search?from=Gachibowli&to=HITEC City" className="link-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 'var(--p-text-xs)', marginTop: 'var(--p-space-sm)' }}>
+                  Search rides <ArrowUpRight size={12} aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
+          </ScrollReveal>
         </aside>
       </div>
     </div>
+  )
+}
+
+function ScrollReideTip() {
+  return (
+    <ScrollReveal animation="reveal-up" delay={350}>
+      <div className="dash-tip-card">
+        <div className="dash-tip-card__img">
+          <img src={DASH_IMAGES.offer} alt="" aria-hidden="true" loading="lazy" />
+        </div>
+        <div className="dash-tip-card__body">
+          <h4 className="dash-tip-card__title">Driving somewhere?</h4>
+          <p className="dash-tip-card__body">
+            Post your trip before you leave — passengers heading your way will request a seat and
+            share the fuel cost.
+          </p>
+          <Link to="/offer-ride" className="link-accent" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 'var(--p-text-xs)', marginTop: 'var(--p-space-sm)' }}>
+            Offer a ride <ArrowUpRight size={12} aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+    </ScrollReveal>
   )
 }
 
@@ -250,16 +330,6 @@ function QuickLink({ to, label }) {
       {label}
       <ArrowRight size={15} aria-hidden="true" />
     </Link>
-  )
-}
-
-function Stat({ icon: Icon, value, label }) {
-  return (
-    <div className="stat-tile">
-      <Icon size={16} aria-hidden="true" />
-      <p className="stat-tile__value tabular">{value}</p>
-      <p className="stat-tile__label">{label}</p>
-    </div>
   )
 }
 

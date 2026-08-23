@@ -64,6 +64,7 @@
 .btn--sm { height: var(--btn-height-sm); padding-inline: calc(var(--btn-pad-sm) * 0.75); }
 .btn--md { height: var(--btn-height-md); padding-inline: calc(var(--btn-pad-md) * 0.8); }
 .btn--lg { height: var(--btn-height-lg); padding-inline: var(--btn-pad-lg); font-size: var(--p-text-base); }
+.btn--xl { height: var(--btn-height-xl); padding-inline: var(--btn-pad-xl); font-size: var(--p-text-md); }
 .btn--block { display: flex; width: 100%; }
 
 /* Variants */

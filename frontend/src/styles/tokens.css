@@ -1,73 +1,74 @@
 /* ════════════════════════════════════════════════════════════════════
-   CoRide — NOCTURNE Design System · Tokens
-   Three-layer architecture: primitive → semantic → component.
-   Dark-first ("Nocturne"), monochrome scale + signal-orange accent.
+   CoRide — NOCTURNE Awwwards Design System · Tokens
+   Three-layer: primitive → semantic → component.
+   oklch() perceptually uniform · Dark Immersive archetype
    ════════════════════════════════════════════════════════════════════ */
 
 /* ────────────────────────────────────────────────────────────────────
-   1 · PRIMITIVES — raw values, never referenced directly by components
+   1 · PRIMITIVES
    ──────────────────────────────────────────────────────────────────── */
 :root {
-  /* 1.1 Monochrome ramp — near-black → white */
-  --p-mono-0: #000000;
-  --p-mono-25: #060607;
-  --p-mono-50: #0a0a0b;
-  --p-mono-100: #121214;
-  --p-mono-150: #17171a;
-  --p-mono-200: #1c1c1f;
-  --p-mono-250: #232327;
-  --p-mono-300: #2a2a2e;
-  --p-mono-350: #34343a;
-  --p-mono-400: #3d3d42;
-  --p-mono-450: #525258;
-  --p-mono-500: #6b6b70;
-  --p-mono-550: #83838a;
-  --p-mono-600: #9a9aa0;
-  --p-mono-650: #afafb4;
-  --p-mono-700: #c4c4c8;
-  --p-mono-750: #d9d9dc;
-  --p-mono-800: #ececee;
-  --p-mono-850: #f5f5f6;
-  --p-mono-900: #ffffff;
+  /* 1.1 Monochrome ramp — oklch, never pure #000 or #fff */
+  --p-mono-0: oklch(0.08 0.003 260);
+  --p-mono-25: oklch(0.10 0.004 260);
+  --p-mono-50: oklch(0.13 0.005 260);
+  --p-mono-100: oklch(0.17 0.006 260);
+  --p-mono-150: oklch(0.20 0.007 260);
+  --p-mono-200: oklch(0.23 0.008 260);
+  --p-mono-250: oklch(0.27 0.008 260);
+  --p-mono-300: oklch(0.31 0.008 260);
+  --p-mono-350: oklch(0.36 0.007 260);
+  --p-mono-400: oklch(0.42 0.007 260);
+  --p-mono-450: oklch(0.50 0.006 260);
+  --p-mono-500: oklch(0.57 0.006 260);
+  --p-mono-550: oklch(0.63 0.006 260);
+  --p-mono-600: oklch(0.70 0.005 260);
+  --p-mono-650: oklch(0.76 0.005 260);
+  --p-mono-700: oklch(0.82 0.004 260);
+  --p-mono-750: oklch(0.87 0.003 260);
+  --p-mono-800: oklch(0.92 0.002 260);
+  --p-mono-850: oklch(0.95 0.002 260);
+  --p-mono-900: oklch(0.97 0.001 260);
 
-  /* 1.2 Signal orange accent ramp */
-  --p-accent-100: rgba(255, 77, 28, 0.06);
-  --p-accent-200: rgba(255, 77, 28, 0.10);
-  --p-accent-300: rgba(255, 77, 28, 0.16);
-  --p-accent-400: rgba(255, 77, 28, 0.24);
-  --p-accent-500: #ff6a40;
-  --p-accent-600: #ff4d1c;   /* brand base */
-  --p-accent-700: #e8430f;
-  --p-accent-800: #c73a0b;
-  --p-accent-glow: rgba(255, 77, 28, 0.32);
-  --p-accent-glow-strong: rgba(255, 77, 28, 0.45);
+  /* 1.2 Signal orange accent — oklch */
+  --p-accent-100: oklch(0.65 0.22 35 / 0.06);
+  --p-accent-200: oklch(0.65 0.22 35 / 0.10);
+  --p-accent-300: oklch(0.65 0.22 35 / 0.16);
+  --p-accent-400: oklch(0.65 0.22 35 / 0.24);
+  --p-accent-500: oklch(0.70 0.22 35);
+  --p-accent-600: oklch(0.65 0.22 35);
+  --p-accent-700: oklch(0.58 0.22 35);
+  --p-accent-800: oklch(0.50 0.20 35);
+  --p-accent-glow: oklch(0.65 0.22 35 / 0.32);
+  --p-accent-glow-strong: oklch(0.65 0.22 35 / 0.50);
 
-  /* 1.3 Status hue ramps (single-step tints kept as primitives) */
-  --p-green-500: #22c55e;
-  --p-green-600: #16a34a;
-  --p-green-tint: rgba(34, 197, 94, 0.12);
-  --p-green-border: rgba(34, 197, 94, 0.28);
+  /* 1.3 Sustainability green */
+  --p-green-500: oklch(0.72 0.19 155);
+  --p-green-600: oklch(0.65 0.19 155);
+  --p-green-tint: oklch(0.72 0.19 155 / 0.12);
+  --p-green-border: oklch(0.72 0.19 155 / 0.28);
 
-  --p-amber-500: #f59e0b;
-  --p-amber-600: #d97706;
-  --p-amber-tint: rgba(245, 158, 11, 0.12);
-  --p-amber-border: rgba(245, 158, 11, 0.30);
+  /* 1.4 Status hues */
+  --p-amber-500: oklch(0.78 0.16 80);
+  --p-amber-600: oklch(0.70 0.16 80);
+  --p-amber-tint: oklch(0.78 0.16 80 / 0.12);
+  --p-amber-border: oklch(0.78 0.16 80 / 0.30);
 
-  --p-red-500: #ef4444;
-  --p-red-600: #dc2626;
-  --p-red-tint: rgba(239, 68, 68, 0.12);
-  --p-red-border: rgba(239, 68, 68, 0.30);
+  --p-red-500: oklch(0.65 0.22 25);
+  --p-red-600: oklch(0.58 0.22 25);
+  --p-red-tint: oklch(0.65 0.22 25 / 0.12);
+  --p-red-border: oklch(0.65 0.22 25 / 0.30);
 
-  --p-teal-500: #14b8a6;
-  --p-teal-600: #0d9488;
-  --p-teal-tint: rgba(20, 184, 166, 0.12);
-  --p-teal-border: rgba(20, 184, 166, 0.28);
+  --p-teal-500: oklch(0.72 0.15 180);
+  --p-teal-600: oklch(0.65 0.15 180);
+  --p-teal-tint: oklch(0.72 0.15 180 / 0.12);
+  --p-teal-border: oklch(0.72 0.15 180 / 0.28);
 
-  --p-blue-500: #3b82f6;
-  --p-blue-tint: rgba(59, 130, 246, 0.12);
-  --p-blue-border: rgba(59, 130, 246, 0.30);
+  --p-blue-500: oklch(0.65 0.18 250);
+  --p-blue-tint: oklch(0.65 0.18 250 / 0.12);
+  --p-blue-border: oklch(0.65 0.18 250 / 0.30);
 
-  /* 1.4 Spacing scale (4px base) */
+  /* 1.5 Spacing scale (4px base) */
   --p-space-0: 0;
   --p-space-3xs: 2px;
   --p-space-2xs: 4px;
@@ -85,7 +86,7 @@
   --p-space-8xl: 96px;
   --p-space-9xl: 128px;
 
-  /* 1.5 Radius scale */
+  /* 1.6 Radius scale */
   --p-radius-xs: 6px;
   --p-radius-sm: 8px;
   --p-radius-md: 10px;
@@ -97,33 +98,35 @@
   --p-radius-pill: 999px;
   --p-radius-circle: 50%;
 
-  /* 1.6 Elevation shadows (tuned for dark canvas) */
-  --p-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --p-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --p-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.40);
-  --p-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
-  --p-shadow-xl: 0 20px 64px rgba(0, 0, 0, 0.55);
-  --p-shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  --p-shadow-focus: 0 0 0 3px rgba(255, 77, 28, 0.28);
+  /* 1.7 Elevation — tuned for dark canvas */
+  --p-shadow-xs: 0 1px 2px oklch(0 0 0 / 0.35);
+  --p-shadow-sm: 0 2px 8px oklch(0 0 0 / 0.35);
+  --p-shadow-md: 0 4px 16px oklch(0 0 0 / 0.40);
+  --p-shadow-lg: 0 12px 40px oklch(0 0 0 / 0.45);
+  --p-shadow-xl: 0 20px 64px oklch(0 0 0 / 0.55);
+  --p-shadow-inset-top: inset 0 1px 0 oklch(1 0 0 / 0.05);
+  --p-shadow-focus: 0 0 0 3px oklch(0.65 0.22 35 / 0.28);
 
-  /* 1.7 Typography primitives */
-  --p-font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont,
+  /* 1.8 Typography primitives */
+  --p-font-display: 'Clash Display', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --p-font-sans: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
     'Segoe UI', Roboto, sans-serif;
-  --p-font-display: 'Fraunces', 'Plus Jakarta Sans', Georgia, serif;
-  --p-font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+  --p-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
     'Liberation Mono', monospace;
 
-  --p-text-2xs: 0.6875rem;    /* 11px */
-  --p-text-xs: 0.75rem;       /* 12px */
-  --p-text-sm: 0.8125rem;     /* 13px */
-  --p-text-base: 0.9063rem;   /* 14.5px */
-  --p-text-md: 1rem;          /* 16px */
-  --p-text-lg: 1.125rem;      /* 18px */
-  --p-text-xl: 1.375rem;      /* 22px */
-  --p-text-2xl: clamp(1.6rem, 1.4rem + 0.9vw, 2rem);        /* 26–32 */
-  --p-text-3xl: clamp(2rem, 1.6rem + 1.8vw, 2.75rem);       /* 32–44 */
-  --p-text-4xl: clamp(2.5rem, 1.9rem + 2.8vw, 4rem);        /* 40–64 */
-  --p-text-hero: clamp(2.75rem, 1.8rem + 4.6vw, 5.5rem);    /* 44–88 */
+  /* Fluid type — Awwwards standard clamp() */
+  --p-text-display: clamp(3rem, 8vw + 1rem, 10rem);
+  --p-text-hero: clamp(2.75rem, 1.8rem + 4.6vw, 5.5rem);
+  --p-text-4xl: clamp(2.5rem, 1.9rem + 2.8vw, 4rem);
+  --p-text-3xl: clamp(2rem, 1.6rem + 1.8vw, 2.75rem);
+  --p-text-2xl: clamp(1.6rem, 1.4rem + 0.9vw, 2rem);
+  --p-text-xl: clamp(1.25rem, 1rem + 0.8vw, 1.5rem);
+  --p-text-lg: clamp(1.1rem, 0.8rem + 0.6vw, 1.25rem);
+  --p-text-md: clamp(1rem, 0.5vw + 0.75rem, 1.125rem);
+  --p-text-base: clamp(0.9375rem, 0.4vw + 0.75rem, 1.0625rem);
+  --p-text-sm: clamp(0.8125rem, 0.3vw + 0.6875rem, 0.875rem);
+  --p-text-xs: clamp(0.6875rem, 0.25vw + 0.625rem, 0.75rem);
+  --p-text-2xs: 0.6875rem;
 
   --p-weight-regular: 400;
   --p-weight-medium: 500;
@@ -131,46 +134,57 @@
   --p-weight-bold: 700;
   --p-weight-extrabold: 800;
 
-  --p-leading-none: 1.04;
-  --p-leading-tight: 1.18;
-  --p-leading-snug: 1.35;
-  --p-leading-normal: 1.55;
-  --p-leading-relaxed: 1.72;
+  /* Tight leading for display, comfortable for body */
+  --p-leading-display: 0.9;
+  --p-leading-h1: 0.95;
+  --p-leading-h2: 1.1;
+  --p-leading-h3: 1.2;
+  --p-leading-body: 1.55;
+  --p-leading-relaxed: 1.7;
 
+  /* Tracking */
+  --p-tracking-display: -0.03em;
   --p-tracking-tightest: -0.03em;
   --p-tracking-tighter: -0.02em;
   --p-tracking-tight: -0.01em;
   --p-tracking-normal: 0;
   --p-tracking-wide: 0.02em;
   --p-tracking-wider: 0.06em;
-  --p-tracking-widest: 0.14em;
+  --p-tracking-widest: 0.12em;
 
-  /* 1.8 Motion primitives */
-  --p-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --p-ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-  --p-ease-in-out-soft: cubic-bezier(0.45, 0, 0.15, 1);
-  --p-ease-spring: cubic-bezier(0.34, 1.36, 0.44, 1);
-  --p-dur-fast: 120ms;
-  --p-dur-base: 180ms;
-  --p-dur-slow: 280ms;
-  --p-dur-slower: 420ms;
-  --p-dur-reveal: 700ms;
+  /* 1.9 Motion primitives — Awwwards easing library */
+  --p-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --p-ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --p-ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --p-ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --p-ease-spring: cubic-bezier(0.22, 1.36, 0.36, 1);
+  --p-ease-expo-in-out: cubic-bezier(0.87, 0, 0.13, 1);
 
-  /* 1.9 Layout primitives */
+  /* Duration scale */
+  --p-dur-micro: 120ms;
+  --p-dur-fast: 180ms;
+  --p-dur-base: 280ms;
+  --p-dur-slow: 400ms;
+  --p-dur-slower: 600ms;
+  --p-dur-reveal: 800ms;
+  --p-dur-hero: 1200ms;
+
+  /* 1.10 Layout */
   --p-container-max: 1200px;
+  --p-container-wide: 1400px;
   --p-container-narrow: 720px;
-  --p-container-prose: 680px;
-  --p-nav-height: 64px;
-  --p-breakpoint-gutter: clamp(16px, 4vw, 40px);
+  --p-container-prose: 65ch;
+  --p-nav-height: 72px;
+  --p-breakpoint-gutter: clamp(20px, 5vw, 80px);
 }
 
 /* ────────────────────────────────────────────────────────────────────
-   2 · SEMANTIC LAYER — dark theme is default; light theme overrides
+   2 · SEMANTIC LAYER — dark is default; light overrides
    ──────────────────────────────────────────────────────────────────── */
 :root {
   color-scheme: dark;
 
-  /* 2.1 Backgrounds & surfaces */
+  /* 2.1 Backgrounds */
   --bg-page: var(--p-mono-50);
   --bg-page-deep: var(--p-mono-25);
   --bg-raised: var(--p-mono-200);
@@ -181,10 +195,10 @@
   --bg-input: var(--p-mono-100);
   --bg-popover: var(--p-mono-100);
   --bg-tooltip: var(--p-mono-300);
-  --bg-scrim: rgba(0, 0, 0, 0.62);
-  --glass-bg: rgba(18, 18, 20, 0.72);
-  --glass-bg-strong: rgba(10, 10, 11, 0.86);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --bg-scrim: oklch(0.08 0.003 260 / 0.62);
+  --glass-bg: oklch(0.17 0.006 260 / 0.72);
+  --glass-bg-strong: oklch(0.13 0.005 260 / 0.86);
+  --glass-border: oklch(1 0 0 / 0.06);
 
   /* 2.2 Text roles */
   --text-strong: var(--p-mono-900);
@@ -193,28 +207,28 @@
   --text-muted: var(--p-mono-500);
   --text-faint: var(--p-mono-450);
   --text-inverse: var(--p-mono-50);
-  --text-on-accent: #ffffff;
+  --text-on-accent: oklch(0.98 0.001 260);
   --text-link: var(--accent-solid);
 
-  /* 2.3 Borders & dividers */
-  --border-default: var(--p-mono-300);
-  --border-strong: var(--p-mono-350);
-  --border-faint: rgba(255, 255, 255, 0.06);
+  /* 2.3 Borders */
+  --border-default: oklch(1 0 0 / 0.08);
+  --border-strong: oklch(1 0 0 / 0.14);
+  --border-faint: oklch(1 0 0 / 0.04);
   --divider: var(--p-mono-250);
   --ring-color: var(--p-accent-600);
   --focus-ring: var(--p-shadow-focus);
 
-  /* 2.4 Accent roles */
+  /* 2.4 Accent */
   --accent-solid: var(--p-accent-600);
   --accent-hover: var(--p-accent-500);
   --accent-active: var(--p-accent-700);
   --accent-tint: var(--p-accent-200);
   --accent-tint-strong: var(--p-accent-300);
-  --accent-text: #ff6b47;
-  --accent-on: #ffffff;
+  --accent-text: oklch(0.70 0.22 35);
+  --accent-on: var(--text-on-accent);
   --accent-glow: var(--p-accent-glow);
 
-  /* 2.5 Status roles */
+  /* 2.5 Status */
   --status-open: var(--p-green-500);
   --status-open-bg: var(--p-green-tint);
   --status-open-border: var(--p-green-border);
@@ -228,8 +242,8 @@
   --status-done-bg: var(--p-teal-tint);
   --status-done-border: var(--p-teal-border);
   --status-cancelled: var(--p-mono-500);
-  --status-cancelled-bg: rgba(107, 107, 112, 0.14);
-  --status-cancelled-border: rgba(107, 107, 112, 0.30);
+  --status-cancelled-bg: oklch(0.57 0.006 260 / 0.14);
+  --status-cancelled-border: oklch(0.57 0.006 260 / 0.30);
   --status-pending: var(--p-amber-500);
   --status-pending-bg: var(--p-amber-tint);
   --status-pending-border: var(--p-amber-border);
@@ -240,13 +254,13 @@
   --danger: var(--p-red-500);
   --warning: var(--p-amber-500);
 
-  /* 2.6 Radii (semantic) */
+  /* 2.6 Radii */
   --radius-field: var(--p-radius-lg);
   --radius-card: var(--p-radius-xl);
   --radius-panel: var(--p-radius-3xl);
   --radius-chip: var(--p-radius-pill);
 
-  /* 2.7 Shadows (semantic) */
+  /* 2.7 Shadows */
   --shadow-card: var(--p-shadow-sm);
   --shadow-card-hover: var(--p-shadow-md);
   --shadow-panel: var(--p-shadow-lg);
@@ -261,12 +275,12 @@
   --fs-small: var(--p-text-sm);
   --fs-caption: var(--p-text-xs);
 
-  /* 2.9 Layout semantics */
+  /* 2.9 Layout */
   --container-w: var(--p-container-max);
   --gutter-x: var(--p-breakpoint-gutter);
   --nav-h: var(--p-nav-height);
 
-  /* 2.10 Z-index scale */
+  /* 2.10 Z-index */
   --z-below: -1;
   --z-base: 0;
   --z-raised: 10;
@@ -276,65 +290,67 @@
   --z-overlay: 400;
   --z-modal: 500;
   --z-toast: 600;
+  --z-cursor: 700;
   --z-preloader: 1000;
 
   /* 2.11 Motion semantics */
-  --ease-standard: var(--p-ease-out-expo);
-  --ease-soft: var(--p-ease-in-out-soft);
+  --ease-standard: var(--p-ease-out);
+  --ease-soft: var(--p-ease-in-out);
+  --ease-bounce: var(--p-ease-back);
   --dur-fast: var(--p-dur-fast);
   --dur-base: var(--p-dur-base);
   --dur-slow: var(--p-dur-slow);
   --dur-reveal: var(--p-dur-reveal);
 }
 
-/* Light theme override — same semantic names, different raw bindings */
+/* Light theme */
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg-page: #fafafa;
-  --bg-page-deep: #f2f2f3;
-  --bg-raised: #ffffff;
-  --bg-raised-hover: #f4f4f5;
-  --bg-overlay: #ffffff;
-  --bg-inset: #f2f2f3;
-  --bg-subtle: #ececee;
-  --bg-input: #ffffff;
-  --bg-popover: #ffffff;
-  --bg-tooltip: #26262b;
-  --bg-scrim: rgba(0, 0, 0, 0.45);
-  --glass-bg: rgba(255, 255, 255, 0.78);
-  --glass-bg-strong: rgba(255, 255, 255, 0.92);
-  --glass-border: rgba(0, 0, 0, 0.08);
+  --bg-page: oklch(0.97 0.005 80);
+  --bg-page-deep: oklch(0.95 0.005 80);
+  --bg-raised: oklch(1.0 0 0);
+  --bg-raised-hover: oklch(0.97 0.002 80);
+  --bg-overlay: oklch(1.0 0 0);
+  --bg-inset: oklch(0.95 0.003 80);
+  --bg-subtle: oklch(0.93 0.003 80);
+  --bg-input: oklch(1.0 0 0);
+  --bg-popover: oklch(1.0 0 0);
+  --bg-tooltip: oklch(0.20 0.01 260);
+  --bg-scrim: oklch(0.08 0 0 / 0.45);
+  --glass-bg: oklch(1.0 0 0 / 0.78);
+  --glass-bg-strong: oklch(1.0 0 0 / 0.92);
+  --glass-border: oklch(0 0 0 / 0.08);
 
-  --text-strong: #0a0a0b;
-  --text-primary: #1a1a1c;
-  --text-secondary: #52525a;
-  --text-muted: #6e6e76;
-  --text-faint: #98989e;
-  --text-inverse: #fafafa;
-  --text-on-accent: #ffffff;
-  --accent-text: #d63a0a;
+  --text-strong: oklch(0.10 0.003 260);
+  --text-primary: oklch(0.15 0.005 260);
+  --text-secondary: oklch(0.42 0.005 260);
+  --text-muted: oklch(0.55 0.005 260);
+  --text-faint: oklch(0.65 0.004 260);
+  --text-inverse: oklch(0.97 0.001 260);
+  --text-on-accent: oklch(0.98 0.001 260);
+  --accent-text: oklch(0.58 0.22 35);
 
-  --border-default: #dcdce0;
-  --border-strong: #c8c8cd;
-  --border-faint: rgba(0, 0, 0, 0.06);
-  --divider: #e4e4e7;
-  --ring-color: #e8430f;
-  --focus-ring: 0 0 0 3px rgba(232, 67, 15, 0.22);
+  --border-default: oklch(0 0 0 / 0.08);
+  --border-strong: oklch(0 0 0 / 0.14);
+  --border-faint: oklch(0 0 0 / 0.04);
+  --divider: oklch(0 0 0 / 0.06);
+  --ring-color: oklch(0.58 0.22 35);
+  --focus-ring: 0 0 0 3px oklch(0.58 0.22 35 / 0.22);
 
-  --accent-solid: #e8430f;
-  --accent-hover: #c73a0b;
-  --accent-active: #a83309;
-  --accent-tint: rgba(232, 67, 15, 0.10);
-  --accent-tint-strong: rgba(232, 67, 15, 0.16);
+  --accent-solid: oklch(0.58 0.22 35);
+  --accent-hover: oklch(0.50 0.22 35);
+  --accent-active: oklch(0.45 0.20 35);
+  --accent-tint: oklch(0.58 0.22 35 / 0.08);
+  --accent-tint-strong: oklch(0.58 0.22 35 / 0.14);
 
-  --status-cancelled-bg: rgba(82, 82, 90, 0.10);
-  --status-cancelled-border: rgba(82, 82, 90, 0.24);
+  --status-cancelled-bg: oklch(0.55 0.005 260 / 0.10);
+  --status-cancelled-border: oklch(0.55 0.005 260 / 0.24);
 
-  --p-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --p-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.07);
-  --p-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.09);
-  --p-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
-  --p-shadow-xl: 0 20px 64px rgba(0, 0, 0, 0.16);
+  --p-shadow-xs: 0 1px 2px oklch(0 0 0 / 0.06);
+  --p-shadow-sm: 0 2px 8px oklch(0 0 0 / 0.07);
+  --p-shadow-md: 0 4px 16px oklch(0 0 0 / 0.09);
+  --p-shadow-lg: 0 12px 40px oklch(0 0 0 / 0.12);
+  --p-shadow-xl: 0 20px 64px oklch(0 0 0 / 0.16);
   --shadow-card: var(--p-shadow-sm);
   --shadow-card-hover: var(--p-shadow-md);
   --shadow-panel: var(--p-shadow-lg);
@@ -342,20 +358,20 @@
 }
 
 /* ────────────────────────────────────────────────────────────────────
-   3 · COMPONENT TOKENS — per-component aliases over semantics
+   3 · COMPONENT TOKENS
    ──────────────────────────────────────────────────────────────────── */
 :root {
   /* 3.1 Button */
   --btn-weight: var(--p-weight-semibold);
   --btn-radius: var(--p-radius-pill);
   --btn-height-sm: 40px;
-  --btn-height-md: 46px;
-  --btn-height-lg: 52px;
-  --btn-height-xl: 56px;
+  --btn-height-md: 48px;
+  --btn-height-lg: 54px;
+  --btn-height-xl: 58px;
   --btn-pad-sm: 14px;
-  --btn-pad-md: 20px;
-  --btn-pad-lg: 26px;
-  --btn-pad-xl: 34px;
+  --btn-pad-md: 22px;
+  --btn-pad-lg: 28px;
+  --btn-pad-xl: 36px;
   --btn-primary-bg: var(--accent-solid);
   --btn-primary-bg-hover: var(--accent-hover);
   --btn-primary-bg-active: var(--accent-active);
@@ -367,10 +383,10 @@
   --btn-danger-bg: var(--p-red-600);
   --btn-danger-bg-hover: var(--p-red-500);
 
-  /* 3.2 Field / input */
-  --field-h: 46px;
+  /* 3.2 Field */
+  --field-h: 48px;
   --field-h-sm: 40px;
-  --field-pad-x: 14px;
+  --field-pad-x: 16px;
   --field-bg: var(--bg-input);
   --field-border: var(--border-default);
   --field-border-hover: var(--border-strong);
@@ -389,20 +405,20 @@
   /* 3.4 Nav */
   --nav-bg: transparent;
   --nav-bg-scrolled: var(--glass-bg);
-  --nav-blur: saturate(160%) blur(18px);
+  --nav-blur: saturate(180%) blur(20px);
   --nav-item-fg: var(--text-secondary);
   --nav-item-fg-active: var(--text-strong);
   --nav-pill-bg: var(--p-mono-250);
   --nav-h: var(--p-nav-height);
 
-  /* 3.5 Badge / pill */
+  /* 3.5 Badge */
   --badge-fg: var(--text-secondary);
   --badge-bg: var(--bg-subtle);
   --badge-border: var(--border-faint);
   --badge-size: var(--p-text-2xs);
 
   /* 3.6 Chat */
-  --chat-bubble-out: linear-gradient(135deg, var(--accent-600, #ff4d1c) 0%, #ff6231 100%);
+  --chat-bubble-out: linear-gradient(135deg, oklch(0.65 0.22 35) 0%, oklch(0.70 0.20 40) 100%);
   --chat-bubble-in: var(--bg-raised);
   --chat-pane-bg: var(--bg-page);
 
@@ -413,12 +429,12 @@
 
   /* 3.8 Skeleton */
   --skeleton-base: var(--p-mono-150);
-  --skeleton-shine: rgba(255, 255, 255, 0.05);
+  --skeleton-shine: oklch(1 0 0 / 0.04);
 
   /* 3.9 Preloader */
   --preloader-bg: var(--p-mono-25);
 
-  /* 3.10 Focus ring width/offset standard */
+  /* 3.10 Focus */
   --focus-outline-width: 2px;
   --focus-outline-offset: 2px;
 }

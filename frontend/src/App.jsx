@@ -7,6 +7,7 @@ import { AppNav } from './components/layout/AppNav'
 import { AppFooter } from './components/layout/AppFooter'
 import { PageTransition } from './components/layout/PageTransition'
 import { Preloader, shouldShowPreloader } from './components/layout/Preloader'
+import CustomCursor from './components/ui/CustomCursor'
 
 const NocturneHome = lazy(() => import('./pages/NocturneHome'))
 const Login = lazy(() => import('./pages/Login'))
@@ -98,6 +99,7 @@ export default function App() {
 
   return (
     <SmoothScroll>
+      <CustomCursor />
       {!booted && <Preloader onDone={() => setBooted(true)} />}
 
       <a href="#main-content" className="skip-link">Skip to content</a>

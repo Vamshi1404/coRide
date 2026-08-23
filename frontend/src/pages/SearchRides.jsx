@@ -63,12 +63,19 @@ export default function SearchRides() {
     setParams({ from_city: r.from, to_city: r.to, date: '' })
   }
 
+  const SEARCH_HERO = 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&q=80'
+
   return (
     <div className="page">
-      <header className="page-head">
-        <h1 className="page-title">Find your ride</h1>
-        <p className="page-sub">Open seats leaving from Hyderabad. Request instantly, split the fare.</p>
-      </header>
+      {/* Hero banner */}
+      <div className="search-hero">
+        <img src={SEARCH_HERO} alt="" aria-hidden="true" />
+        <div className="search-hero__overlay" />
+        <div className="search-hero__content">
+          <h1 className="page-title" style={{ color: 'var(--text-strong)' }}>Find your ride</h1>
+          <p className="page-sub" style={{ color: 'var(--text-secondary)' }}>Open seats leaving from Hyderabad. Request instantly, split the fare.</p>
+        </div>
+      </div>
 
       <form onSubmit={submit} className="search-panel" aria-label="Search rides">
         <div className="search-grid">

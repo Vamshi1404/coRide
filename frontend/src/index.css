@@ -1,7 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════
    CoRide — NOCTURNE design system entry point.
-   Manual CSS only: primitive → semantic → component token architecture
-   lives in styles/tokens.css; everything else layers on top of it.
+   Manual CSS: primitive → semantic → component token architecture.
    ════════════════════════════════════════════════════════════════════ */
 @import './styles/tokens.css';
 @import './styles/base.css';
@@ -10,5 +9,5 @@
 @import './styles/pages.css';
 @import './styles/states.css';
 
-/* Fonts — Plus Jakarta Sans (UI) + Fraunces (display accents) */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+/* Fonts — Clash Display (display) + Inter (body) + JetBrains Mono (data) */
+@import url('https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');

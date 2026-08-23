@@ -256,6 +256,13 @@ demos/
 # UI/UX Pro Max skill
 ui-ux-pro-max-skill/
 
+# Awwwards skill
+.claude/skills/
+.claude-skill-awwwards/
+claude-skill-awwwards/
+.agents/
+skills-lock.json
+
 # IDEs
 .idea/
 .vscode/

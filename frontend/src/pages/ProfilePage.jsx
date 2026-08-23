@@ -49,13 +49,22 @@ export default function ProfilePage() {
     setSaving(false)
   }
 
+  const PROFILE_COVER = 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80'
+
   return (
     <div className="page page--form">
+      {/* Cover image */}
+      <div className="profile-hero" style={{ marginTop: 'calc(-1 * clamp(var(--p-space-4xl), 5vw, var(--p-space-6xl)))' }}>
+        <img src={PROFILE_COVER} alt="" aria-hidden="true" />
+        <div className="profile-hero__overlay" />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className="card profile-card"
+        style={{ marginTop: '-60px', position: 'relative', zIndex: 2 }}
       >
         {/* Identity */}
         <div className="profile-identity">
