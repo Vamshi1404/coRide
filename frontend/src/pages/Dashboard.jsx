@@ -13,10 +13,13 @@ import {
 } from 'lucide-react'
 
 const DASH_IMAGES = {
-  hero: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/CHARMINAR%2C_Hyderabad_01.jpg/800px-CHARMINAR%2C_Hyderabad_01.jpg',
+  hero: 'https://commons.wikimedia.org/wiki/Special:FilePath/CHARMINAR,_Hyderabad_01.jpg?width=800',
   offer: 'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?w=800',
-  tip: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hyderabad_skyline.jpg/800px-Hyderabad_skyline.jpg',
+  tip: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hyderabad_skyline.jpg?width=800',
 }
+
+/* Verified: dusk highway traffic loop (Pexels, 4.6 MB SD variant) */
+const TRAFFIC_VIDEO = 'https://videos.pexels.com/video-files/2103099/2103099-sd_640_360_30fps.mp4'
 
 const getGreeting = () => {
   const h = new Date().getHours()
@@ -268,7 +271,7 @@ function ScrollReideTip() {
             poster={DASH_IMAGES.offer}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           >
-            <source src="https://videos.pexels.com/video-files/3192473/3192473-hd_1920_1080_30fps.mp4" type="video/mp4" />
+            <source src={TRAFFIC_VIDEO} type="video/mp4" />
           </video>
         </div>
         <div className="dash-tip-card__body">

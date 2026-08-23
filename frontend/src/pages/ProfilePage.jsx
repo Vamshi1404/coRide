@@ -49,7 +49,7 @@ export default function ProfilePage() {
     setSaving(false)
   }
 
-  const PROFILE_COVER = 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&q=80'
+  const PROFILE_COVER = 'https://commons.wikimedia.org/wiki/Special:FilePath/CHARMINAR,_Hyderabad_01.jpg?width=1200'
 
   return (
     <div className="page page--form">

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Navigation } from 'lucide-react'
 
-const NOTFOUND_IMAGE = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&q=80'
+const NOTFOUND_IMAGE = 'https://commons.wikimedia.org/wiki/Special:FilePath/Hyderabad_skyline.jpg?width=1200'
 
 export default function NotFound() {
   return (

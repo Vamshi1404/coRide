@@ -1,7 +1,7 @@
 import { Navigation } from 'lucide-react'
 
-/* Real Hyderabad images from Wikimedia Commons */
-const CHARMINAR = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/CHARMINAR%2C_Hyderabad_01.jpg/800px-CHARMINAR%2C_Hyderabad_01.jpg'
+/* Verified: real Charminar photo via Wikimedia Commons FilePath redirect */
+const CHARMINAR = 'https://commons.wikimedia.org/wiki/Special:FilePath/CHARMINAR,_Hyderabad_01.jpg?width=800'
 
 export default function AuthVisual() {
   return (

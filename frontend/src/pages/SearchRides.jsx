@@ -63,7 +63,7 @@ export default function SearchRides() {
     setParams({ from_city: r.from, to_city: r.to, date: '' })
   }
 
-  const SEARCH_HERO = 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&q=80'
+  const SEARCH_HERO = 'https://commons.wikimedia.org/wiki/Special:FilePath/Hyderabad_skyline.jpg?width=1600'
 
   return (
     <div className="page">

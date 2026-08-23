@@ -10,18 +10,17 @@ import {
   TrendingUp, Heart, Globe,
 } from 'lucide-react'
 
-/* ── Real Hyderabad images (Wikimedia Commons / Pexels) ─────────── */
+/* ── Verified media: real Hyderabad imagery (Wikimedia Commons) + Pexels ── */
 const MEDIA = {
-  heroVideo: 'https://videos.pexels.com/video-files/3192473/3192473-hd_1920_1080_30fps.mp4',
-  heroPoster: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/CHARMINAR%2C_Hyderabad_01.jpg/1200px-CHARMINAR%2C_Hyderabad_01.jpg',
-  gachibowli: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hyderabad_skyline.jpg/1200px-Hyderabad_skyline.jpg',
-  hitec: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hyderabad_skyline.jpg/1200px-Hyderabad_skyline.jpg',
-  secunderabad: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hyderabad_skyline.jpg/1200px-Hyderabad_skyline.jpg',
+  heroVideo: 'https://videos.pexels.com/video-files/2103099/2103099-hd_1920_1080_30fps.mp4',
+  heroPoster: 'https://commons.wikimedia.org/wiki/Special:FilePath/CHARMINAR,_Hyderabad_01.jpg?width=1600',
+  skyline: 'https://commons.wikimedia.org/wiki/Special:FilePath/Hyderabad_skyline.jpg?width=1200',
+  charminar: 'https://commons.wikimedia.org/wiki/Special:FilePath/Charminar,_Hyderabad,_Telangana.jpg?width=800',
+  meccamasjid: 'https://commons.wikimedia.org/wiki/Special:FilePath/Mecca_Masjid_Hyderabad.JPG?width=800',
   highway: 'https://images.pexels.com/photos/1173777/pexels-photo-1173777.jpeg?w=1200',
   commuters: 'https://images.pexels.com/photos/3727464/pexels-photo-3727464.jpeg?w=800',
   carInterior: 'https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg?w=800',
   traffic: 'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?w=1200',
-  sunset: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Hyderabad_Skyline.jpg/1200px-Hyderabad_Skyline.jpg',
 }
 
 const POPULAR_ROUTES = [
@@ -358,7 +357,11 @@ export default function NocturneHome() {
                 className="route-gallery__card"
               >
                 <div className="route-gallery__card-img">
-                  <img src={i % 2 === 0 ? MEDIA.gachibowli : MEDIA.hitec} alt={`${route.from} to ${route.to}`} loading="lazy" />
+                  <img
+                    src={[MEDIA.skyline, MEDIA.charminar, MEDIA.meccamasjid][i % 3]}
+                    alt={`${route.from} to ${route.to}`}
+                    loading="lazy"
+                  />
                 </div>
                 <div className="route-gallery__card-body">
                   <span className="route-gallery__card-route">
@@ -449,7 +452,7 @@ export default function NocturneHome() {
 
       {/* ═══ Chapter 8 · CTA with parallax background ═══ */}
       <section className="cta-section parallax-section">
-        <div className="parallax-img" style={{ backgroundImage: `url(${MEDIA.sunset})` }} />
+        <div className="parallax-img" style={{ backgroundImage: `url(${MEDIA.skyline})` }} />
         <div className="cta-overlay">
           <div className="container">
             <ScrollReveal animation="reveal-scale" className="cta-content">
