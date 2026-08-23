@@ -3,7 +3,6 @@ import toast from 'react-hot-toast'
 import { Loader2 } from 'lucide-react'
 import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
-import { cn } from '@/lib/utils'
 
 export default function RequestButton({ ride, onUpdate }) {
   const { user } = useAuth()
@@ -54,12 +53,9 @@ export default function RequestButton({ ride, onUpdate }) {
     setLoading(false)
   }
 
-  const base =
-    'w-full h-11 rounded-full font-semibold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer'
-
   if (existing?.status === 'accepted') {
     return (
-      <span className={cn(base, 'bg-[var(--nc-accent-dim)] text-[var(--nc-accent)] border border-[var(--nc-accent)]/50 cursor-default')} aria-live="polite">
+      <span className="badge badge--accepted badge--lg btn--block" style={{ justifyContent: 'center' }} aria-live="polite">
         Seat confirmed ✓
       </span>
     )
@@ -67,8 +63,8 @@ export default function RequestButton({ ride, onUpdate }) {
 
   if (existing?.status === 'pending') {
     return (
-      <button onClick={cancelRequest} disabled={loading} className={cn(base, 'border border-[var(--nc-400)] text-[var(--nc-600)] hover:bg-[var(--nc-300)] disabled:opacity-60')}>
-        {loading && <Loader2 size={15} className="animate-spin" />}
+      <button type="button" onClick={cancelRequest} disabled={loading} className="btn btn--outline btn--md btn--block">
+        {loading && <Loader2 size={15} className="spinner" aria-hidden="true" />}
         {loading ? 'Cancelling…' : 'Cancel request'}
       </button>
     )
@@ -76,7 +72,7 @@ export default function RequestButton({ ride, onUpdate }) {
 
   if (existing?.status === 'rejected') {
     return (
-      <span className={cn(base, 'bg-transparent border border-dashed border-[var(--nc-400)] text-[var(--nc-500)] cursor-default')}>
+      <span className="badge badge--neutral badge--lg btn--block" style={{ justifyContent: 'center', borderStyle: 'dashed' }}>
         Request declined
       </span>
     )
@@ -84,7 +80,7 @@ export default function RequestButton({ ride, onUpdate }) {
 
   if (!isOpen) {
     return (
-      <span className={cn(base, 'bg-[var(--nc-100)] border border-[var(--nc-300)] text-[var(--nc-500)] cursor-default')}>
+      <span className="badge badge--neutral badge--lg btn--block" style={{ justifyContent: 'center' }}>
         {ride.status === 'completed' ? 'Ride completed' : 'Ride in progress'}
       </span>
     )
@@ -92,17 +88,17 @@ export default function RequestButton({ ride, onUpdate }) {
 
   if (isFull) {
     return (
-      <span className={cn(base, 'bg-[var(--nc-100)] border border-[var(--nc-300)] text-[var(--nc-500)] cursor-default')}>
+      <span className="badge badge--neutral badge--lg btn--block" style={{ justifyContent: 'center' }}>
         Fully booked
       </span>
     )
   }
 
   return (
-    <button onClick={handleRequest} disabled={loading} className={cn(base, 'bg-[var(--nc-accent)] text-white hover:brightness-110 active:scale-[0.98] disabled:opacity-60')}>
+    <button type="button" onClick={handleRequest} disabled={loading} className="btn btn--accent btn--md btn--block">
       {loading ? (
         <>
-          <Loader2 size={15} className="animate-spin" /> Sending…
+          <Loader2 size={15} className="spinner" aria-hidden="true" /> Sending…
         </>
       ) : (
         'Request seat'

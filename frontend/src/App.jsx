@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { AnimatePresence } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useAuth } from './contexts/AuthContext'
 import { SmoothScroll } from './components/providers/SmoothScroll'
 import { AppNav } from './components/layout/AppNav'
@@ -41,15 +41,44 @@ function GuestRoute({ children }) {
   return children
 }
 
+/** Slim top bar that sweeps once per in-app navigation. */
+function RouteProgress() {
+  const location = useLocation()
+  const reduced = useReducedMotion()
+  const [key, setKey] = useState(0)
+
+  useEffect(() => {
+    if (!reduced) setKey((k) => k + 1)
+  }, [location.pathname, reduced])
+
+  if (reduced) return null
+
+  return (
+    <div className="route-progress" aria-hidden="true">
+      {key > 0 && (
+        <motion.div
+          key={key}
+          className="route-progress__fill"
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: [0, 0.7, 1], opacity: [1, 1, 0] }}
+          transition={{ duration: 0.55, times: [0, 0.7, 1], ease: 'easeOut' }}
+        />
+      )}
+    </div>
+  )
+}
+
 function PageSkeleton() {
   return (
-    <div className="max-w-7xl mx-auto px-6 pt-28 pb-16 animate-pulse" aria-busy="true">
-      <div className="h-9 w-64 rounded-[10px] bg-[var(--nc-200)]" />
-      <div className="mt-4 h-4 w-96 max-w-full rounded bg-[var(--nc-100)]" />
-      <div className="mt-10 grid gap-5 md:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-44 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)]" />
-        ))}
+    <div className="page" aria-busy="true">
+      <div className="stack stack--gap-md skel-page" role="status" aria-label="Loading page">
+        <div className="skel skel--line lg skel-hero-line" />
+        <div className="skel skel--line skel-hero-sub" />
+        <div className="skel-row" style={{ marginTop: 'var(--p-space-3xl)' }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="skel skel--block card--inset" style={{ flex: 1, height: '176px' }} />
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -64,16 +93,20 @@ export default function App() {
   }, [location.pathname])
 
   const isChat =
-    location.pathname === '/chats' || location.pathname.startsWith('/chat/')
+    location.pathname === '/chats' || location.pathname.startsWith('/chat/') ||
+    location.pathname === '/login' || location.pathname === '/register'
 
   return (
     <SmoothScroll>
       {!booted && <Preloader onDone={() => setBooted(true)} />}
 
-      <div className="min-h-screen bg-[var(--nc-50)] text-[var(--nc-800)] antialiased">
+      <a href="#main-content" className="skip-link">Skip to content</a>
+
+      <div className="app-shell">
+        <RouteProgress />
         <AppNav />
 
-        <main className={isChat ? 'pt-16' : ''}>
+        <main id="main-content" className="app-main">
           <Suspense fallback={<PageSkeleton />}>
             <AnimatePresence mode="wait" initial={false} onExitComplete={scrollToTop}>
               <Routes location={location} key={location.pathname}>

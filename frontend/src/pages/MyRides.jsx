@@ -6,10 +6,8 @@ import { api } from '@/lib/api'
 import {
   formatRideDateTime, formatVehicleName, getDriverName, getInitials,
 } from '@/lib/rideDisplay'
-import { cn } from '@/lib/utils'
-import { RideCardSkeleton } from '@/components/nocturne/skeletons'
 import {
-  CalendarDays, ArrowRight, SearchX, History, Navigation, ChevronRight, Users,
+  CalendarDays, ArrowRight, SearchX, History, ChevronRight,
 } from 'lucide-react'
 
 export default function MyRides() {
@@ -33,17 +31,17 @@ export default function MyRides() {
     .sort((a, b) => new Date(b.departure_time ?? 0) - new Date(a.departure_time ?? 0))
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-24 md:pt-28 pb-16">
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[var(--nc-900)]">My rides</h1>
-        <p className="mt-2 text-[var(--nc-500)]">Your scheduled commutes and travel history.</p>
-      </div>
+    <div className="page page--narrow">
+      <header className="page-head">
+        <h1 className="page-title">My rides</h1>
+        <p className="page-sub">Your scheduled commutes and travel history.</p>
+      </header>
 
       {/* Tabs */}
       <div
         role="tablist"
         aria-label="Ride lists"
-        className="inline-flex p-1 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] mb-8"
+        className="tabs rides-tabs tabs--block"
       >
         {[
           { id: 'upcoming', label: `Upcoming${loading ? '' : ` (${upcoming.length})`}` },
@@ -54,27 +52,38 @@ export default function MyRides() {
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
-            className={cn(
-              'relative px-5 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer',
-              tab === t.id ? 'text-[var(--nc-0)]' : 'text-[var(--nc-500)] hover:text-[var(--nc-800)]'
-            )}
+            className={`tab${tab === t.id ? ' is-active' : ''}`}
           >
             {tab === t.id && (
               <motion.span
                 layoutId="rides-tab-pill"
-                className="absolute inset-0 rounded-full bg-[var(--nc-900)]"
+                className="tab__pill"
                 transition={{ type: 'spring', stiffness: 420, damping: 34 }}
               />
             )}
-            <span className="relative">{t.label}</span>
+            <span>{t.label}</span>
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="space-y-4" aria-busy="true">
+        <div className="results-stack" aria-busy="true">
           {[0, 1].map((i) => (
-            <RideCardSkeleton key={i} />
+            <div key={i} className="skel-card" aria-hidden="true">
+              <div className="skel skel--line sm" style={{ width: 140 }} />
+              <div className="skel-row">
+                <span className="skel skel--circle" style={{ width: 15, height: 15 }} />
+                <div className="skel skel--line" style={{ flex: 1 }} />
+              </div>
+              <div className="skel skel--line" style={{ width: '60%' }} />
+              <div className="skel-row">
+                <span className="skel skel--circle" style={{ width: 40, height: 40 }} />
+                <div className="stack stack--gap-sm" style={{ flex: 1 }}>
+                  <div className="skel skel--line" style={{ width: 110 }} />
+                  <div className="skel skel--line sm" style={{ width: 150 }} />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       ) : (
@@ -97,7 +106,7 @@ export default function MyRides() {
                     cta={{ label: 'Find a ride', to: '/search' }}
                   />
                 ) : (
-                  <ul className="space-y-4">
+                  <ul className="results-stack" style={{ listStyle: 'none', padding: 0 }}>
                     {upcoming.map((ride) => (
                       <li key={`${ride.user_role}-${ride.id}`}>
                         <UpcomingCard ride={ride} onOpen={() => navigate(`/rides/${ride.id}`)} />
@@ -124,25 +133,22 @@ export default function MyRides() {
                     body="Completed rides will show up here with their details."
                   />
                 ) : (
-                  <ul className="space-y-3">
+                  <ul className="history-stack" style={{ listStyle: 'none', padding: 0 }}>
                     {history.map((ride) => (
                       <li key={`${ride.user_role}-${ride.id}`}>
                         <button
+                          type="button"
                           onClick={() => navigate(`/rides/${ride.id}`)}
-                          className="w-full group flex items-center gap-4 p-4 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] hover:border-[var(--nc-400)] transition-colors text-left cursor-pointer"
+                          className="row-item row-item--clickable"
                         >
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-[var(--nc-800)] truncate">
-                              {ride.from_city} → {ride.to_city}
-                            </p>
-                            <p className="text-xs text-[var(--nc-500)] mt-0.5 tabular-nums">
+                          <div className="row-item__body">
+                            <p className="row-item__title">{ride.from_city} → {ride.to_city}</p>
+                            <p className="row-item__sub tabular">
                               {formatRideDateTime(ride.departure_time)} · as {ride.user_role}
                             </p>
                           </div>
-                          <span className="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[var(--nc-accent-dim)] text-[var(--nc-accent)]">
-                            Completed
-                          </span>
-                          <ChevronRight size={16} className="text-[var(--nc-500)] shrink-0" />
+                          <span className="badge badge--completed">Completed</span>
+                          <ChevronRight size={16} aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
                         </button>
                       </li>
                     ))}
@@ -163,66 +169,60 @@ function UpcomingCard({ ride, onOpen }) {
 
   return (
     <div
-      className="group p-5 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] hover:border-[var(--nc-400)] transition-colors cursor-pointer"
+      className="card card--interactive ride-card"
       onClick={onOpen}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen()}
     >
       {/* Status row */}
-      <div className="flex items-center gap-2.5 mb-4 flex-wrap">
-        <span
-          className={cn(
-            'px-2.5 py-1 rounded-full text-[11px] font-semibold',
-            confirmed
-              ? 'bg-[var(--nc-900)] text-[var(--nc-0)]'
-              : 'bg-[var(--nc-accent-dim)] text-[var(--nc-accent)]'
-          )}
-        >
+      <div className="ride-card__status">
+        <span className={`badge ${confirmed ? 'badge--neutral' : 'badge--pending'} badge--lg`}>
           {confirmed ? 'Confirmed' : 'Pending approval'}
         </span>
         {ride.status === 'in_progress' && (
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[var(--nc-accent)]">
-            <span className="size-1.5 rounded-full bg-[var(--nc-accent)] animate-pulse" />
-            LIVE
-          </span>
+          <span className="live-now"><span className="live-now__dot" aria-hidden="true" />LIVE</span>
         )}
-        <span className="flex items-center gap-1.5 text-xs text-[var(--nc-500)] tabular-nums ml-auto">
-          <CalendarDays size={12} />
+        <span className="ride-card__when tabular">
+          <CalendarDays size={12} aria-hidden="true" />
           {formatRideDateTime(ride.departure_time)}
         </span>
       </div>
 
       {/* Route */}
-      <div className="space-y-3">
-        <RoutePoint dot="accent" name={ride.from_city} sub="Pickup" />
-        <div className="ml-[7px] w-px h-4 bg-[var(--nc-300)]" aria-hidden="true" />
-        <RoutePoint dot="gray" name={ride.to_city} sub="Drop-off" />
+      <div className="vroute ride-card__vroute">
+        <div className="vroute__point">
+          <span className="vroute__mark"><span className="vroute__dot" /></span>
+          <span>
+            <span className="vroute__name">{ride.from_city}</span><br />
+            <span className="vroute__sub">Pickup</span>
+          </span>
+        </div>
+        <span className="vroute__stem ride-card__stem" aria-hidden="true" />
+        <div className="vroute__point vroute__point--dest">
+          <span className="vroute__mark"><span className="vroute__dot" /></span>
+          <span>
+            <span className="vroute__name">{ride.to_city}</span><br />
+            <span className="vroute__sub">Drop-off</span>
+          </span>
+        </div>
       </div>
 
       {/* Driver + vehicle + CTA */}
-      <div className="mt-5 pt-4 border-t border-[var(--nc-300)] flex items-center gap-3">
-        <div className="relative shrink-0">
-          <div className="size-10 rounded-full bg-[var(--nc-300)] flex items-center justify-center text-xs font-bold text-[var(--nc-700)]">
-            {getInitials(getDriverName(ride))}
-          </div>
-          {confirmed && (
-            <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-[var(--nc-accent)] ring-2 ring-[var(--nc-200)]" />
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[10px] uppercase tracking-wide text-[var(--nc-500)]">
-            {isDriving ? 'You are driving' : 'Your driver'}
-          </p>
-          <p className="text-sm font-semibold text-[var(--nc-800)] truncate">
-            {isDriving ? 'Your vehicle' : getDriverName(ride)}
-          </p>
-          <p className="text-xs text-[var(--nc-500)] truncate flex items-center gap-1.5">
+      <div className="ride-card__foot">
+        <span className="avatar avatar--md" style={{ position: 'relative', flexShrink: 0 }}>
+          {getInitials(getDriverName(ride))}
+          {confirmed && <span className="avatar__dot" aria-hidden="true" />}
+        </span>
+        <div className="ride-card__who">
+          <p className="ride-card__who-label">{isDriving ? 'You are driving' : 'Your driver'}</p>
+          <p className="ride-card__who-name">{isDriving ? 'Your vehicle' : getDriverName(ride)}</p>
+          <p className="ride-card__vehicle">
             {formatVehicleName(ride)}
-            {ride.vehicle_plate && <span className="font-mono">· {ride.vehicle_plate}</span>}
+            {ride.vehicle_plate && <span className="mono">· {ride.vehicle_plate}</span>}
           </p>
         </div>
-        <span className="shrink-0 inline-flex items-center gap-1 px-4 py-2 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-xs font-semibold group-hover:bg-[var(--nc-accent)] transition-colors">
+        <span className="btn btn--primary btn--sm" aria-hidden="true">
           Details
           <ArrowRight size={13} />
         </span>
@@ -231,41 +231,18 @@ function UpcomingCard({ ride, onOpen }) {
   )
 }
 
-function RoutePoint({ dot, name, sub }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span
-        className={cn(
-          'size-[15px] rounded-full border-4 mt-0.5 shrink-0',
-          dot === 'accent'
-            ? 'bg-[var(--nc-accent)]/30 border-[var(--nc-accent)]'
-            : 'bg-[var(--nc-400)]/30 border-[var(--nc-500)]'
-        )}
-        aria-hidden="true"
-      />
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-[var(--nc-800)] break-words">{name}</p>
-        <p className="text-xs text-[var(--nc-500)]">{sub}</p>
-      </div>
-    </div>
-  )
-}
-
 function EmptyState({ icon: Icon, title, body, cta }) {
   return (
-    <div className="py-20 text-center">
-      <div className="mx-auto size-14 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] flex items-center justify-center">
-        <Icon size={22} className="text-[var(--nc-500)]" />
-      </div>
-      <h3 className="mt-4 text-lg font-semibold text-[var(--nc-900)]">{title}</h3>
-      <p className="mt-1.5 text-sm text-[var(--nc-500)] max-w-sm mx-auto">{body}</p>
+    <div className="state">
+      <span className="state__icon-wrap"><Icon size={22} aria-hidden="true" /></span>
+      <h2 className="state__title">{title}</h2>
+      <p className="state__body">{body}</p>
       {cta && (
-        <button
-          onClick={() => window.location.assign(cta.to)}
-          className="mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-sm font-medium hover:bg-[var(--nc-800)] transition-colors cursor-pointer"
-        >
-          {cta.label}
-        </button>
+        <div className="state__actions">
+          <button type="button" onClick={() => window.location.assign(cta.to)} className="btn btn--primary btn--md">
+            {cta.label}
+          </button>
+        </div>
       )}
     </div>
   )

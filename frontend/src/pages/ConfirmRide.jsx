@@ -2,19 +2,17 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-hot-toast'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { DriverCard } from '@/components/nocturne/driver-card'
 import { SafetyChecklist } from '@/components/nocturne/safety-checklist'
 import { FareCounter } from '@/components/nocturne/fare-counter'
 import { LiveChip } from '@/components/nocturne/live-indicators'
+import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
 import { api } from '@/lib/api'
 import { formatRideDateTime, formatCurrency } from '@/lib/rideDisplay'
 import {
-  ArrowLeft, MapPin, Navigation, Clock, Users, Wallet,
-  CheckCircle2, AlertTriangle, Loader2, Route as RouteIcon,
+  ArrowLeft, MapPin, Navigation, Clock,
+  CheckCircle2, AlertTriangle, Loader2, Route as RouteIcon, Wallet,
 } from 'lucide-react'
 
 export default function ConfirmRide() {
@@ -54,24 +52,28 @@ export default function ConfirmRide() {
 
   if (rideQuery.isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-6 pt-24 pb-16 space-y-5" aria-busy="true">
-        <div className="h-6 w-40 rounded bg-[var(--nc-200)] animate-pulse" />
-        <div className="h-64 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] animate-pulse" />
-        <div className="h-40 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] animate-pulse" />
+      <div className="page page--narrow" aria-busy="true">
+        <div className="stack stack--gap-lg">
+          <div className="skel skel--line lg" style={{ width: 160 }} />
+          <div className="skel skel--block" style={{ height: 256 }} />
+          <div className="skel skel--block" style={{ height: 160 }} />
+        </div>
       </div>
     )
   }
 
   if (rideQuery.isError || !ride) {
     return (
-      <div className="min-h-[60vh] pt-32 pb-16 px-6 flex items-center justify-center text-center">
+      <div className="centered-state">
         <div>
-          <AlertTriangle size={28} className="mx-auto text-[var(--nc-accent)]" />
-          <h1 className="mt-4 text-xl font-bold text-[var(--nc-900)]">Ride not found</h1>
-          <p className="mt-1.5 text-sm text-[var(--nc-500)]">It may have been cancelled or removed.</p>
-          <Button render={<Link to="/search" />} variant="outline" className="mt-6 border-[var(--nc-400)] text-[var(--nc-600)] cursor-pointer">
-            <ArrowLeft size={16} className="mr-2" />Back to Search
-          </Button>
+          <AlertTriangle size={28} aria-hidden="true" style={{ color: 'var(--accent-text)' }} />
+          <h1 className="state__title">Ride not found</h1>
+          <p className="state__body">It may have been cancelled or removed.</p>
+          <div className="state__actions">
+            <Button render={<Link to="/search" />} variant="outline" size="md">
+              <ArrowLeft size={16} style={{ marginRight: 8 }} />Back to Search
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -79,14 +81,16 @@ export default function ConfirmRide() {
 
   if (ride.owner_id === user?.id) {
     return (
-      <div className="min-h-[60vh] pt-32 pb-16 px-6 flex items-center justify-center text-center">
+      <div className="centered-state">
         <div>
-          <RouteIcon size={28} className="mx-auto text-[var(--nc-accent)]" />
-          <h1 className="mt-4 text-xl font-bold text-[var(--nc-900)]">This is your ride</h1>
-          <p className="mt-1.5 text-sm text-[var(--nc-500)]">Manage requests and status from the ride page.</p>
-          <Button render={<Link to={`/rides/${ride.id}`} />} className="mt-6 bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] cursor-pointer">
-            Open ride
-          </Button>
+          <RouteIcon size={28} aria-hidden="true" style={{ color: 'var(--accent-text)' }} />
+          <h1 className="state__title">This is your ride</h1>
+          <p className="state__body">Manage requests and status from the ride page.</p>
+          <div className="state__actions">
+            <Button render={<Link to={`/rides/${ride.id}`} />} variant="primary" size="md">
+              Open ride
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -97,162 +101,176 @@ export default function ConfirmRide() {
   const bookingStatus = ride.booking_status
 
   return (
-    <div className="pt-20 pb-12 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Link to="/search" className="inline-flex items-center gap-2 text-[var(--nc-500)] text-sm hover:text-[var(--nc-800)] transition-colors cursor-pointer">
-          <ArrowLeft size={14} />Back to search
+    <div className="page page--narrow">
+      <div className="page-head">
+        <Link to="/search" className="backlink">
+          <ArrowLeft size={14} aria-hidden="true" />
+          Back to search
         </Link>
+      </div>
 
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-[var(--nc-900)] text-2xl font-bold tracking-tight">
-              {bookingStatus === 'accepted' ? 'Ride confirmed' : booked ? 'Request sent' : 'Confirm your ride'}
-            </h1>
-            <p className="text-[var(--nc-500)] text-sm">
-              {bookingStatus === 'accepted'
-                ? 'The driver accepted your request'
-                : booked
-                  ? 'Waiting for the driver to accept'
-                  : 'Review details before requesting a seat'}
-            </p>
+      <div className="detail-head">
+        <div>
+          <h1 className="page-title">
+            {bookingStatus === 'accepted' ? 'Ride confirmed' : booked ? 'Request sent' : 'Confirm your ride'}
+          </h1>
+          <p className="page-sub">
+            {bookingStatus === 'accepted'
+              ? 'The driver accepted your request'
+              : booked
+                ? 'Waiting for the driver to accept'
+                : 'Review details before requesting a seat'}
+          </p>
+        </div>
+        {(booked || bookingStatus === 'accepted') && <LiveChip />}
+      </div>
+
+      {/* Booking funnel — mirrors the real flow state */}
+      <div className="flow-steps" role="list" aria-label="Booking progress" style={{ marginBottom: 'var(--p-space-xl)' }}>
+        <span className="flow-step flow-step--done" role="listitem">
+          <span className="flow-step__dot">✓</span>
+          <span className="flow-step__label">Search</span>
+        </span>
+        <span className="flow-step__bar" aria-hidden="true" />
+        <span className={`flow-step ${booked || bookingStatus ? 'flow-step--done' : 'flow-step--active'}`} role="listitem">
+          <span className="flow-step__dot">{booked || bookingStatus ? '✓' : '2'}</span>
+          <span className="flow-step__label">Request</span>
+        </span>
+        <span className="flow-step__bar" aria-hidden="true" />
+        <span
+          className={`flow-step ${bookingStatus === 'accepted' ? 'flow-step--active' : ''}`}
+          role="listitem"
+          aria-current={bookingStatus === 'accepted' ? 'step' : undefined}
+        >
+          <span className="flow-step__dot">3</span>
+          <span className="flow-step__label">Ride day</span>
+        </span>
+      </div>
+
+      <div className="confirm-grid">
+        <div className="confirm-main">
+          {/* Route visual */}
+          <div className="route-art-frame card card--flush" style={{ boxShadow: 'none', background: 'none', border: 'none', padding: 0 }}>
+            <svg viewBox="0 0 400 200" className="route-art" role="img" aria-label={`Route from ${ride.from_city} to ${ride.to_city}`} fill="none">
+              <path d="M 40 160 Q 120 40, 200 100 T 360 60" stroke="var(--border-strong)" strokeWidth="2" strokeDasharray="6 4" opacity="0.5" />
+              <path d="M 40 160 Q 120 40, 200 100 T 360 60" stroke="var(--accent-solid)" strokeWidth="2.5" strokeLinecap="round" />
+              <circle cx="40" cy="160" r="6" fill="var(--accent-solid)" />
+              <circle cx="360" cy="60" r="6" fill="var(--text-muted)" />
+              <text x="40" y="182" textAnchor="middle">{truncate(ride.from_city, 16)}</text>
+              <text x="360" y="46" textAnchor="middle">{truncate(ride.to_city, 16)}</text>
+            </svg>
           </div>
-          {(booked || bookingStatus === 'accepted') && <LiveChip />}
+
+          {/* Route details */}
+          <div className="card">
+            <div className="vroute">
+              <div className="vroute__point">
+                <span className="vroute__mark"><span className="vroute__dot" /></span>
+                <span>
+                  <span className="vroute__name">{ride.from_city}</span><br />
+                  <span className="vroute__sub">Pickup point</span>
+                </span>
+              </div>
+              <span className="vroute__stem" aria-hidden="true" />
+              <div className="vroute__point vroute__point--dest">
+                <span className="vroute__mark"><span className="vroute__dot" /></span>
+                <span>
+                  <span className="vroute__name">{ride.to_city}</span><br />
+                  <span className="vroute__sub">Drop-off point</span>
+                </span>
+              </div>
+            </div>
+
+            <hr className="divider divider--tight" />
+
+            <div className="meta-tiles">
+              <Meta label="Departs" value={formatRideDateTime(ride.departure_time)} />
+              <Meta
+                label="Distance"
+                value={ride.distance_km != null ? `${Number(ride.distance_km).toFixed(0)} km` : '—'}
+              />
+              <Meta label="Seats left" value={String(ride.available_seats ?? '—')} />
+            </div>
+          </div>
+
+          <SafetyChecklist />
         </div>
 
-        <div className="grid md:grid-cols-5 gap-6">
-          <div className="md:col-span-3 space-y-4">
-            {/* Route visual */}
-            <Card className="bg-[var(--nc-200)] border-[var(--nc-300)] border overflow-hidden">
-              <div className="h-48 relative flex items-center justify-center">
-                <svg viewBox="0 0 400 200" className="w-full h-full" fill="none" role="img" aria-label={`Route from ${ride.from_city} to ${ride.to_city}`}>
-                  <path d="M 40 160 Q 120 40, 200 100 T 360 60" stroke="var(--nc-400)" strokeWidth="2" strokeDasharray="6 4" opacity="0.5" />
-                  <path d="M 40 160 Q 120 40, 200 100 T 360 60" stroke="var(--nc-accent)" strokeWidth="2.5" strokeLinecap="round" />
-                  <circle cx="40" cy="160" r="6" fill="var(--nc-accent)" />
-                  <circle cx="360" cy="60" r="6" fill="var(--nc-500)" />
-                  <text x="40" y="182" fill="var(--nc-600)" fontSize="11" textAnchor="middle">{truncate(ride.from_city, 16)}</text>
-                  <text x="360" y="46" fill="var(--nc-600)" fontSize="11" textAnchor="middle">{truncate(ride.to_city, 16)}</text>
-                </svg>
+        {/* Right column */}
+        <div className="confirm-aside">
+          <DriverCard
+            driver={{
+              name: ride.driver_name,
+              rating: Number(ride.driver_avg_rating) || 0,
+              totalRides: ride.driver_total_ratings,
+              vehicleMake: ride.brand,
+              vehicleModel: ride.model,
+              vehiclePlate: ride.vehicle_plate,
+            }}
+          />
+
+          <div className="card">
+            <h2 className="card__title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Wallet size={16} aria-hidden="true" style={{ color: 'var(--text-muted)' }} />
+              Fare summary
+            </h2>
+            <div className="stack stack--gap-sm" style={{ marginTop: 'var(--p-space-lg)' }}>
+              <div className="fare-row">
+                <span className="fare-row__label">Seat price</span>
+                <FareCounter value={seatPrice} className="fare-row__value" />
               </div>
-            </Card>
-
-            {/* Route details */}
-            <Card className="bg-[var(--nc-200)] border-[var(--nc-300)] border">
-              <CardContent className="space-y-4 p-5">
-                <div className="flex items-start gap-3">
-                  <MapPin size={15} className="text-[var(--nc-accent)] mt-0.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[var(--nc-800)] text-sm font-medium break-words">{ride.from_city}</p>
-                    <p className="text-[var(--nc-500)] text-xs">Pickup point</p>
-                  </div>
-                </div>
-                <div className="ml-[7px] w-px h-5 bg-[var(--nc-300)]" aria-hidden="true" />
-                <div className="flex items-start gap-3">
-                  <Navigation size={15} className="text-[var(--nc-500)] mt-0.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[var(--nc-800)] text-sm font-medium break-words">{ride.to_city}</p>
-                    <p className="text-[var(--nc-500)] text-xs">Drop-off point</p>
-                  </div>
-                </div>
-
-                <Separator className="bg-[var(--nc-300)]" />
-
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <Meta label="Departs" value={formatRideDateTime(ride.departure_time)} />
-                  <Meta
-                    label="Distance"
-                    value={ride.distance_km != null ? `${Number(ride.distance_km).toFixed(0)} km` : '—'}
-                  />
-                  <Meta label="Seats left" value={String(ride.available_seats ?? '—')} />
-                </div>
-              </CardContent>
-            </Card>
-
-            <SafetyChecklist />
+              <div className="fare-row">
+                <span className="fare-row__label">Seats requested</span>
+                <span className="fare-row__value tabular">1</span>
+              </div>
+              <div className="fare-total fare-row" style={{ display: 'flex' }}>
+                <span className="fare-row__label">Total</span>
+                <FareCounter value={seatPrice} />
+              </div>
+              <p className="fare-note">Pay the driver directly — no card needed.</p>
+            </div>
           </div>
 
-          {/* Right column */}
-          <div className="md:col-span-2 space-y-4 md:sticky md:top-24 self-start w-full">
-            <DriverCard
-              driver={{
-                name: ride.driver_name,
-                rating: Number(ride.driver_avg_rating) || 0,
-                totalRides: ride.driver_total_ratings,
-                vehicleMake: ride.brand,
-                vehicleModel: ride.model,
-                vehiclePlate: ride.vehicle_plate,
-              }}
-            />
-
-            <Card className="bg-[var(--nc-200)] border-[var(--nc-300)] border">
-              <CardContent className="space-y-3 p-5">
-                <h3 className="text-[var(--nc-800)] text-base font-semibold flex items-center gap-2">
-                  <Wallet size={16} className="text-[var(--nc-500)]" />
-                  Fare summary
-                </h3>
-                <div className="flex justify-between text-sm">
-                  <span className="text-[var(--nc-600)]">Seat price</span>
-                  <FareCounter value={seatPrice} className="text-[var(--nc-800)]" />
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-[var(--nc-600)]">Seats requested</span>
-                  <span className="text-[var(--nc-800)] tabular-nums">1</span>
-                </div>
-                <Separator className="bg-[var(--nc-300)]" />
-                <div className="flex justify-between">
-                  <span className="text-[var(--nc-800)] font-semibold">Total</span>
-                  <FareCounter value={seatPrice} className="text-[var(--nc-900)] font-bold text-xl" />
-                </div>
-                <p className="text-[var(--nc-500)] text-xs leading-relaxed">
-                  Pay the driver directly — no card needed.
+          {booked || bookingStatus === 'accepted' ? (
+            <div className="booking-banner">
+              <CheckCircle2 size={20} aria-hidden="true" />
+              <div>
+                <p className="booking-banner__title">
+                  {bookingStatus === 'accepted' ? 'Booking confirmed!' : 'Request sent to driver'}
                 </p>
-              </CardContent>
-            </Card>
+                <p className="booking-banner__sub">Track it under My Rides → Upcoming</p>
+              </div>
+            </div>
+          ) : isFull ? (
+            <Button disabled size="lg" block>Ride full</Button>
+          ) : (
+            <Button
+              onClick={() => requestMutation.mutate()}
+              disabled={requestMutation.isPending}
+              variant="primary"
+              size="lg"
+              block
+            >
+              {requestMutation.isPending ? (
+                <>
+                  <Loader2 size={16} className="spinner" aria-hidden="true" />
+                  Sending…
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={18} aria-hidden="true" />
+                  Request seat — {formatCurrency(seatPrice)}
+                </>
+              )}
+            </Button>
+          )}
 
-            {booked || bookingStatus === 'accepted' ? (
-              <Card className="bg-[var(--nc-accent-dim)] border border-[var(--nc-accent)]">
-                <CardContent className="p-4 flex items-center gap-3">
-                  <CheckCircle2 size={20} className="text-[var(--nc-accent)] shrink-0" />
-                  <div>
-                    <p className="text-[var(--nc-800)] text-sm font-medium">
-                      {bookingStatus === 'accepted' ? 'Booking confirmed!' : 'Request sent to driver'}
-                    </p>
-                    <p className="text-[var(--nc-500)] text-xs">
-                      Track it under My Rides → Upcoming
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : isFull ? (
-              <Button disabled className="w-full h-12 text-base cursor-not-allowed">
-                Ride full
-              </Button>
-            ) : (
-              <Button
-                onClick={() => requestMutation.mutate()}
-                disabled={requestMutation.isPending}
-                className="w-full bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] cursor-pointer h-12 text-base"
-              >
-                {requestMutation.isPending ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 size={16} className="animate-spin" />
-                    Sending…
-                  </span>
-                ) : (
-                  <>
-                    <CheckCircle2 size={18} className="mr-2" />
-                    Request seat — {formatCurrency(seatPrice)}
-                  </>
-                )}
-              </Button>
-            )}
-
-            {!booked && !isFull && (
-              <p className="text-center text-[var(--nc-500)] text-xs flex items-center justify-center gap-1.5">
-                <Clock size={12} />
-                Free cancellation until the driver departs
-              </p>
-            )}
-          </div>
+          {!booked && !isFull && (
+            <p className="fare-note" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <Clock size={12} aria-hidden="true" />
+              Free cancellation until the driver departs
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -261,9 +279,9 @@ export default function ConfirmRide() {
 
 function Meta({ label, value }) {
   return (
-    <div className="min-w-0">
-      <p className="text-[var(--nc-500)] text-xs mb-1">{label}</p>
-      <p className="text-[var(--nc-800)] text-sm font-semibold tabular-nums truncate">{value}</p>
+    <div className="meta-tile" style={{ minWidth: 0 }}>
+      <p className="meta-tile__label">{label}</p>
+      <p className="meta-tile__value">{value}</p>
     </div>
   )
 }

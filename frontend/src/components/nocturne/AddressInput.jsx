@@ -57,15 +57,10 @@ export function AddressInput({
   }
 
   return (
-    <div ref={rootRef} className="relative flex-1 min-w-0">
-      <label
-        htmlFor={id}
-        className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--nc-500)] mb-1.5"
-      >
-        {label}
-      </label>
-      <div className="relative">
-        <MapPin size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--nc-accent)] pointer-events-none" />
+    <div ref={rootRef} className="field" style={{ position: 'relative' }}>
+      <label htmlFor={id} className="field__label">{label}</label>
+      <div className="input-wrap">
+        <span className="input-wrap__icon"><MapPin size={15} aria-hidden="true" /></span>
         <input
           id={id}
           value={value}
@@ -74,25 +69,25 @@ export function AddressInput({
           onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
           placeholder={placeholder}
           autoComplete="off"
-          className="w-full h-11 pl-9 pr-8 rounded-[12px] bg-[var(--nc-200)] border border-[var(--nc-300)] text-sm text-[var(--nc-800)] placeholder:text-[var(--nc-500)] outline-none focus:border-[var(--nc-accent)] transition-colors"
+          role="combobox"
+          aria-expanded={open && items.length > 0}
+          aria-controls={`${id}-listbox`}
+          className="input"
         />
-        {loading && (
-          <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--nc-500)] animate-spin" />
-        )}
+        {loading && <Loader2 size={14} className="input-wrap__spinner spinner" aria-hidden="true" style={{ border: '2px solid var(--border-default)', borderTopColor: 'var(--text-muted)' }} />}
       </div>
 
       {open && items.length > 0 && (
         <ul
+          id={`${id}-listbox`}
           role="listbox"
-          className="absolute z-30 left-0 right-0 mt-1.5 rounded-[12px] bg-[var(--nc-100)] border border-[var(--nc-300)] shadow-[0_16px_40px_rgba(0,0,0,0.45)] overflow-hidden"
+          aria-label={`${label} suggestions`}
+          className="autocomplete"
         >
           {items.map((item) => (
-            <li key={`${item.lat}-${item.lon}-${item.label}`}>
-              <button
-                type="button"
-                onClick={() => choose(item)}
-                className="w-full text-left px-3.5 py-2.5 text-sm text-[var(--nc-700)] hover:bg-[var(--nc-200)] hover:text-[var(--nc-900)] transition-colors cursor-pointer"
-              >
+            <li key={`${item.lat}-${item.lon}-${item.label}`} role="option" aria-selected="false">
+              <button type="button" onClick={() => choose(item)} className="autocomplete__option">
+                <MapPin size={13} aria-hidden="true" />
                 {item.label}
               </button>
             </li>

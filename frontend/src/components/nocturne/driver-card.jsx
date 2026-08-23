@@ -1,11 +1,8 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Card, CardContent } from '@/components/ui/card'
 import { useCounter } from '@/hooks/useCounter'
 import { useReducedMotion } from '@/lib/motion/MotionProvider'
 import { getInitials } from '@/lib/rideDisplay'
-import { cn } from '@/lib/utils'
 
-export function DriverCard({ driver, ETA, className }) {
+export function DriverCard({ driver, ETA, className = '' }) {
   const reducedMotion = useReducedMotion()
   const rating = Math.min(5, Math.max(0, Number(driver.rating) || 0))
   const ratingValue = useCounter(rating * 100, {
@@ -15,52 +12,45 @@ export function DriverCard({ driver, ETA, className }) {
 
   const displayRating = rating > 0 ? (ratingValue / 100).toFixed(rating % 1 === 0 ? 0 : 2) : '—'
   const initials = getInitials(driver.name)
+  const dash = (rating / 5) * 163.36
 
   return (
-    <Card className={cn('bg-[var(--nc-200)] border-[var(--nc-300)] border', className)}>
-      <CardContent className="flex items-center gap-4 p-4">
-        <div className="relative">
-          <Avatar className="size-14">
-            <AvatarFallback className="bg-[var(--nc-300)] text-[var(--nc-800)] text-lg font-semibold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <svg
-            className="absolute inset-0 size-14 -rotate-90"
-            viewBox="0 0 56 56"
-            aria-hidden="true"
-          >
+    <div className={`card${className ? ` ${className}` : ''}`}>
+      <div className="result-card__driver" style={{ margin: 0 }}>
+        <span className="avatar avatar--lg" aria-hidden="true" style={{ width: 56, height: 56 }}>
+          {initials}
+          <svg className="avatar__ring" viewBox="0 0 56 56" fill="none">
             <circle
               cx="28"
               cy="28"
               r="26"
-              fill="none"
-              stroke="var(--nc-accent)"
-              strokeWidth="2"
-              strokeDasharray={`${(rating / 5) * 163.36} 163.36`}
-              className={cn(
-                'transition-all duration-700',
-                reducedMotion ? 'opacity-100' : 'animate-[drawRing_700ms_cubic-bezier(0.22,1,0.36,1)_forwards]'
-              )}
+              stroke="var(--accent-solid)"
+              strokeWidth="2.5"
               strokeLinecap="round"
+              strokeDasharray={`${dash} 163.36`}
+              style={
+                reducedMotion
+                  ? undefined
+                  : { animation: 'drawRing 700ms cubic-bezier(0.22,1,0.36,1) forwards', '--ring-length': '163.36' }
+              }
             />
           </svg>
-        </div>
+        </span>
 
-        <div className="flex-1 min-w-0">
-          <h3 className="text-[var(--nc-800)] font-semibold truncate">{driver.name}</h3>
-          <p className="text-[var(--nc-600)] text-sm mt-0.5 truncate">
+        <div className="row-item__body">
+          <h3 className="card__title" style={{ fontSize: 'var(--fs-small)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {driver.name || 'Driver'}
+          </h3>
+          <p className="row-item__sub">
             {[driver.vehicleMake, driver.vehicleModel].filter(Boolean).join(' ') || 'Vehicle'}
           </p>
-          <div className="flex items-center gap-3 mt-1.5">
-            <span className="text-[var(--nc-800)] font-semibold text-sm tabular-nums">
-              ★ {displayRating}
-            </span>
+          <div className="row-item__actions" style={{ marginTop: 6, gap: 'var(--p-space-md)' }}>
+            <span className="rating-chip tabular">★ {displayRating}</span>
             {driver.totalRides != null && (
-              <span className="text-[var(--nc-500)] text-xs">({driver.totalRides} ratings)</span>
+              <span className="row-item__sub tabular" style={{ marginTop: 0 }}>({driver.totalRides} ratings)</span>
             )}
             {ETA != null && (
-              <span className="text-[var(--nc-accent)] text-xs font-medium tabular-nums">
+              <span className="row-item__sub text-accent tabular" style={{ marginTop: 0, fontWeight: 600 }}>
                 Arriving in {ETA}m
               </span>
             )}
@@ -68,12 +58,14 @@ export function DriverCard({ driver, ETA, className }) {
         </div>
 
         {driver.vehiclePlate && (
-          <div className="text-right shrink-0">
-            <p className="text-[var(--nc-600)] text-xs uppercase tracking-wider">Plate</p>
-            <p className="text-[var(--nc-800)] text-sm font-mono tabular-nums">{driver.vehiclePlate}</p>
+          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+            <p className="ride-card__who-label">Plate</p>
+            <p className="mono tabular" style={{ fontSize: 'var(--fs-small)', color: 'var(--text-primary)' }}>
+              {driver.vehiclePlate}
+            </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

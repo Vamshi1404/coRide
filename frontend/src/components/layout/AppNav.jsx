@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useAuth } from '../../contexts/AuthContext'
-import { Button } from '@/components/ui/button'
 import NotificationBell from '../notifications/NotificationBell'
 import {
   Navigation, Search, Plus, Route as RouteIcon, MessageCircle, LayoutDashboard,
@@ -17,9 +16,7 @@ const AUTHED_ITEMS = [
   { label: 'Chats', to: '/chats', icon: MessageCircle },
 ]
 
-const PUBLIC_ITEMS = [
-  { label: 'Home', to: '/', icon: Navigation },
-]
+const PUBLIC_ITEMS = []
 
 export function AppNav() {
   const { user, logout } = useAuth()
@@ -41,7 +38,7 @@ export function AppNav() {
   }, [location.pathname])
 
   useEffect(() => {
-    document.body.style.overflow = drawerOpen && window.innerWidth < 768 ? 'hidden' : ''
+    document.body.style.overflow = drawerOpen && window.innerWidth < 900 ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [drawerOpen])
 
@@ -53,157 +50,129 @@ export function AppNav() {
     navigate('/')
   }
 
-  const linkClass = ({ isActive }) =>
-    `relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
-      isActive
-        ? 'text-[var(--nc-900)]'
-        : 'text-[var(--nc-500)] hover:text-[var(--nc-800)]'
-    }`
-
   return (
-    <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled || drawerOpen
-            ? 'bg-[var(--nc-50)]/70 backdrop-blur-xl border-b border-[var(--nc-300)]/50 shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-            : 'bg-transparent border-b border-transparent'
-        }`}
-      >
-        <nav className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 group" aria-label="CoRide home">
-            <div className="size-8 rounded-[10px] bg-[var(--nc-900)] flex items-center justify-center transition-transform duration-300 group-hover:rotate-12">
-              <Navigation size={16} className="text-[var(--nc-accent)]" />
-            </div>
-            <span className="text-[var(--nc-900)] font-bold text-lg tracking-tight">CoRide</span>
-          </Link>
+    <header className="nav" data-scrolled={scrolled || drawerOpen}>
+      <div className="container nav__inner">
+        <Link to="/" className="nav__brand" aria-label="CoRide home">
+          <span className="nav__brand-mark" aria-hidden="true">
+            <Navigation size={16} />
+          </span>
+          <span className="nav__brand-word">
+            Co<em>Ride</em>
+          </span>
+        </Link>
 
-          <div className="hidden md:flex items-center gap-1">
-            {items.map((item) => (
-              <NavLink key={item.to} to={item.to} className={linkClass} end={item.to === '/'}>
-                {({ isActive }) => (
-                  <span className="relative flex items-center gap-2">
-                    {isActive && !reduced && (
-                      <motion.span
-                        layoutId="nav-pill"
-                        className="absolute inset-0 bg-[var(--nc-200)] rounded-full"
-                        transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                      />
-                    )}
-                    {isActive && reduced && (
-                      <span className="absolute inset-0 bg-[var(--nc-200)] rounded-full" />
-                    )}
-                    <item.icon size={15} className="relative" />
-                    <span className="relative">{item.label}</span>
-                  </span>
-                )}
-              </NavLink>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-3">
-            {user ? (
-              <>
-                <NotificationBell />
-                <Link
-                  to="/profile"
-                  aria-label="Profile"
-                  className="size-9 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] hidden sm:flex items-center justify-center text-[var(--nc-700)] text-sm font-semibold hover:bg-[var(--nc-300)] transition-colors"
-                >
-                  {user.name?.[0]?.toUpperCase() || 'U'}
-                </Link>
-              </>
-            ) : (
-              <div className="hidden md:flex items-center gap-2">
-                <Button variant="ghost" size="sm" render={<Link to="/login" />} className="text-[var(--nc-500)] hover:text-[var(--nc-900)] cursor-pointer">
-                  Sign In
-                </Button>
-                <Button size="sm" render={<Link to="/register" />} className="bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] cursor-pointer">
-                  Get Started
-                </Button>
-              </div>
-            )}
-
-            <button
-              onClick={() => setDrawerOpen((v) => !v)}
-              aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={drawerOpen}
-              className="md:hidden size-9 flex items-center justify-center rounded-full text-[var(--nc-700)] hover:bg-[var(--nc-200)] transition-colors cursor-pointer"
+        <nav className="nav__links" aria-label="Primary">
+          {items.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) => `nav__link${isActive ? ' is-active' : ''}`}
             >
-              {drawerOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
+              {({ isActive }) => (
+                <>
+                  {!reduced && isActive && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="nav__pill"
+                      transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                    />
+                  )}
+                  {reduced && isActive && <span className="nav__pill" />}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <item.icon size={15} aria-hidden="true" />
+                    {item.label}
+                  </span>
+                </>
+              )}
+            </NavLink>
+          ))}
         </nav>
-      </header>
+
+        <div className="nav__actions">
+          {user && <NotificationBell />}
+
+          {user ? (
+            <Link to="/profile" className="nav__user nav-desktop-only" aria-label="Your profile">
+              <span className="avatar avatar--sm avatar--brand" aria-hidden="true">
+                {user.name?.[0]?.toUpperCase() || 'U'}
+              </span>
+              <span className="nav__user-name">{user.name}</span>
+            </Link>
+          ) : (
+            <div className="nav__actions nav-desktop-only" style={{ gap: 'var(--p-space-sm)' }}>
+              <Link to="/login" className="btn btn--ghost btn--md">Sign in</Link>
+              <Link to="/register" className="btn btn--accent btn--md">Get started</Link>
+            </div>
+          )}
+
+          <button
+            onClick={() => setDrawerOpen((v) => !v)}
+            aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={drawerOpen}
+            className="nav__burger"
+          >
+            {drawerOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+      </div>
 
       <AnimatePresence>
         {drawerOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="fixed inset-0 z-40 md:hidden bg-[var(--nc-50)] pt-20 px-6 pb-8 overflow-y-auto"
-          >
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="nav-drawer__scrim"
+              onClick={() => setDrawerOpen(false)}
+              aria-hidden="true"
+            />
             <motion.nav
-              className="flex flex-col gap-1"
-              initial={reduced ? false : 'hidden'}
-              animate="show"
-              variants={{
-                show: { transition: { staggerChildren: 0.05, delayChildren: 0.05 } },
-              }}
+              initial={reduced ? false : { y: -12, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={reduced ? undefined : { y: -8, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="nav-drawer"
+              aria-label="Mobile navigation"
             >
-              {(user ? [...AUTHED_ITEMS, { label: 'Profile', to: '/profile', icon: User }] : PUBLIC_ITEMS).map(
-                (item) => (
-                  <motion.div
-                    key={item.to}
-                    variants={reduced ? {} : {
-                      hidden: { opacity: 0, x: -14 },
-                      show: { opacity: 1, x: 0 },
-                    }}
-                  >
+              <ul className="nav-drawer__list">
+                {(user
+                  ? [...AUTHED_ITEMS, { label: 'Profile', to: '/profile', icon: User }]
+                  : [{ label: 'Home', to: '/', icon: Navigation }]
+                ).map((item) => (
+                  <li key={item.to}>
                     <NavLink
                       to={item.to}
                       end={item.to === '/'}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3.5 rounded-[14px] text-base font-medium ${
-                          isActive
-                            ? 'bg-[var(--nc-200)] text-[var(--nc-900)]'
-                            : 'text-[var(--nc-600)] active:bg-[var(--nc-200)]'
-                        }`
-                      }
+                      className={({ isActive }) => `nav-drawer__item${isActive ? ' is-active' : ''}`}
                     >
-                      <item.icon size={18} />
                       {item.label}
+                      <item.icon size={17} aria-hidden="true" />
                     </NavLink>
-                  </motion.div>
-                )
-              )}
+                  </li>
+                ))}
+              </ul>
 
-              {!user && (
-                <motion.div variants={reduced ? {} : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }} className="flex flex-col gap-2 mt-4">
-                  <Button render={<Link to="/login" />} variant="outline" className="border-[var(--nc-400)] text-[var(--nc-700)] h-11 cursor-pointer">
-                    Sign In
-                  </Button>
-                  <Button render={<Link to="/register" />} className="bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] h-11 cursor-pointer">
-                    Get Started
-                  </Button>
-                </motion.div>
-              )}
-
-              {user && (
-                <motion.button
-                  variants={reduced ? {} : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-                  onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-3.5 mt-2 rounded-[14px] text-base font-medium text-[var(--nc-accent)] cursor-pointer"
-                >
-                  <LogOut size={18} />
-                  Log out
-                </motion.button>
-              )}
+              <div className="nav-drawer__foot">
+                {user ? (
+                  <button type="button" onClick={handleLogout} className="nav-drawer__item is-active" style={{ width: '100%' }}>
+                    Log out
+                    <LogOut size={17} aria-hidden="true" />
+                  </button>
+                ) : (
+                  <>
+                    <Link to="/login" className="btn btn--outline btn--lg btn--block">Sign in</Link>
+                    <Link to="/register" className="btn btn--accent btn--lg btn--block">Get started</Link>
+                  </>
+                )}
+              </div>
             </motion.nav>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
-    </>
+    </header>
   )
 }

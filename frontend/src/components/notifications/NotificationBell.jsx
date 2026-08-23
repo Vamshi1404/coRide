@@ -1,14 +1,34 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import { Bell, UserPlus, CheckCircle2, XCircle, Flag, CalendarX2 } from 'lucide-react'
 import { gsap, useGSAP } from '../../lib/gsapSetup'
 import { format } from 'date-fns'
 import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
 import RatingModal from '../ratings/RatingModal'
-import { Icon } from '../../components/ui/icon'
 
 const COMPLETED_RIDE_TYPES = new Set(['ride_completed', 'ride_complete'])
+
+const NOTIFICATION_ICONS = {
+  request_sent: { icon: UserPlus, cls: 'bell-item__icon--request' },
+  request_accepted: { icon: CheckCircle2, cls: 'bell-item__icon--accepted' },
+  request_rejected: { icon: XCircle, cls: 'bell-item__icon--rejected' },
+  ride_completed: { icon: Flag, cls: 'bell-item__icon--completed' },
+  ride_complete: { icon: Flag, cls: 'bell-item__icon--completed' },
+  ride_cancelled: { icon: CalendarX2, cls: 'bell-item__icon--cancelled' },
+}
+
+function NotificationIcon({ type }) {
+  const meta = NOTIFICATION_ICONS[type]
+  if (!meta) return null
+  const Icon = meta.icon
+  return (
+    <span className={`bell-item__icon ${meta.cls}`} aria-hidden="true">
+      <Icon size={15} />
+    </span>
+  )
+}
 
 export default function NotificationBell() {
   const { user } = useAuth()
@@ -20,7 +40,9 @@ export default function NotificationBell() {
   const lastIdRef = useRef(null)
   const prevCountRef = useRef(0)
   const dismissedIdsRef = useRef(new Set())
-  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const reducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   const unread = notifications.filter((n) => !n.is_read).length
 
@@ -88,11 +110,9 @@ export default function NotificationBell() {
           }
           return [...newN, ...prev]
         })
-        // Shake bell on new notifications
-        if (data.length > prevCountRef.current) {
-          setShake(true)
-          setTimeout(() => setShake(false), 500)
-        }
+        // Shake bell on brand-new notifications
+        setShake(true)
+        setTimeout(() => setShake(false), 500)
         prevCountRef.current = data.length
       }
     } catch {
@@ -107,6 +127,14 @@ export default function NotificationBell() {
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  // Close on Escape for keyboard users
+  useEffect(() => {
+    if (!open) return undefined
+    const onKey = (e) => e.key === 'Escape' && setOpen(false)
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open])
 
   const markAllRead = async () => {
     try {
@@ -127,56 +155,51 @@ export default function NotificationBell() {
   return (
     <div className="notification-bell" ref={ref}>
       <button
-        className={`bell-btn ${shake ? 'shake' : ''}`}
+        type="button"
+        className={`bell-btn${shake ? ' shake' : ''}`}
         onClick={() => setOpen(!open)}
+        aria-label={open ? 'Close notifications' : 'Open notifications'}
+        aria-expanded={open}
       >
-        <Icon name="notifications" size={24} />
+        <Bell size={19} aria-hidden="true" />
         {unread > 0 && (
-          <span className="bell-badge">
+          <span className="bell-badge" aria-label={`${unread} unread`}>
             {unread > 99 ? '99+' : unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="bell-dropdown">
+        <div className="bell-dropdown" role="dialog" aria-label="Notifications">
           <div className="bell-header">
             <h4>Notifications</h4>
             {unread > 0 && (
-              <button
-                className="btn-text"
-                onClick={markAllRead}
-              >
+              <button type="button" className="btn-text" onClick={markAllRead}>
                 Mark all read
               </button>
             )}
           </div>
 
-          <div className="bell-list">
+          <div className="bell-list" aria-live="polite">
             {!notifications.length && <p className="empty-text">No notifications</p>}
             {notifications.map((n) => (
-              <div
-                key={n.id}
-                className={`bell-item ${!n.is_read ? 'unread' : ''}`}
-              >
-                <p className="bell-title">{n.title}</p>
-                <p className="bell-msg">{n.message}</p>
-                <span className="bell-time">
-                  {format(new Date(n.created_at), 'MMM d, h:mm a')}
-                </span>
+              <div key={n.id} className={`bell-item ${!n.is_read ? 'unread' : ''}`}>
+                <NotificationIcon type={n.type} />
+                <div className="bell-item__body">
+                  <p className="bell-title">{n.title}</p>
+                  <p className="bell-msg">{n.message}</p>
+                  <span className="bell-time">
+                    {format(new Date(n.created_at), 'MMM d, h:mm a')}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {pendingRatingRide && createPortal(
-        <RatingModal
-          ride={pendingRatingRide}
-          onClose={handleCloseRating}
-        />,
-        document.body,
-      )}
+      {pendingRatingRide &&
+        createPortal(<RatingModal ride={pendingRatingRide} onClose={handleCloseRating} />, document.body)}
     </div>
   )
 }

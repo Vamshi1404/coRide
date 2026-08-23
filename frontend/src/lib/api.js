@@ -1,4 +1,12 @@
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '')
+// Dev builds fall back to the local backend; production builds fall back to
+// the Render deployment defined in render.yaml. VITE_API_URL always wins, so
+// ops can repoint the app without a code change.
+const PROD_FALLBACK = 'https://coride-backend.onrender.com'
+const DEV_FALLBACK = 'http://localhost:8000'
+const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? PROD_FALLBACK : DEV_FALLBACK)
+).replace(/\/+$/, '')
 
 let isHandling401 = false
 

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/motion/MotionProvider'
 
-// Odometer-style digit roll for fare/ETA display
-export function FareCounter({ value, prefix = '₹', className }) {
+// Odometer-style digit roll for fare/ETA display (components.css §20)
+export function FareCounter({ value, prefix = '₹', className = '' }) {
   const reducedMotion = useReducedMotion()
   const [displayDigits, setDisplayDigits] = useState([])
   const prevValueRef = useRef(value)
@@ -14,7 +13,7 @@ export function FareCounter({ value, prefix = '₹', className }) {
     prevValueRef.current = value
 
     if (reducedMotion) {
-      setDisplayDigits(str.split('').map((d) => ({ char: d, key: d, animate: false })))
+      setDisplayDigits(str.split('').map((d, i) => ({ char: d, key: `${i}-${d}`, animate: false })))
       return
     }
 
@@ -31,16 +30,10 @@ export function FareCounter({ value, prefix = '₹', className }) {
   }, [value, reducedMotion])
 
   return (
-    <span className={cn('inline-flex items-baseline tabular-nums font-variant-numeric-tabular-nums', className)}>
-      {prefix && <span className="mr-0.5">{prefix}</span>}
+    <span className={`counter-digits${className ? ` ${className}` : ''}`}>
+      {prefix && <span style={{ marginRight: 2 }}>{prefix}</span>}
       {displayDigits.map((digit) => (
-        <span
-          key={digit.key}
-          className={cn(
-            'inline-block overflow-hidden',
-            digit.animate && 'animate-[counterRoll_600ms_cubic-bezier(0.22,1,0.36,1)]'
-          )}
-        >
+        <span key={digit.key} className={digit.animate ? 'is-rolling' : undefined}>
           {digit.char}
         </span>
       ))}

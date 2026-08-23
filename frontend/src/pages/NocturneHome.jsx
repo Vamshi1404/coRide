@@ -1,77 +1,24 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Card, CardContent } from '@/components/ui/card'
 import { MagneticButton } from '@/components/nocturne/magnetic-button'
 import { RouteHero } from '@/components/nocturne/route-hero'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
 import { useReducedMotion } from '@/lib/motion/MotionProvider'
 import { gsap, useGSAP, ScrollTrigger } from '@/lib/gsapSetup'
-import { cn } from '@/lib/utils'
 import {
-  Navigation, Shield, Clock, MapPin, Zap, ArrowRight,
-  Leaf, Users, Star,
+  Navigation, Clock, MapPin, Zap, ArrowRight,
+  Leaf, Users, Star, ShieldCheck,
 } from 'lucide-react'
 
-function Section({ children, className }) {
+function Section({ children, className = '', inset = false }) {
   const [ref, isVisible] = useScrollReveal({ threshold: 0.1 })
   return (
     <section
       ref={ref}
-      className={cn('nc-section-reveal', isVisible && 'visible', className)}
+      className={`chapter nc-section-reveal${inset ? ' chapter--inset' : ''}${className ? ` ${className}` : ''}${isVisible ? ' visible' : ''}`}
     >
       {children}
     </section>
-  )
-}
-
-function FeatureCard({ icon: Icon, title, description }) {
-  return (
-    <Card className="nc-stagger-child bg-[var(--nc-200)] border-[var(--nc-300)] border hover:border-[var(--nc-400)] transition-colors duration-300 group">
-      <CardContent className="p-6 space-y-3">
-        <div className="size-10 rounded-[12px] bg-[var(--nc-300)] flex items-center justify-center group-hover:bg-[var(--nc-accent-dim)] transition-colors duration-300">
-          <Icon size={18} className="text-[var(--nc-600)] group-hover:text-[var(--nc-accent)] transition-colors duration-300" />
-        </div>
-        <h3 className="text-[var(--nc-800)] font-semibold">{title}</h3>
-        <p className="text-[var(--nc-500)] text-sm leading-relaxed">{description}</p>
-      </CardContent>
-    </Card>
-  )
-}
-
-function RouteCard({ from, to, distance }) {
-  return (
-    <Link
-      to={`/search?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`}
-      className="nc-stagger-child flex items-center gap-4 p-4 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] hover:border-[var(--nc-accent)] transition-colors duration-200 group"
-    >
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        <div className="size-2 rounded-full bg-[var(--nc-accent)] shrink-0" />
-        <span className="text-[var(--nc-800)] text-sm font-medium truncate">{from}</span>
-      </div>
-      <div className="flex items-center gap-1.5 text-[var(--nc-400)]" aria-hidden="true">
-        <div className="w-8 h-px bg-[var(--nc-400)]" />
-        <ArrowRight size={12} />
-        <div className="w-8 h-px bg-[var(--nc-400)]" />
-      </div>
-      <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
-        <span className="text-[var(--nc-800)] text-sm font-medium truncate">{to}</span>
-        <div className="size-2 rounded-full bg-[var(--nc-500)] shrink-0" />
-      </div>
-      <span className="text-[var(--nc-500)] text-xs tabular-nums shrink-0 hidden sm:block">{distance} km</span>
-      <ArrowRight size={14} className="text-[var(--nc-500)] group-hover:text-[var(--nc-accent)] group-hover:translate-x-0.5 transition-all shrink-0" />
-    </Link>
-  )
-}
-
-function StepCard({ number, title, description }) {
-  return (
-    <div className="nc-stagger-child relative pl-12 space-y-2">
-      <div className="absolute left-0 top-0 size-8 rounded-full bg-[var(--nc-900)] text-[var(--nc-accent)] flex items-center justify-center text-sm font-bold">
-        {number}
-      </div>
-      <h3 className="text-[var(--nc-800)] font-semibold">{title}</h3>
-      <p className="text-[var(--nc-500)] text-sm leading-relaxed">{description}</p>
-    </div>
   )
 }
 
@@ -103,7 +50,7 @@ export default function NocturneHome() {
       start: 'top top',
       end: 'bottom top',
       scrub: true,
-      animation: gsap.to('.hero-fade', {
+      animation: gsap.to('.hero-core', {
         autoAlpha: 0,
         y: -60,
         ease: 'none',
@@ -113,16 +60,16 @@ export default function NocturneHome() {
 
   return (
     <div ref={heroRef}>
-      {/* ─── Hero ─── */}
-      <section className="relative min-h-[92vh] flex flex-col items-center justify-center px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[var(--nc-0)] via-[var(--nc-50)] to-[var(--nc-50)]" />
+      {/* ─── Chapter 0 · Intro hook ─── */}
+      <section className="home-hero">
+        <div className="hero-gradient" aria-hidden="true" />
 
         {!reducedMotion && (
-          <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div className="hero-particles" aria-hidden="true">
             {Array.from({ length: 40 }).map((_, i) => (
-              <div
+              <span
                 key={i}
-                className="absolute rounded-full bg-[var(--nc-700)]"
+                className="particle"
                 style={{
                   width: `${1 + Math.random() * 2}px`,
                   height: `${1 + Math.random() * 2}px`,
@@ -137,49 +84,47 @@ export default function NocturneHome() {
           </div>
         )}
 
-        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8 hero-fade">
-          <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] text-[var(--nc-600)] text-xs font-medium">
-            <span className="size-1.5 rounded-full bg-[var(--nc-accent)] animate-[livePulse_1.5s_ease-in-out_infinite]" aria-hidden="true" />
+        <div className="hero-core">
+          <p className="hero-badge">
+            <span className="hero-badge__dot" aria-hidden="true" />
             Live now in Hyderabad
-          </div>
+          </p>
 
-          <h1 className="text-[var(--nc-900)] text-5xl md:text-7xl font-bold tracking-[-0.03em] leading-[1.05]">
-            <span className="hero-line block">Ride together.</span>
-            <span className="hero-line block text-[var(--nc-accent)]">Move smarter.</span>
+          <h1 className="hero-title">
+            <span className="hero-line">Ride together.</span>
+            <span className="hero-line hero-line--accent">Move smarter.</span>
           </h1>
 
-          <p className="hero-sub text-[var(--nc-600)] text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+          <p className="hero-sub">
             Carpooling for professionals. Community-rated drivers, real-time GPS
             tracking, and a commute that costs less — for you and the planet.
           </p>
 
-          <RouteHero className="hero-route max-w-3xl mx-auto my-8" />
+          <RouteHero className="hero-route" />
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <MagneticButton render={<Link to="/search" />} size="lg" className="hero-cta bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] px-8 text-base cursor-pointer">
-              <MapPin size={18} className="mr-2" />
+          <div className="hero-cta-row">
+            <MagneticButton render={<Link to="/search" />} variant="accent" size="lg" className="hero-cta">
+              <MapPin size={19} aria-hidden="true" />
               Find a Ride
             </MagneticButton>
-            <MagneticButton render={<Link to="/offer-ride" />} variant="outline" size="lg" className="hero-cta border-[var(--nc-400)] text-[var(--nc-700)] hover:bg-[var(--nc-200)] px-8 text-base cursor-pointer">
-              <Navigation size={18} className="mr-2" />
+            <MagneticButton render={<Link to="/offer-ride" />} variant="outline" size="lg" className="hero-cta">
+              <Navigation size={19} aria-hidden="true" />
               Offer a Ride
             </MagneticButton>
           </div>
         </div>
       </section>
 
-      {/* ─── Features ─── */}
-      <Section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-4">
-            <h2 className="nc-stagger-child text-[var(--nc-900)] text-3xl md:text-4xl font-bold tracking-tight">
-              Built for the daily commute
-            </h2>
-            <p className="nc-stagger-child text-[var(--nc-500)] text-lg max-w-xl mx-auto">
+      {/* ─── Chapter 1 · Why share ─── */}
+      <Section inset>
+        <div className="chapter__inner">
+          <div className="chapter__head">
+            <h2 className="chapter__title nc-stagger-child">Built for the daily commute</h2>
+            <p className="chapter__sub nc-stagger-child">
               Everything you need to share rides safely — nothing you don't.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-5">
+          <div className="features-grid">
             <FeatureCard
               icon={Star}
               title="Community ratings"
@@ -214,18 +159,16 @@ export default function NocturneHome() {
         </div>
       </Section>
 
-      {/* ─── Popular Routes ─── */}
-      <Section className="py-20 px-6 bg-[var(--nc-100)]">
-        <div className="max-w-4xl mx-auto space-y-10">
-          <div className="text-center space-y-3">
-            <h2 className="nc-stagger-child text-[var(--nc-900)] text-3xl font-bold tracking-tight">
-              Popular routes
-            </h2>
-            <p className="nc-stagger-child text-[var(--nc-500)]">
+      {/* ─── Chapter 2 · Popular corridors ─── */}
+      <Section>
+        <div className="chapter__inner">
+          <div className="chapter__head">
+            <h2 className="chapter__title nc-stagger-child">Popular routes</h2>
+            <p className="nc-stagger-child" style={{ color: 'var(--text-secondary)' }}>
               Hyderabad's most commuted corridors — tap one to search it
             </p>
           </div>
-          <div className="space-y-3">
+          <div className="routes-list">
             {POPULAR_ROUTES.map((route) => (
               <RouteCard key={`${route.from}-${route.to}`} {...route} />
             ))}
@@ -233,15 +176,13 @@ export default function NocturneHome() {
         </div>
       </Section>
 
-      {/* ─── How It Works ─── */}
-      <Section className="py-20 px-6">
-        <div className="max-w-3xl mx-auto space-y-12">
-          <div className="text-center">
-            <h2 className="nc-stagger-child text-[var(--nc-900)] text-3xl font-bold tracking-tight">
-              How it works
-            </h2>
+      {/* ─── Chapter 3 · How it works ─── */}
+      <Section inset>
+        <div className="chapter__inner chapter__inner--narrow">
+          <div className="chapter__head">
+            <h2 className="chapter__title nc-stagger-child">How it works</h2>
           </div>
-          <div className="space-y-10">
+          <div className="steps-list">
             <StepCard
               number="1"
               title="Search your route"
@@ -266,22 +207,63 @@ export default function NocturneHome() {
         </div>
       </Section>
 
-      {/* ─── CTA ─── */}
-      <Section className="py-24 px-6">
-        <div className="max-w-3xl mx-auto text-center space-y-8">
-          <h2 className="nc-stagger-child text-[var(--nc-900)] text-4xl md:text-5xl font-bold tracking-tight">
-            Your commute,{' '}
-            <span className="text-[var(--nc-accent)]">reimagined</span>
+      {/* ─── Chapter 4 · Climax CTA ─── */}
+      <Section>
+        <div className="final-cta__inner">
+          <h2 className="final-cta__title nc-stagger-child">
+            Your commute, <span className="text-accent">reimagined</span>
           </h2>
-          <p className="nc-stagger-child text-[var(--nc-500)] text-lg max-w-xl mx-auto">
+          <p className="chapter__sub nc-stagger-child">
             Create a free account — offer seats on your drive or find one heading your way.
           </p>
-          <MagneticButton render={<Link to="/register" />} size="lg" className="bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-800)] px-10 text-base cursor-pointer">
-            Get Started
-            <ArrowRight size={18} className="ml-2" />
-          </MagneticButton>
+          <div className="nc-stagger-child">
+            <MagneticButton render={<Link to="/register" />} variant="accent" size="lg" className="hero-cta">
+              Get Started
+              <ArrowRight size={19} aria-hidden="true" />
+            </MagneticButton>
+          </div>
+          <p className="eyebrow nc-stagger-child" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <ShieldCheck size={14} aria-hidden="true" />
+            Free to join · Rated drivers · Cash or UPI at pickup
+          </p>
         </div>
       </Section>
+    </div>
+  )
+}
+
+function FeatureCard({ icon: Icon, title, description }) {
+  return (
+    <article className="card card--interactive feature-card nc-stagger-child">
+      <span className="card__icon"><Icon size={18} aria-hidden="true" /></span>
+      <h3 className="card__title">{title}</h3>
+      <p className="card__body">{description}</p>
+    </article>
+  )
+}
+
+function RouteCard({ from, to, distance }) {
+  return (
+    <Link to={`/search?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`} className="route-row nc-stagger-child">
+      <span className="routeline" style={{ flex: 1, minWidth: 0 }}>
+        <span className="routeline__node routeline__node--origin" aria-hidden="true" />
+        <span className="routeline__label">{from}</span>
+        <span className="routeline__connector" aria-hidden="true"><ArrowRight size={11} /></span>
+        <span className="routeline__label" style={{ textAlign: 'right' }}>{to}</span>
+        <span className="routeline__node routeline__node--dest" aria-hidden="true" />
+      </span>
+      <span className="route-row__km">{distance} km</span>
+      <ArrowRight size={15} className="route-row__go" aria-hidden="true" />
+    </Link>
+  )
+}
+
+function StepCard({ number, title, description }) {
+  return (
+    <div className="step-item nc-stagger-child">
+      <span className="step-item__num" aria-hidden="true">{number}</span>
+      <h3 className="step-item__title">{title}</h3>
+      <p className="step-item__body">{description}</p>
     </div>
   )
 }

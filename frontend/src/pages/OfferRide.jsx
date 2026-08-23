@@ -123,42 +123,42 @@ export default function OfferRide() {
 
   if (showAddVehicle) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-24 md:pt-28 pb-16">
+      <div className="page page--form">
         <AddVehicle onSaved={onVehicleSaved} onSkip={() => setShowAddVehicle(false)} />
       </div>
     )
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 sm:px-6 pt-24 md:pt-28 pb-16">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--nc-900)]">Offer a ride</h1>
-        <p className="mt-2 text-[var(--nc-500)]">Share your commute and split the costs.</p>
-      </div>
+    <div className="page page--form">
+      <header className="page-head" style={{ textAlign: 'center', alignItems: 'center' }}>
+        <h1 className="page-title">Offer a ride</h1>
+        <p className="page-sub">Share your commute and split the costs.</p>
+      </header>
 
       {vehiclesQuery.isLoading ? (
-        <div className="py-20 flex flex-col items-center gap-3 text-[var(--nc-500)]" aria-busy="true">
-          <Loader2 size={22} className="animate-spin" />
-          <span className="text-sm">Loading your garage…</span>
+        <div className="busy-line" aria-busy="true">
+          <Loader2 size={20} className="spinner spinner--page" aria-hidden="true" />
+          <span>Loading your garage…</span>
         </div>
       ) : (
         <form
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          className="p-5 sm:p-6 rounded-[16px] bg-[var(--nc-200)] border border-[var(--nc-300)] shadow-[0_12px_40px_rgba(0,0,0,0.3)] space-y-4"
+          className="offer-panel"
         >
           {errors.root && (
-            <div role="alert" className="px-3.5 py-2.5 rounded-[10px] bg-[var(--nc-accent-dim)] border border-[var(--nc-accent)]/50 text-sm text-[var(--nc-accent)] flex items-center gap-2">
-              <CircleAlert size={15} /> {errors.root.message}
+            <div role="alert" className="auth-alert">
+              <CircleAlert size={15} aria-hidden="true" style={{ flexShrink: 0 }} /> {errors.root.message}
             </div>
           )}
 
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="field-grid field-grid--wide" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
             <Controller
               name="from_city"
               control={control}
               render={({ field }) => (
-                <div>
+                <div className={`field${errors.from_city ? ' field--invalid' : ''}`}>
                   <AddressInput
                     id="offer-from"
                     label="From"
@@ -179,7 +179,7 @@ export default function OfferRide() {
               name="to_city"
               control={control}
               render={({ field }) => (
-                <div>
+                <div className={`field${errors.to_city ? ' field--invalid' : ''}`}>
                   <AddressInput
                     id="offer-to"
                     label="To"
@@ -199,40 +199,41 @@ export default function OfferRide() {
           </div>
 
           {distanceKm != null && (
-            <p className="flex items-center justify-center gap-1.5 text-xs font-medium text-[var(--nc-accent)] tabular-nums" aria-live="polite">
-              <RouteIcon size={13} />
+            <p className="distance-preview" aria-live="polite">
+              <RouteIcon size={13} aria-hidden="true" />
               ≈ {distanceKm.toFixed(1)} km via fastest route
             </p>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Departure date" error={errors.departure_date}>
-              <input type="date" min={todayISO()} {...register('departure_date')} className={inputCls(errors.departure_date)} />
+          <div className="field-grid">
+            <Field label="Departure date" error={errors.departure_date} htmlFor="offer-date">
+              <input id="offer-date" type="date" min={todayISO()} {...register('departure_date')} className={`input${errors.departure_date ? ' is-invalid' : ''}`} />
             </Field>
-            <Field label="Departure time" error={errors.departure_time}>
-              <input type="time" {...register('departure_time')} className={inputCls(errors.departure_time)} />
+            <Field label="Departure time" error={errors.departure_time} htmlFor="offer-time">
+              <input id="offer-time" type="time" {...register('departure_time')} className={`input${errors.departure_time ? ' is-invalid' : ''}`} />
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Seats offered" error={errors.total_seats}>
-              <select {...register('total_seats')} className={`${inputCls()} cursor-pointer`}>
+          <div className="field-grid">
+            <Field label="Seats offered" error={errors.total_seats} htmlFor="offer-seats">
+              <select id="offer-seats" {...register('total_seats')} className="input">
                 {[1, 2, 3, 4, 5, 6].map((n) => (
                   <option key={n} value={n}>{n}</option>
                 ))}
               </select>
             </Field>
-            <Field label="Fare per seat (₹)" error={errors.final_cost}>
-              <input type="number" min="0" step="10" placeholder="e.g. 150" {...register('final_cost')} className={inputCls(errors.final_cost)} />
+            <Field label="Fare per seat (₹)" error={errors.final_cost} htmlFor="offer-fare">
+              <input id="offer-fare" type="number" min="0" step="10" placeholder="e.g. 150" {...register('final_cost')} className={`input${errors.final_cost ? ' is-invalid' : ''}`} />
             </Field>
           </div>
 
-          <Field label="Vehicle" error={errors.vehicle_id}>
-            <div className="flex gap-2">
+          <Field label="Vehicle" error={errors.vehicle_id} htmlFor="offer-vehicle">
+            <div className="vehicle-row">
               <select
+                id="offer-vehicle"
                 disabled={vehicles.length === 0}
                 {...register('vehicle_id')}
-                className={`${inputCls()} cursor-pointer flex-1`}
+                className={`input${errors.vehicle_id ? ' is-invalid' : ''}`}
               >
                 {vehicles.length === 0 ? (
                   <option value="">No vehicles yet</option>
@@ -247,7 +248,8 @@ export default function OfferRide() {
               <button
                 type="button"
                 onClick={() => setShowAddVehicle(true)}
-                className="shrink-0 px-4 h-11 rounded-[12px] border border-[var(--nc-400)] text-sm font-semibold text-[var(--nc-700)] hover:bg-[var(--nc-300)] transition-colors cursor-pointer whitespace-nowrap"
+                className="btn btn--outline btn--md"
+                style={{ whiteSpace: 'nowrap' }}
               >
                 + Add vehicle
               </button>
@@ -257,13 +259,14 @@ export default function OfferRide() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="!mt-6 w-full h-12 rounded-full bg-[var(--nc-accent)] text-white font-semibold text-sm hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="btn btn--accent btn--lg btn--block"
+            style={{ marginTop: 'var(--p-space-sm)' }}
           >
-            {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+            {isSubmitting && <Loader2 size={16} className="spinner" aria-hidden="true" />}
             Publish ride
           </button>
 
-          <p className="text-center text-xs text-[var(--nc-500)]">
+          <p className="offer-footnote">
             Passengers request seats — you accept or decline. They pay you directly.
           </p>
         </form>
@@ -272,12 +275,10 @@ export default function OfferRide() {
   )
 }
 
-function Field({ label, error, children }) {
+function Field({ label, error, children, htmlFor }) {
   return (
-    <div>
-      <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--nc-500)] mb-1.5">
-        {label}
-      </label>
+    <div className={`field${error ? ' field--invalid' : ''}`}>
+      <label htmlFor={htmlFor} className="field__label">{label}</label>
       {children}
       {error && <FieldError msg={error.message} />}
     </div>
@@ -286,14 +287,8 @@ function Field({ label, error, children }) {
 
 function FieldError({ msg }) {
   return (
-    <p className="mt-1.5 text-xs text-[var(--nc-accent)]" role="alert">
+    <p className="field__error" role="alert">
       {msg}
     </p>
   )
-}
-
-function inputCls(error) {
-  return `w-full h-11 px-4 rounded-[12px] bg-[var(--nc-100)] border ${
-    error ? 'border-[var(--nc-accent)]' : 'border-[var(--nc-300)]'
-  } text-sm text-[var(--nc-800)] placeholder:text-[var(--nc-500)] outline-none focus:border-[var(--nc-accent)] transition-colors`
 }

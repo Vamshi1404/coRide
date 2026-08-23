@@ -12,7 +12,6 @@ import RouteMap from '../components/maps/RouteMap'
 import {
   formatCurrency, formatVehicleName, getDriverName, getInitials,
 } from '@/lib/rideDisplay'
-import { cn } from '@/lib/utils'
 import {
   ChevronRight, Star, CarFront, MessageCircle, Navigation,
   Play, CheckCircle2, Loader2, MapPin, Flag, CircleAlert,
@@ -70,14 +69,16 @@ export default function RideDetailPage() {
 
   if (rideQuery.isLoading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-24 md:pt-28 pb-16 space-y-5" aria-busy="true">
-        <div className="h-8 w-72 max-w-full rounded bg-[var(--nc-200)] animate-pulse" />
-        <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-80 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] animate-pulse" />
-          <div className="space-y-4">
-            {[0, 1].map((i) => (
-              <div key={i} className="h-40 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)] animate-pulse" />
-            ))}
+      <div className="page" aria-busy="true">
+        <div className="stack stack--gap-lg">
+          <div className="skel skel--line lg" style={{ width: 280, maxWidth: '100%' }} />
+          <div className="detail-grid">
+            <div className="skel skel--block" style={{ height: 320 }} />
+            <div className="stack stack--gap-md">
+              {[0, 1].map((i) => (
+                <div key={i} className="skel skel--block" style={{ height: 160 }} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -86,14 +87,14 @@ export default function RideDetailPage() {
 
   if (rideQuery.isError || !ride) {
     return (
-      <div className="min-h-[60vh] pt-32 pb-16 px-6 flex items-center justify-center text-center">
+      <div className="centered-state">
         <div>
-          <CircleAlert size={28} className="mx-auto text-[var(--nc-accent)]" />
-          <h1 className="mt-4 text-xl font-bold text-[var(--nc-900)]">Ride not found</h1>
-          <p className="mt-1.5 text-sm text-[var(--nc-500)]">It may have been cancelled or removed.</p>
-          <Link to="/my-rides" className="inline-block mt-6 px-5 py-2.5 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-sm font-medium hover:bg-[var(--nc-800)] transition-colors">
-            My Rides
-          </Link>
+          <CircleAlert size={28} aria-hidden="true" style={{ color: 'var(--accent-text)' }} />
+          <h1 className="state__title">Ride not found</h1>
+          <p className="state__body">It may have been cancelled or removed.</p>
+          <div className="state__actions">
+            <Link to="/my-rides" className="btn btn--primary btn--md">My Rides</Link>
+          </div>
         </div>
       </div>
     )
@@ -103,94 +104,77 @@ export default function RideDetailPage() {
   const isActive = ride.status === 'in_progress'
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-24 md:pt-28 pb-16">
+    <div className="page">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-8"
+        className="detail-head"
       >
-        <div className="min-w-0">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-[var(--nc-500)] mb-2">
-            <Link to="/my-rides" className="hover:text-[var(--nc-accent)] transition-colors">My Rides</Link>
-            <ChevronRight size={12} />
-            <span className="truncate font-mono">#CR-{String(ride.id).slice(-6)}-HYD</span>
+        <div style={{ minWidth: 0 }}>
+          <nav aria-label="Breadcrumb" className="crumbs">
+            <Link to="/my-rides">My Rides</Link>
+            <ChevronRight size={12} aria-hidden="true" />
+            <span className="mono">#CR-{String(ride.id).slice(-6)}-HYD</span>
           </nav>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[var(--nc-900)] truncate">
-            {ride.from_city} <span className="text-[var(--nc-500)]">to</span> {ride.to_city}
+          <h1 className="page-title detail-title-row" style={{ display: 'block' }}>
+            {ride.from_city} <span style={{ color: 'var(--text-muted)', fontWeight: 'var(--p-weight-medium)' }}>to</span> {ride.to_city}
           </h1>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="row-item__actions">
           {isActive ? (
-            <Link
-              to={`/track/${ride.id}`}
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--nc-accent-dim)] border border-[var(--nc-accent)]/50 text-sm font-semibold text-[var(--nc-accent)] hover:brightness-110 transition-all"
-            >
-              <span className="size-1.5 rounded-full bg-[var(--nc-accent)] animate-pulse" />
+            <Link to={`/track/${ride.id}`} className="badge badge--live badge--lg" style={{ textDecoration: 'none' }}>
+              <span className="badge__dot" aria-hidden="true" />
               Live · Open tracker
             </Link>
           ) : (
-            <span className="px-4 py-2 rounded-full bg-[var(--nc-200)] border border-[var(--nc-300)] text-xs font-medium text-[var(--nc-600)] capitalize">
+            <span className={`badge badge--${ride.status === 'open' ? 'open' : ride.status} badge--lg`}>
               {ride.status.replace('_', ' ')}
             </span>
           )}
         </div>
       </motion.header>
 
-      <div className="grid lg:grid-cols-3 gap-6 items-start">
+      <div className="detail-grid">
         {/* Left */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.05 }}
-          className="lg:col-span-2 space-y-5 min-w-0"
+          className="detail-main"
         >
           {/* Map */}
-          <div className="rounded-[14px] overflow-hidden border border-[var(--nc-300)] relative">
+          <div className="map-frame" style={{ height: 340 }}>
             <RouteMap
               from={{ lat: ride.from_lat, lng: ride.from_lng }}
               to={{ lat: ride.to_lat, lng: ride.to_lng }}
-              height={320}
+              height="100%"
             />
-            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-3 px-4 py-2.5 rounded-[12px] bg-[var(--nc-50)]/85 backdrop-blur-md border border-[var(--nc-300)]">
+            <div className="map-overlaybar">
               <OverlayStat label="Departure" value={ride.departure_time ? new Date(ride.departure_time).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : '—'} />
-              <div className="w-px h-7 bg-[var(--nc-300)]" />
+              <span className="ostat-divider" aria-hidden="true" />
               <OverlayStat label="Distance" value={ride.distance_km != null ? `${Number(ride.distance_km).toFixed(1)} km` : '—'} />
-              <div className="w-px h-7 bg-[var(--nc-300)] hidden sm:block" />
-              <OverlayStat label="Seats left" value={String(ride.available_seats ?? '—')} className="hidden sm:block" />
+              <span className="ostat-divider hide-sm-divider" aria-hidden="true" />
+              <OverlayStat label="Seats left" value={String(ride.available_seats ?? '—')} />
             </div>
           </div>
 
           {/* Timeline */}
-          <div className="p-5 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)]">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--nc-500)] mb-4">
-              Journey timeline
-            </h3>
-            <ol className="grid sm:grid-cols-3 gap-4">
+          <div className="card">
+            <h2 className="section-head">Journey timeline</h2>
+            <ol className="journey-steps" style={{ listStyle: 'none', padding: 0 }}>
               {STEPS.map((step, idx) => {
                 const done = currentStep > idx || ride.status === 'cancelled'
                 const activeNow = currentStep === idx
+                const state = activeNow ? ' tstep--active' : done ? ' tstep--done' : ''
                 return (
-                  <li key={step.key} className="flex sm:flex-col items-center sm:items-start gap-3">
-                    <span
-                      className={cn(
-                        'size-9 rounded-full flex items-center justify-center shrink-0 transition-colors',
-                        activeNow
-                          ? 'bg-[var(--nc-accent)] text-white'
-                          : done
-                            ? 'bg-[var(--nc-900)] text-[var(--nc-0)]'
-                            : 'bg-[var(--nc-100)] border border-[var(--nc-400)] text-[var(--nc-500)]'
-                      )}
-                    >
-                      {activeNow ? <step.icon size={15} /> : <step.icon size={15} />}
-                    </span>
-                    <div className="text-center sm:text-left">
-                      <p className={cn('text-sm font-semibold', activeNow ? 'text-[var(--nc-900)]' : done ? 'text-[var(--nc-700)]' : 'text-[var(--nc-500)]')}>
-                        {step.label}
-                      </p>
-                      <p className="text-[11px] text-[var(--nc-500)]">
+                  <li key={step.key} className={`tstep${state}`}>
+                    <span className="tstep__dot"><step.icon size={15} aria-hidden="true" /></span>
+                    <div>
+                      <p className="tstep__label">{step.label}</p>
+                      <p className="tstep__meta">
                         {activeNow ? 'Current stage' : done ? 'Done' : 'Upcoming'}
                       </p>
                     </div>
@@ -202,30 +186,22 @@ export default function RideDetailPage() {
 
           {/* Live tracking promo while active */}
           {isActive && (
-            <Link
-              to={`/track/${ride.id}`}
-              className="group flex items-center gap-4 p-5 rounded-[14px] bg-[var(--nc-900)] hover:bg-[var(--nc-800)] transition-colors"
-            >
-              <span className="relative flex size-3 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--nc-accent)] opacity-60" />
-                <span className="relative inline-flex rounded-full size-3 bg-[var(--nc-accent)]" />
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="text-[var(--nc-0)] font-semibold text-sm">This ride is live</p>
-                <p className="text-[var(--nc-0)]/60 text-xs mt-0.5">
+            <Link to={`/track/${ride.id}`} className="live-banner">
+              <span className="live-banner__ping" aria-hidden="true" />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p className="live-banner__title">This ride is live</p>
+                <p className="live-banner__sub">
                   Follow the driver's GPS position and traffic-aware ETA in real time.
                 </p>
               </div>
-              <Navigation size={18} className="text-[var(--nc-accent)] group-hover:translate-x-0.5 transition-transform shrink-0" />
+              <Navigation size={18} aria-hidden="true" style={{ color: 'var(--accent-text)', flexShrink: 0 }} />
             </Link>
           )}
 
           {/* Driver requests (driver view) */}
           {isDriver && (
-            <div className="p-5 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)]">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--nc-500)] mb-3">
-                Passenger requests
-              </h3>
+            <div className="card">
+              <h2 className="section-head">Passenger requests</h2>
               <RequestList
                 requests={requestsQuery.data}
                 ride={ride}
@@ -243,58 +219,56 @@ export default function RideDetailPage() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.1 }}
-          className="space-y-5 lg:sticky lg:top-24"
+          className="detail-aside"
         >
           {/* Driver card */}
-          <div className="p-5 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)]">
-            <div className="flex items-center gap-3.5">
-              <div className="size-12 rounded-full bg-[var(--nc-300)] flex items-center justify-center text-base font-bold text-[var(--nc-700)] shrink-0">
-                {getInitials(getDriverName(ride))}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase tracking-wide text-[var(--nc-500)]">
-                  {isDriver ? 'You are the driver' : 'Your driver'}
-                </p>
-                <p className="font-semibold text-[var(--nc-800)] truncate">{getDriverName(ride)}</p>
-                <p className="text-xs text-[var(--nc-500)] flex items-center gap-1 mt-0.5 tabular-nums">
-                  <Star size={11} className="fill-current text-[var(--nc-accent)]" />
+          <div className="card">
+            <div className="result-card__driver">
+              <span className="avatar avatar--lg">{getInitials(getDriverName(ride))}</span>
+              <div className="row-item__body">
+                <p className="ride-card__who-label">{isDriver ? 'You are the driver' : 'Your driver'}</p>
+                <p className="card__title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{getDriverName(ride)}</p>
+                <p className="rating-chip tabular">
+                  <Star size={11} style={{ fill: 'currentColor' }} aria-hidden="true" />
                   {ride.driver_avg_rating ? Number(ride.driver_avg_rating).toFixed(1) : 'New driver'}
-                  {ride.driver_total_ratings > 0 && (
-                    <span className="ml-0.5">({ride.driver_total_ratings})</span>
-                  )}
+                  {ride.driver_total_ratings > 0 && <span style={{ color: 'var(--text-muted)' }}>({ride.driver_total_ratings})</span>}
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 flex items-center gap-3 p-3 rounded-[12px] bg-[var(--nc-100)] border border-[var(--nc-300)]">
-              <CarFront size={18} className="text-[var(--nc-accent)] shrink-0" />
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-[var(--nc-800)] truncate">{formatVehicleName(ride)}</p>
+            <div className="vehicle-strip" style={{ marginTop: 'var(--p-space-lg)' }}>
+              <CarFront size={18} aria-hidden="true" />
+              <div style={{ minWidth: 0 }}>
+                <p className="vehicle-strip__name">{formatVehicleName(ride)}</p>
                 {ride.vehicle_plate && (
-                  <p className="text-xs text-[var(--nc-500)] font-mono">{ride.vehicle_plate}</p>
+                  <p className="vehicle-strip__plate">{ride.vehicle_plate}</p>
                 )}
               </div>
             </div>
 
             <button
+              type="button"
               onClick={() => navigate(`/chat/${ride.id}`)}
-              className="mt-4 w-full h-11 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] text-sm font-semibold hover:bg-[var(--nc-800)] active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="btn btn--primary btn--md btn--block"
+              style={{ marginTop: 'var(--p-space-lg)' }}
             >
-              <MessageCircle size={15} />
+              <MessageCircle size={15} aria-hidden="true" />
               {isDriver ? 'Chat with passengers' : 'Chat with driver'}
             </button>
 
             {!isDriver && (
-              <div className="mt-3">
+              <div style={{ marginTop: 'var(--p-space-md)' }}>
                 <RequestButton ride={ride} onUpdate={() => rideQuery.refetch()} />
               </div>
             )}
 
             {!isDriver && ride.booking_id && ride.booking_status !== 'accepted' && (
               <button
+                type="button"
                 onClick={handleCancelRequest}
                 disabled={cancelling}
-                className="mt-2 w-full h-10 text-sm font-medium text-[var(--nc-500)] hover:text-[var(--nc-accent)] transition-colors cursor-pointer disabled:opacity-50"
+                className="withdraw-btn"
+                style={{ marginTop: 'var(--p-space-sm)' }}
               >
                 {cancelling ? 'Cancelling…' : 'Withdraw my request'}
               </button>
@@ -303,18 +277,16 @@ export default function RideDetailPage() {
             {isDriver && ride.status === 'open' && (
               <>
                 <button
+                  type="button"
                   onClick={startRide}
                   disabled={updating}
-                  className="mt-3 w-full h-11 rounded-full bg-[var(--nc-accent)] text-white text-sm font-semibold hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
+                  className="btn btn--accent btn--md btn--block"
+                  style={{ marginTop: 'var(--p-space-md)' }}
                 >
-                  {updating ? <Loader2 size={15} className="animate-spin" /> : <Play size={15} />}
+                  {updating ? <Loader2 size={15} className="spinner" aria-hidden="true" /> : <Play size={15} aria-hidden="true" />}
                   Start ride
                 </button>
-                <button
-                  onClick={cancelRide}
-                  disabled={updating}
-                  className="mt-2 w-full h-10 text-sm font-medium text-[var(--nc-500)] hover:text-[var(--nc-accent)] transition-colors cursor-pointer disabled:opacity-50"
-                >
+                <button type="button" onClick={cancelRide} disabled={updating} className="withdraw-btn" style={{ marginTop: 'var(--p-space-xs)' }}>
                   Cancel ride
                 </button>
               </>
@@ -323,18 +295,16 @@ export default function RideDetailPage() {
             {isDriver && isActive && (
               <>
                 <button
+                  type="button"
                   onClick={completeRide}
                   disabled={updating}
-                  className="mt-3 w-full h-11 rounded-full bg-[var(--nc-accent)] text-white text-sm font-semibold hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
+                  className="btn btn--accent btn--md btn--block"
+                  style={{ marginTop: 'var(--p-space-md)' }}
                 >
-                  {updating ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+                  {updating ? <Loader2 size={15} className="spinner" aria-hidden="true" /> : <CheckCircle2 size={15} aria-hidden="true" />}
                   Complete ride
                 </button>
-                <button
-                  onClick={cancelRide}
-                  disabled={updating}
-                  className="mt-2 w-full h-10 text-sm font-medium text-[var(--nc-500)] hover:text-[var(--nc-accent)] transition-colors cursor-pointer disabled:opacity-50"
-                >
+                <button type="button" onClick={cancelRide} disabled={updating} className="withdraw-btn" style={{ marginTop: 'var(--p-space-xs)' }}>
                   Cancel ride
                 </button>
               </>
@@ -342,24 +312,24 @@ export default function RideDetailPage() {
           </div>
 
           {/* Fare card */}
-          <div className="p-5 rounded-[14px] bg-[var(--nc-200)] border border-[var(--nc-300)]">
-            <div className="flex items-start justify-between gap-3">
+          <div className="card">
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--p-space-md)' }}>
               <div>
-                <p className="text-[10px] uppercase tracking-wide text-[var(--nc-500)]">Fare per seat</p>
-                <p className="text-2xl font-bold text-[var(--nc-900)] tabular-nums mt-0.5">
+                <p className="ride-card__who-label">Fare per seat</p>
+                <p className="tabular" style={{ fontSize: 'var(--p-text-2xl)', fontWeight: 'var(--p-weight-extrabold)', color: 'var(--text-strong)' }}>
                   {formatCurrency(ride.final_cost)}
                 </p>
               </div>
-              <span className="text-xs text-[var(--nc-500)] tabular-nums text-right">
+              <span className="tstep__meta tabular" style={{ textAlign: 'right' }}>
                 {new Date(ride.departure_time).toLocaleDateString('en-IN', {
                   weekday: 'short', day: 'numeric', month: 'short',
                 })}
               </span>
             </div>
-            <ul className="mt-4 space-y-2 text-xs text-[var(--nc-500)] leading-relaxed">
-              <li>· Pay the driver directly at pickup — cash or UPI.</li>
-              <li>· Requests are free to withdraw until accepted.</li>
-              <li>· Rate your co-travellers after the ride.</li>
+            <ul className="fare-list">
+              <li>Pay the driver directly at pickup — cash or UPI.</li>
+              <li>Requests are free to withdraw until accepted.</li>
+              <li>Rate your co-travellers after the ride.</li>
             </ul>
           </div>
         </motion.aside>
@@ -368,11 +338,11 @@ export default function RideDetailPage() {
   )
 }
 
-function OverlayStat({ label, value, className }) {
+function OverlayStat({ label, value }) {
   return (
-    <div className={`min-w-0 ${className || ''}`}>
-      <p className="text-[9px] uppercase tracking-wide text-[var(--nc-500)]">{label}</p>
-      <p className="text-sm font-bold text-[var(--nc-900)] tabular-nums truncate">{value}</p>
+    <div className="ostat">
+      <p className="ostat__label">{label}</p>
+      <p className="ostat__value">{value}</p>
     </div>
   )
 }

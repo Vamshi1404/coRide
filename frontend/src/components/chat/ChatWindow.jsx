@@ -3,7 +3,6 @@ import toast from 'react-hot-toast'
 import { api } from '../../lib/api'
 import { useAuth } from '../../contexts/AuthContext'
 import { getInitials } from '@/lib/rideDisplay'
-import { cn } from '@/lib/utils'
 import {
   ArrowLeft, Phone, MapPin, Send, Loader2, MapPinned, ExternalLink,
   Clock, CheckCheck,
@@ -95,6 +94,7 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
     const payload = (messageContent || content).trim()
     if (!payload || sending) return
 
+    // Optimistic bubble — reconciled (or rolled back) when the server replies
     const tempId = `temp-${Date.now()}`
     const tempMsg = {
       id: tempId,
@@ -179,43 +179,44 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
 
   if (loading && messages.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center gap-3 text-[var(--nc-500)]" aria-busy="true">
-        <Loader2 size={18} className="animate-spin" />
-        <span className="text-sm">Loading messages…</span>
+      <div className="busy-line" aria-busy="true">
+        <Loader2 size={18} className="spinner" aria-hidden="true" />
+        <span>Loading messages…</span>
       </div>
     )
   }
 
   return (
-    <div className="h-full flex flex-col min-h-0">
+    <div className="chat-window">
       {/* Header */}
-      <header className="shrink-0 flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--nc-300)] bg-[var(--nc-100)]">
-        <div className="flex items-center gap-3 min-w-0">
+      <header className="chat-head">
+        <div className="chat-head__id">
           {onBack && (
             <button
+              type="button"
               onClick={onBack}
               aria-label="Back to conversations"
-              className="md:hidden size-9 shrink-0 rounded-full flex items-center justify-center text-[var(--nc-700)] hover:bg-[var(--nc-200)] cursor-pointer"
+              className="icon-btn chat-back"
+              style={{ border: 'none' }}
             >
               <ArrowLeft size={18} />
             </button>
           )}
-          <div className="size-10 shrink-0 rounded-full bg-[var(--nc-900)] flex items-center justify-center text-sm font-bold text-[var(--nc-0)]">
-            {getInitials(convName)}
-          </div>
-          <div className="min-w-0">
-            <h2 className="font-semibold text-[var(--nc-900)] truncate">{convName || 'Chat'}</h2>
-            <p className="text-[11px] text-[var(--nc-500)] flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-[var(--nc-accent)] animate-pulse" />
+          <span className="avatar avatar--md avatar--brand">{getInitials(convName)}</span>
+          <div style={{ minWidth: 0 }}>
+            <h2 className="chat-head__name">{convName || 'Chat'}</h2>
+            <p className="chat-head__status">
+              <span className="chat-head__live-dot" aria-hidden="true" />
               {convStatus || 'Ride chat'}
             </p>
           </div>
         </div>
         <button
+          type="button"
           onClick={handleCall}
           title={driverPhone ? `Call ${convName}` : 'Phone number unavailable'}
           aria-label="Call"
-          className="size-9 shrink-0 rounded-full border border-[var(--nc-300)] text-[var(--nc-600)] hover:border-[var(--nc-accent)] hover:text-[var(--nc-accent)] transition-colors flex items-center justify-center cursor-pointer"
+          className="icon-btn"
         >
           <Phone size={16} />
         </button>
@@ -223,81 +224,57 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
 
       {/* Messages */}
       <div
-        className="flex-1 overflow-y-auto px-4 py-4 space-y-1 min-h-0"
+        className="chat-msgs"
         ref={areaRef}
         onScroll={handleScrollArea}
         data-lenis-prevent
+        aria-live="polite"
       >
         {messages.length === 0 && (
-          <div className="h-full flex items-center justify-center">
-            <p className="text-sm text-[var(--nc-500)]">No messages yet — say hello!</p>
-          </div>
+          <p className="empty-text" style={{ marginTop: 'auto', marginBottom: 'auto' }}>
+            No messages yet — say hello!
+          </p>
         )}
 
         {messages.map((msg, idx) => {
           const isMine = String(msg.sender_id) === String(user?.id)
           return (
-            <div key={msg.id}>
+            <div key={msg.id} style={{ display: 'flex', flexDirection: 'column' }}>
               {showTimestamp(msg, idx) && (
-                <div className="flex justify-center my-3">
-                  <span className="px-3 py-1 rounded-full bg-[var(--nc-200)] text-[11px] text-[var(--nc-500)] tabular-nums">
-                    {formatTime(msg.created_at)}
-                  </span>
-                </div>
+                <span className="chat-day-chip tabular">{formatTime(msg.created_at)}</span>
               )}
-              <div className={cn('flex gap-2 max-w-[85%] items-end', isMine ? 'ml-auto flex-row-reverse' : 'mr-auto')}>
+              <div className={`msg-row ${isMine ? 'msg-row--out' : 'msg-row--in'}`}>
                 {!isMine && (
-                  <div className="size-7 shrink-0 rounded-full bg-[var(--nc-300)] flex items-center justify-center text-[10px] font-bold text-[var(--nc-600)]">
+                  <span className="avatar avatar--xs" aria-hidden="true">
                     {getInitials(msg.sender_name || convName)}
-                  </div>
+                  </span>
                 )}
-                <div className="min-w-0">
-                  <div
-                    className={cn(
-                      'px-3.5 py-2.5 rounded-[14px] shadow-sm',
-                      isMine
-                        ? 'bg-[var(--nc-accent)] text-white rounded-br-[4px]'
-                        : 'bg-[var(--nc-200)] border border-[var(--nc-300)] text-[var(--nc-800)] rounded-bl-[4px]'
-                    )}
-                  >
+                <div style={{ minWidth: 0 }}>
+                  <div className={`bubble ${isMine ? 'bubble--out' : 'bubble--in'}${msg.pending ? ' bubble__pending' : ''}`}>
                     {isLocationMsg(msg.content) ? (
                       <a
                         href={msg.content}
                         target="_blank"
                         rel="noreferrer"
-                        className={cn(
-                          'flex items-center gap-2.5 p-2.5 rounded-[10px] min-w-[190px]',
-                          isMine ? 'bg-black/15' : 'bg-[var(--nc-accent-dim)]'
-                        )}
+                        className={`loc-card ${isMine ? 'loc-card--out' : 'loc-card--in'}`}
                       >
-                        <span className={cn(
-                          'size-8 shrink-0 rounded-[8px] flex items-center justify-center',
-                          isMine ? 'bg-white/20' : 'bg-[var(--nc-accent)] text-white'
-                        )}>
-                          <MapPin size={14} />
+                        <span className="loc-card__pin"><MapPin size={14} /></span>
+                        <span style={{ minWidth: 0 }}>
+                          <span className="loc-card__title">Shared location</span>
+                          <span className="loc-card__sub">Tap to open in Google Maps</span>
                         </span>
-                        <span className="min-w-0">
-                          <span className={cn('block text-xs font-bold', isMine ? 'text-white' : 'text-[var(--nc-800)]')}>
-                            Shared location
-                          </span>
-                          <span className={cn('block text-[11px]', isMine ? 'text-white/80' : 'text-[var(--nc-500)]')}>
-                            Tap to open in Google Maps
-                          </span>
-                        </span>
-                        <ExternalLink size={13} className={cn('shrink-0 ml-auto', isMine ? 'text-white/80' : 'text-[var(--nc-500)]')} />
+                        <ExternalLink size={13} style={{ marginLeft: 'auto', opacity: 0.8 }} />
                       </a>
                     ) : (
-                      <p className="text-sm leading-relaxed break-words">{msg.content}</p>
+                      <p>{msg.content}</p>
                     )}
                   </div>
-                  <div className={cn('flex items-center gap-1 mt-1 px-1', isMine && 'justify-end')}>
-                    <span className="text-[10px] text-[var(--nc-500)] tabular-nums flex items-center gap-1">
-                      {msg.pending && <Clock size={9} />}
-                      {msg.created_at
-                        ? new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
-                        : ''}
-                    </span>
-                    {isMine && !msg.pending && <CheckCheck size={12} className="text-[var(--nc-accent)]" />}
+                  <div className={`msg-row__meta${isMine ? ' msg-row__meta--out' : ''}`}>
+                    {msg.pending && <Clock size={9} aria-hidden="true" />}
+                    {msg.created_at
+                      ? new Date(msg.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+                      : ''}
+                    {isMine && !msg.pending && <CheckCheck size={12} className="delivered" aria-hidden="true" />}
                   </div>
                 </div>
               </div>
@@ -308,9 +285,10 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
       </div>
 
       {/* Composer */}
-      <footer className="shrink-0 px-4 pt-2 pb-4 border-t border-[var(--nc-300)] bg-[var(--nc-100)]">
-        <div className="flex gap-2 pb-2 overflow-x-auto scrollbar-hide">
-          <QuickChip onClick={shareLocation} disabled={sharingLocation} icon={<MapPinned size={13} />}>
+      <footer style={{ flexShrink: 0, padding: 'var(--p-space-sm) var(--p-space-lg) var(--p-space-lg)', borderTop: '1px solid var(--border-default)', background: 'var(--bg-inset)' }}>
+        <div className="quick-chips">
+          <QuickChip onClick={shareLocation} disabled={sharingLocation}>
+            <MapPinned size={13} aria-hidden="true" />
             {sharingLocation ? 'Locating…' : 'Share location'}
           </QuickChip>
           <QuickChip onClick={() => setContent('Please wait for 5 mins, I am on my way!')}>
@@ -321,8 +299,8 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
           </QuickChip>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex-1 flex items-center bg-[var(--nc-200)] border border-[var(--nc-300)] rounded-full px-4 transition-colors focus-within:border-[var(--nc-accent)]">
+        <div className="composer">
+          <div className="composer__field">
             <input
               type="text"
               value={content}
@@ -331,16 +309,17 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
               placeholder="Type a message…"
               maxLength={500}
               aria-label="Message"
-              className="flex-1 h-11 bg-transparent text-sm text-[var(--nc-800)] placeholder:text-[var(--nc-500)] outline-none"
+              className="composer__input"
             />
           </div>
           <button
+            type="button"
             onClick={() => send()}
             disabled={sending || !content.trim()}
             aria-label="Send message"
-            className="size-11 shrink-0 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] hover:bg-[var(--nc-accent)] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center justify-center"
+            className="composer__send"
           >
-            {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+            {sending ? <Loader2 size={16} className="spinner" /> : <Send size={16} />}
           </button>
         </div>
       </footer>
@@ -348,14 +327,14 @@ export default function ChatWindow({ rideId, conversation, onBack }) {
   )
 }
 
-function QuickChip({ children, icon, onClick, disabled }) {
+function QuickChip({ children, onClick, disabled }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
-      className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-transparent border border-[var(--nc-accent)]/40 text-[var(--nc-accent)] text-xs font-medium hover:bg-[var(--nc-accent-dim)] transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
+      className="quick-chip"
     >
-      {icon}
       {children}
     </button>
   )

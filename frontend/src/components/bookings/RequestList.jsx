@@ -2,7 +2,6 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { api } from '../../lib/api'
 import { getInitials } from '@/lib/rideDisplay'
-import { cn } from '@/lib/utils'
 import { Check, X } from 'lucide-react'
 
 export default function RequestList({ requests, ride, onUpdate }) {
@@ -27,52 +26,46 @@ export default function RequestList({ requests, ride, onUpdate }) {
 
   if (!requests?.length) {
     return (
-      <p className="text-sm text-[var(--nc-500)] py-2">
+      <p className="row-item__sub" style={{ padding: 'var(--p-space-xs) 0' }}>
         No requests yet. Share your ride to fill your seats.
       </p>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <div className="stack stack--gap-lg">
       {pending.length > 0 && (
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-[var(--nc-500)] mb-2">
-            Pending ({pending.length})
-          </h4>
-          <ul className="space-y-2">
+          <h4 className="req-group-label">Pending ({pending.length})</h4>
+          <ul className="row-list" style={{ listStyle: 'none', padding: 0 }}>
             {pending.map((req) => (
-              <li
-                key={req.id}
-                className="flex items-center gap-3 p-3 rounded-[12px] bg-[var(--nc-100)] border border-[var(--nc-300)]"
-              >
-                <div className="size-9 shrink-0 rounded-full bg-[var(--nc-300)] flex items-center justify-center text-xs font-bold text-[var(--nc-700)]">
+              <li key={req.id} className="row-item">
+                <span className="avatar avatar--sm" aria-hidden="true">
                   {getInitials(req.passenger_name)}
+                </span>
+                <div className="row-item__body">
+                  <p className="row-item__title">{req.passenger_name}</p>
+                  {req.passenger_phone && <p className="row-item__sub tabular">{req.passenger_phone}</p>}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[var(--nc-800)] truncate">
-                    {req.passenger_name}
-                  </p>
-                  {req.passenger_phone && (
-                    <p className="text-xs text-[var(--nc-500)]">{req.passenger_phone}</p>
-                  )}
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="row-item__actions">
                   <button
+                    type="button"
                     onClick={() => respond(req.id, 'accepted')}
                     disabled={loading === req.id || !canAccept}
                     aria-label={`Accept ${req.passenger_name}`}
                     title={!canAccept ? 'No seats available' : 'Accept'}
-                    className="size-8 rounded-full bg-[var(--nc-900)] text-[var(--nc-0)] flex items-center justify-center hover:bg-[var(--nc-accent)] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    data-tooltip={!canAccept ? 'No seats available' : undefined}
+                    className="icon-btn icon-btn--solid icon-btn--sm"
                   >
-                    <Check size={14} />
+                    {loading === req.id ? <span className="spinner" style={{ width: 12, height: 12 }} /> : <Check size={14} />}
                   </button>
                   <button
+                    type="button"
                     onClick={() => respond(req.id, 'rejected')}
                     disabled={loading === req.id}
                     aria-label={`Decline ${req.passenger_name}`}
                     title="Decline"
-                    className="size-8 rounded-full border border-[var(--nc-400)] text-[var(--nc-500)] flex items-center justify-center hover:border-[var(--nc-accent)] hover:text-[var(--nc-accent)] transition-colors cursor-pointer disabled:opacity-40"
+                    className="icon-btn icon-btn--sm"
                   >
                     <X size={14} />
                   </button>
@@ -85,22 +78,17 @@ export default function RequestList({ requests, ride, onUpdate }) {
 
       {resolved.length > 0 && (
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-[var(--nc-500)] mb-2">
-            Resolved
-          </h4>
-          <ul className="space-y-1.5">
+          <h4 className="req-group-label">Resolved</h4>
+          <ul className="stack stack--gap-xs" style={{ listStyle: 'none', padding: 0, gap: 6 }}>
             {resolved.map((req) => (
               <li
                 key={req.id}
-                className={cn(
-                  'flex items-center justify-between px-3 py-2 rounded-[10px] text-xs',
-                  req.status === 'accepted'
-                    ? 'bg-[var(--nc-accent-dim)] text-[var(--nc-700)]'
-                    : 'bg-[var(--nc-100)] text-[var(--nc-500)]'
-                )}
+                className={`resolved-row${req.status === 'accepted' ? ' resolved-row--accepted' : ''}`}
               >
-                <span className="font-medium truncate">{req.passenger_name}</span>
-                <span className="capitalize shrink-0 ml-2">{req.status}</span>
+                <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {req.passenger_name}
+                </span>
+                <span style={{ textTransform: 'capitalize', flexShrink: 0 }}>{req.status}</span>
               </li>
             ))}
           </ul>

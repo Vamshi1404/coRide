@@ -4,7 +4,7 @@ A ride-sharing application connecting drivers and passengers with real-time chat
 
 ## Tech Stack
 
-- **Frontend:** React + Vite, Tailwind CSS v4 + shadcn/ui, Motion (route transitions & micro-interactions), GSAP + ScrollTrigger (landing storytelling), Lenis smooth scroll, TanStack Query, react-hook-form + zod, TomTom Maps SDK, lucide-react
+- **Frontend:** React + Vite, manual CSS design system (~5,000 lines, no Tailwind/shadcn), Motion (route transitions & micro-interactions), GSAP + ScrollTrigger (landing storytelling), Lenis smooth scroll, TanStack Query, react-hook-form + zod, TomTom Maps SDK, lucide-react
 - **Backend:** FastAPI (Python), asyncpg, JWT auth (bcrypt + HS256)
 - **Database:** PostgreSQL (via Supabase)
 
@@ -80,12 +80,16 @@ A ride-sharing application connecting drivers and passengers with real-time chat
 
 ### UI/UX
 
-- NOCTURNE dark design system (monochrome scale + signal-orange accent) across every surface
+- NOCTURNE dark-first design system (~5,000 lines of hand-written CSS across 6 files: tokens, base, layout, components, pages, states) — no Tailwind or shadcn
+- Three-layer token architecture: primitive values → semantic roles → component aliases, with light-theme overrides via `data-theme="light"`
+- Full accessibility: `prefers-reduced-motion`, `prefers-reduced-transparency`, `prefers-contrast: more`, `forced-colors`, keyboard navigation, ARIA attributes, focus-visible rings, skip-link, error summaries
+- Print stylesheet (ride detail doubles as a receipt)
 - Branded first-load preloader (once per session), skeleton screens for all data views
 - Route-level code splitting with Suspense + animated page transitions (Motion)
 - Scroll-triggered reveal animations and GSAP hero choreography on the landing page
 - Lenis smooth scrolling, magnetic buttons, reduced-motion fallbacks throughout
-- Responsive nav with mobile drawer, notification bell, and real empty/error states
+- Responsive nav with mobile drawer, notification bell (type-colored icons per event), and real empty/error states
+- Segmented controls for vehicle type selection, booking flow stepper, route progress bar
 - lucide-react icons
 
 ## Getting Started

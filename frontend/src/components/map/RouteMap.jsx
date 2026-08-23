@@ -11,7 +11,7 @@ export default function RouteMap({ from, to, driverLocation, height = '300px' })
   const driverMarkerRef = useRef(null)
 
   useEffect(() => {
-    if (!mapEl.current) return
+    if (!mapEl.current || !API_KEY) return
     const map = tt.map({
       key: API_KEY,
       container: mapEl.current,
@@ -36,7 +36,10 @@ export default function RouteMap({ from, to, driverLocation, height = '300px' })
       }
     })
 
-    return () => { map.remove() }
+    return () => {
+      mapRef.current = null
+      map.remove()
+    }
   }, [])
 
   useEffect(() => {
@@ -63,14 +66,9 @@ export default function RouteMap({ from, to, driverLocation, height = '300px' })
         driverMarkerRef.current.setLngLat([driverLocation.lng, driverLocation.lat])
       } else {
         const el = document.createElement('div')
-        el.style.width = '16px'
-        el.style.height = '16px'
-        el.style.background = 'var(--success)'
-        el.style.borderRadius = '50%'
-        el.style.border = '3px solid white'
-        el.style.boxShadow = '0 0 8px var(--primary-glow)'
+        el.className = 'driver-marker'
         if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          el.style.animation = 'pulse-ring 2.4s ease-out infinite'
+          el.classList.add('driver-marker--pulse')
         }
         const marker = new tt.Marker({ element: el })
           .setLngLat([driverLocation.lng, driverLocation.lat])
@@ -81,7 +79,7 @@ export default function RouteMap({ from, to, driverLocation, height = '300px' })
   }, [driverLocation?.lat, driverLocation?.lng])
 
   return (
-    <div style={{ height, width: '100%', borderRadius: 8, overflow: 'hidden' }}>
+    <div style={{ height, width: '100%' }}>
       <div ref={mapEl} style={{ height: '100%', width: '100%' }} />
     </div>
   )

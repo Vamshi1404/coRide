@@ -4,12 +4,12 @@ import { calculateRoute } from '../../lib/tomtom'
 
 const API_KEY = import.meta.env.VITE_TOMTOM_API_KEY
 
-export default function RouteMap({ from, to, height = 300, className = '' }) {
+export default function RouteMap({ from, to, height = 300 }) {
   const mapEl = useRef(null)
   const mapRef = useRef(null)
 
   useEffect(() => {
-    if (!from || !to || !mapEl.current) return
+    if (!from || !to || !mapEl.current || !API_KEY) return
 
     const map = tt.map({
       key: API_KEY,
@@ -28,8 +28,9 @@ export default function RouteMap({ from, to, height = 300, className = '' }) {
 
       try {
         const route = await calculateRoute(from.lat, from.lng, to.lat, to.lng)
-        const coords = route.routeGeometry.map(p => [p.lon, p.lat])
+        const coords = route.routeGeometry.map((p) => [p.lon, p.lat])
 
+        if (!mapRef.current) return
         map.addLayer({
           id: 'route',
           type: 'line',
@@ -42,7 +43,7 @@ export default function RouteMap({ from, to, height = 300, className = '' }) {
             },
           },
           layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: { 'line-color': '#1b7f3c', 'line-width': 4, 'line-opacity': 0.85 },
+          paint: { 'line-color': '#ff4d1c', 'line-width': 4, 'line-opacity': 0.85 },
         })
 
         const bounds = new tt.LngLatBounds()
@@ -56,23 +57,34 @@ export default function RouteMap({ from, to, height = 300, className = '' }) {
       }
     })
 
-    return () => { map.remove() }
+    return () => {
+      mapRef.current = null
+      map.remove()
+    }
   }, [from?.lat, from?.lng, to?.lat, to?.lng])
+
+  if (!API_KEY) {
+    return (
+      <div className="map-frame__fallback" style={{ height }}>
+        Map preview unavailable — set VITE_TOMTOM_API_KEY
+      </div>
+    )
+  }
 
   if (!from || !to) {
     return (
-      <div
-        className={`route-map-fallback ${className}`}
-        style={{ height, background: 'var(--surface-variant)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--on-surface-variant)', fontSize: '0.85rem' }}
-      >
+      <div className="map-frame__fallback" style={{ height }}>
         Map unavailable
       </div>
     )
   }
 
   return (
-    <div>
-      <div ref={mapEl} style={{ height, borderRadius: 12, overflow: 'hidden' }} className={className} />
-    </div>
+    <div
+      ref={mapEl}
+      style={{ position: 'absolute', inset: 0, height }}
+      aria-label={`Route map from ${from.lat}, ${from.lng} to ${to.lat}, ${to.lng}`}
+      role="img"
+    />
   )
 }

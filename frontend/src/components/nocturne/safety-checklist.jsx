@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/lib/motion/MotionProvider'
 import { Check, MessageCircle, Star, MapPinned } from 'lucide-react'
@@ -35,47 +34,46 @@ export function SafetyChecklist({ className }) {
   }, [reducedMotion])
 
   return (
-    <Card className={cn('bg-[var(--nc-200)] border-[var(--nc-300)] border', className)}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-[var(--nc-800)] text-base flex items-center gap-2">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--nc-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
-          Safety first
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2.5">
-        <ul className="space-y-2.5">
-          {TIPS.map((item) => {
-            const isComplete = completedItems.includes(item.id)
-            const Icon = item.icon
-            return (
-              <li
-                key={item.id}
-                className={cn(
-                  'flex items-center gap-3 text-sm transition-opacity duration-300',
-                  isComplete ? 'opacity-100' : 'opacity-40'
-                )}
+    <div className={cn('card', className)}>
+      <h3 className="section-head" style={{ color: 'var(--text-strong)', fontSize: 'var(--fs-small)', textTransform: 'none', letterSpacing: 0 }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-solid)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+        Safety first
+      </h3>
+
+      <ul style={{ listStyle: 'none', padding: 0 }} className="stack stack--gap-md">
+        {TIPS.map((item) => {
+          const isComplete = completedItems.includes(item.id)
+          const Icon = item.icon
+          return (
+            <li key={item.id} className="row-item" style={{ background: 'transparent', border: 'none', padding: 0, opacity: isComplete ? 1 : 0.4, transition: 'opacity 300ms ease' }}>
+              <span
+                aria-hidden="true"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 20,
+                  height: 20,
+                  flexShrink: 0,
+                  borderRadius: '50%',
+                  border: `1px solid ${isComplete ? 'var(--text-strong)' : 'var(--border-strong)'}`,
+                  background: isComplete ? 'var(--text-strong)' : 'transparent',
+                  color: isComplete ? 'var(--bg-page)' : 'transparent',
+                  transition: 'all 300ms ease',
+                }}
               >
-                <span
-                  className={cn(
-                    'flex items-center justify-center size-5 rounded-full border text-xs transition-all duration-300 shrink-0',
-                    isComplete
-                      ? 'bg-[var(--nc-900)] border-[var(--nc-900)] text-[var(--nc-0)]'
-                      : 'border-[var(--nc-400)] text-transparent'
-                  )}
-                >
-                  <Check size={12} strokeWidth={3} />
-                </span>
-                <Icon size={14} className="text-[var(--nc-500)] shrink-0" />
-                <span className={cn(isComplete ? 'text-[var(--nc-800)]' : 'text-[var(--nc-500)]')}>
-                  {item.label}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
-      </CardContent>
-    </Card>
+                <Check size={12} strokeWidth={3} />
+              </span>
+              <Icon size={14} aria-hidden="true" style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+              <span style={{ fontSize: 'var(--fs-small)', color: isComplete ? 'var(--text-primary)' : 'var(--text-muted)', transition: 'color 300ms ease' }}>
+                {item.label}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
   )
 }

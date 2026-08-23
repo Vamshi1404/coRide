@@ -1,20 +1,25 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'motion/react'
+import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { useAuth } from '../contexts/AuthContext'
+import { motion } from 'motion/react'
 import { api } from '../lib/api'
+import { useAuth } from '../contexts/AuthContext'
+import AddVehicle from '../components/vehicles/AddVehicle'
 import { getInitials } from '@/lib/rideDisplay'
 import {
   Star, PencilLine, ChevronRight, Route as RouteIcon,
-  MessageCircle, ShieldCheck, CheckCircle2, Loader2,
+  MessageCircle, ShieldCheck, CheckCircle2, Loader2, CarFront, Plus,
 } from 'lucide-react'
+
+const VEHICLE_LABELS = { car: 'Car', suv: 'SUV', bike: 'Bike' }
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth()
   const [name, setName] = useState(user?.name || '')
   const [phone, setPhone] = useState(user?.phone || '')
   const [saving, setSaving] = useState(false)
+  const [showAddVehicle, setShowAddVehicle] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -22,6 +27,12 @@ export default function ProfilePage() {
       setPhone(user.phone || '')
     }
   }, [user])
+
+  const vehiclesQuery = useQuery({
+    queryKey: ['vehicles'],
+    queryFn: () => api.get('/api/vehicles'),
+  })
+  const vehicles = vehiclesQuery.data ?? []
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -39,98 +50,159 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 sm:px-6 pt-24 md:pt-28 pb-16">
+    <div className="page page--form">
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="p-6 sm:p-7 rounded-[16px] bg-[var(--nc-200)] border border-[var(--nc-300)] shadow-[0_12px_40px_rgba(0,0,0,0.3)]"
+        className="card profile-card"
       >
         {/* Identity */}
-        <div className="flex items-center gap-4">
-          <div className="size-[72px] shrink-0 rounded-full bg-gradient-to-br from-[var(--nc-900)] to-[var(--nc-700)] text-[var(--nc-0)] flex items-center justify-center text-2xl font-bold shadow-lg">
+        <div className="profile-identity">
+          <span className="avatar avatar--xl avatar--brand" aria-hidden="true">
             {getInitials(user?.name)}
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-xl font-bold tracking-tight text-[var(--nc-900)] truncate">
-              {user?.name || 'Your profile'}
-            </h1>
-            <p className="text-sm text-[var(--nc-500)] truncate">{user?.email}</p>
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <h1 className="profile-name">{user?.name || 'Your profile'}</h1>
+            <p className="profile-email">{user?.email}</p>
             {user?.total_ratings > 0 ? (
-              <p className="mt-1 flex items-center gap-1.5 text-sm tabular-nums">
-                <Star size={13} className="fill-current text-[var(--nc-accent)]" />
-                <span className="font-semibold text-[var(--nc-800)]">{Number(user.avg_rating).toFixed(1)}</span>
-                <span className="text-[var(--nc-500)]">({user.total_ratings} reviews)</span>
+              <p className="profile-rating">
+                <Star size={13} style={{ fill: 'currentColor', color: 'var(--accent-solid)' }} aria-hidden="true" />
+                <strong>{Number(user.avg_rating).toFixed(1)}</strong>
+                <span>({user.total_ratings} reviews)</span>
               </p>
             ) : (
-              <p className="mt-1 text-xs italic text-[var(--nc-500)]">No ratings yet</p>
+              <p className="row-item__sub" style={{ fontStyle: 'italic' }}>No ratings yet</p>
             )}
           </div>
         </div>
 
-        <div className="my-6 h-px bg-[var(--nc-300)]" />
+        <hr className="divider" />
 
         {/* Edit form */}
         <section aria-label="Edit profile">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-[var(--nc-800)] mb-4">
-            <PencilLine size={14} className="text-[var(--nc-accent)]" />
+          <h2 className="section-head" style={{ color: 'var(--text-strong)', fontSize: 'var(--fs-small)', textTransform: 'none', letterSpacing: 0 }}>
+            <PencilLine size={14} aria-hidden="true" style={{ color: 'var(--accent-text)' }} />
             Edit profile
           </h2>
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-4">
-            <Field label="Full name">
+          <form onSubmit={handleSubmit} noValidate className="stack stack--gap-lg" style={{ marginTop: 'var(--p-space-md)' }}>
+            <div className="field">
+              <label htmlFor="pf-name" className="field__label">Full name</label>
               <input
+                id="pf-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your full name"
-                className={inputCls}
+                className="input"
               />
-            </Field>
+            </div>
 
-            <Field label="Email">
+            <div className="field">
+              <label htmlFor="pf-email" className="field__label">Email</label>
               <input
+                id="pf-email"
                 type="email"
                 value={user?.email || ''}
                 disabled
                 aria-disabled
-                className={`${inputCls} opacity-60 cursor-not-allowed`}
+                className="input"
               />
-            </Field>
+            </div>
 
-            <Field label="Phone number" hint="Needed so drivers and passengers can reach you.">
+            <div className="field">
+              <label htmlFor="pf-phone" className="field__label">Phone number</label>
               <input
+                id="pf-phone"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91 98765 43210"
-                className={inputCls}
+                className="input"
               />
-            </Field>
+              <p className="field__hint">Needed so drivers and passengers can reach you.</p>
+            </div>
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="!mt-6 w-full h-11 rounded-full bg-[var(--nc-accent)] text-white font-semibold text-sm hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {saving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+            <button type="submit" disabled={saving} className="btn btn--accent btn--md btn--block">
+              {saving ? <Loader2 size={15} className="spinner" aria-hidden="true" /> : <CheckCircle2 size={15} aria-hidden="true" />}
               {saving ? 'Saving…' : 'Save changes'}
             </button>
           </form>
         </section>
 
-        <div className="my-6 h-px bg-[var(--nc-300)]" />
+        <hr className="divider" />
+
+        {/* Vehicles */}
+        <section aria-label="Your vehicles">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--p-space-md)' }}>
+            <h2 className="section-head" style={{ margin: 0, color: 'var(--text-strong)', fontSize: 'var(--fs-small)', textTransform: 'none', letterSpacing: 0 }}>
+              <CarFront size={14} aria-hidden="true" style={{ color: 'var(--accent-text)' }} />
+              Your vehicles
+            </h2>
+            <button
+              type="button"
+              onClick={() => setShowAddVehicle((v) => !v)}
+              className="btn btn--outline btn--sm"
+            >
+              <Plus size={14} aria-hidden="true" />
+              Add
+            </button>
+          </div>
+
+          {showAddVehicle && (
+            <div style={{ marginTop: 'var(--p-space-lg)' }}>
+              <AddVehicle
+                onSaved={() => {
+                  setShowAddVehicle(false)
+                  vehiclesQuery.refetch()
+                }}
+              />
+            </div>
+          )}
+
+          {vehiclesQuery.isLoading ? (
+            <div className="vehicle-list" aria-busy="true">
+              {[0, 1].map((i) => (
+                <div key={i} className="skel skel--block" style={{ height: 64 }} aria-hidden="true" />
+              ))}
+            </div>
+          ) : vehicles.length === 0 ? (
+            !showAddVehicle && (
+              <p className="state__body" style={{ marginTop: 'var(--p-space-md)', textAlign: 'center' }}>
+                No vehicles yet — add one to start offering rides.
+              </p>
+            )
+          ) : (
+            <ul className="vehicle-list" style={{ listStyle: 'none', padding: 0 }}>
+              {vehicles.map((v) => (
+                <li key={v.id} className="vehicle-item">
+                  <CarFront size={17} aria-hidden="true" />
+                  <div style={{ minWidth: 0 }}>
+                    <p className="vehicle-item__name">{v.brand} {v.model}</p>
+                    <p className="vehicle-item__meta tabular">
+                      {v.seat_capacity} seats · {VEHICLE_LABELS[v.type] || v.type}
+                    </p>
+                  </div>
+                  <span className="badge badge--neutral mono">{v.registration_number}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <hr className="divider" />
 
         {/* Stats strip */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="profile-stats">
           <StatBox label="Rides completed" value={user?.completed_rides ?? 0} />
           <StatBox label="Rides cancelled" value={user?.cancelled_rides ?? 0} />
         </div>
 
-        <div className="my-6 h-px bg-[var(--nc-300)]" />
+        <hr className="divider" />
 
         {/* Quick links */}
-        <nav aria-label="Quick links" className="space-y-1">
+        <nav aria-label="Quick links" className="profile-links">
           <QuickLink to="/my-rides" icon={<RouteIcon size={17} />} label="My Rides" />
           <QuickLink to="/chats" icon={<MessageCircle size={17} />} label="Messages" />
           <QuickLink to="/privacy-policy" icon={<ShieldCheck size={17} />} label="Privacy Policy" />
@@ -140,39 +212,21 @@ export default function ProfilePage() {
   )
 }
 
-function Field({ label, hint, children }) {
-  return (
-    <div>
-      <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--nc-500)] mb-1.5">
-        {label}
-      </label>
-      {children}
-      {hint && <p className="mt-1.5 text-xs text-[var(--nc-500)]">{hint}</p>}
-    </div>
-  )
-}
-
 function QuickLink({ to, icon, label }) {
   return (
-    <Link
-      to={to}
-      className="group flex items-center gap-3 px-3.5 py-3 rounded-[12px] text-sm font-medium text-[var(--nc-700)] hover:bg-[var(--nc-300)] hover:text-[var(--nc-900)] transition-colors"
-    >
-      <span className="text-[var(--nc-accent)]">{icon}</span>
-      <span className="flex-1">{label}</span>
-      <ChevronRight size={15} className="text-[var(--nc-500)] transition-transform group-hover:translate-x-0.5" />
+    <Link to={to} className="profile-link">
+      {icon}
+      <span style={{ flex: 1 }}>{label}</span>
+      <ChevronRight size={15} className="profile-link__chevron" aria-hidden="true" />
     </Link>
   )
 }
 
 function StatBox({ label, value }) {
   return (
-    <div className="p-3.5 rounded-[12px] bg-[var(--nc-100)] border border-[var(--nc-300)] text-center">
-      <p className="text-xl font-bold text-[var(--nc-900)] tabular-nums">{value}</p>
-      <p className="text-[10px] uppercase tracking-wide text-[var(--nc-500)] mt-0.5">{label}</p>
+    <div className="mini-stat">
+      <p className="mini-stat__value">{value}</p>
+      <p className="mini-stat__label">{label}</p>
     </div>
   )
 }
-
-const inputCls =
-  'w-full h-11 px-4 rounded-[12px] bg-[var(--nc-100)] border border-[var(--nc-300)] text-sm text-[var(--nc-800)] placeholder:text-[var(--nc-500)] outline-none focus:border-[var(--nc-accent)] transition-colors'
