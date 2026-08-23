@@ -2147,6 +2147,204 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════
+    14f · CINEMATIC HOMEPAGE — Scroll experience
+    ════════════════════════════════════════════════════════════════════ */
+
+/* ── Scroll progress — thin orange route line on viewport edge ── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 3px;
+  height: 100vh;
+  z-index: 9999;
+  background: oklch(1 0 0 / 0.04);
+}
+.scroll-progress__fill {
+  width: 100%;
+  height: 0%;
+  background: var(--accent-solid);
+  border-radius: 0 0 2px 2px;
+  transition: height 50ms linear;
+}
+
+/* ── Route reveal section — animated SVG route lines ── */
+.route-reveal-section {
+  padding: clamp(var(--p-space-6xl), 10vw, var(--p-space-9xl)) 0;
+  background: var(--bg-page);
+}
+.route-reveal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--p-space-2xl);
+  max-width: 900px;
+  margin: 0 auto;
+}
+.route-reveal-grid__item {
+  width: 100%;
+  height: auto;
+  opacity: 0.85;
+  transition: opacity 300ms ease;
+}
+.route-reveal-grid__item:hover { opacity: 1; }
+
+.route-svg {
+  width: 100%;
+  height: auto;
+}
+.route-svg text {
+  font-family: var(--font-body);
+  font-size: 9px;
+}
+
+/* ── Pinned storytelling section ── */
+.story-section {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+.story-visual {
+  position: absolute;
+  inset: 0;
+}
+.story-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+.story-visual__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, oklch(0.08 0.003 260 / 0.82), oklch(0.08 0.003 260 / 0.65));
+}
+.story-route-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  max-width: 500px;
+  opacity: 0.2;
+}
+.story-text {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--gutter-x);
+}
+.story-step {
+  position: absolute;
+  text-align: center;
+  max-width: 520px;
+  transition: opacity 500ms var(--ease-standard), transform 500ms var(--ease-standard);
+  will-change: opacity, transform;
+}
+.story-step__number {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: var(--p-weight-bold);
+  color: var(--accent-solid);
+  letter-spacing: 0.1em;
+  margin-bottom: var(--p-space-md);
+}
+.story-step__label {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: var(--p-weight-bold);
+  letter-spacing: var(--p-tracking-tighter);
+  line-height: var(--p-leading-tight);
+  color: var(--text-strong);
+  margin-bottom: var(--p-space-md);
+}
+.story-step__accent {
+  font-size: var(--p-text-lg);
+  color: var(--text-secondary);
+  line-height: var(--p-leading-body);
+}
+
+/* ── Horizontal scroll section ── */
+.hscroll-section {
+  overflow: hidden;
+  padding: clamp(var(--p-space-6xl), 10vw, var(--p-space-9xl)) 0;
+  background: var(--bg-page-deep);
+}
+.hscroll-track {
+  display: flex;
+  gap: var(--p-space-3xl);
+  padding: 0 var(--gutter-x);
+  width: max-content;
+}
+.hscroll-card {
+  flex-shrink: 0;
+  width: 360px;
+  padding: var(--p-space-3xl);
+  border-radius: var(--p-radius-2xl);
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-space-md);
+}
+.hscroll-card__number {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: var(--p-weight-bold);
+  color: var(--accent-solid);
+  letter-spacing: 0.1em;
+}
+.hscroll-card__word {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: var(--p-weight-extrabold);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--text-strong);
+}
+.hscroll-card__desc {
+  font-size: var(--p-text-md);
+  color: var(--text-secondary);
+  line-height: var(--p-leading-body);
+}
+.hscroll-card__line {
+  width: 40px;
+  height: 2px;
+  background: var(--accent-solid);
+  border-radius: 1px;
+  margin-top: auto;
+}
+
+/* ── Section headings (shared) ── */
+.overline {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: var(--p-weight-bold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-solid);
+  margin-bottom: var(--p-space-md);
+}
+.section-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+  font-weight: var(--p-weight-bold);
+  letter-spacing: var(--p-tracking-tighter);
+  line-height: var(--p-leading-tight);
+  color: var(--text-strong);
+}
+.section-sub {
+  font-size: var(--p-text-md);
+  color: var(--text-secondary);
+  max-width: 50ch;
+  line-height: var(--p-leading-body);
+}
+
+/* ════════════════════════════════════════════════════════════════════
     15 · RESPONSIVE
     ════════════════════════════════════════════════════════════════════ */
 @media (max-width: 900px) {
@@ -2165,6 +2363,9 @@
   .results-grid { grid-template-columns: 1fr; }
   .rides-grid { grid-template-columns: 1fr; }
   .dash-content { grid-template-columns: 1fr; }
+  .route-reveal-grid { grid-template-columns: 1fr; gap: var(--p-space-xl); }
+  .hscroll-card { width: 280px; padding: var(--p-space-xl); }
+  .story-step__label { font-size: clamp(1.4rem, 3.5vw, 2rem); }
 }
 
 @media (max-width: 640px) {
@@ -2172,6 +2373,8 @@
   .stat-tiles { grid-template-columns: repeat(3, 1fr); }
   .hero-route__card { flex-direction: column; }
   .hero-route__divider { width: 100%; height: 1px; }
+  .hscroll-card { width: 260px; }
+  .scroll-progress { display: none; }
 }
 
 /* ════════════════════════════════════════════════════════════════════

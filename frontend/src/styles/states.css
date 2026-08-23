@@ -378,4 +378,14 @@
   .menu { animation: none !important; }
   .unread-divider::before,
   .unread-divider::after { background: var(--divider); }
+  .scroll-progress { display: none; }
+  .story-step { transition: none; opacity: 1; transform: none; position: relative; }
+  .story-section { height: auto; position: static; }
+  .story-visual { position: relative; height: 50vh; }
+  .story-text { position: static; height: auto; padding: var(--p-space-3xl) var(--gutter-x); }
+  .hscroll-section { overflow: visible; }
+  .hscroll-track { transform: none !important; width: auto; flex-wrap: wrap; justify-content: center; }
+  .hscroll-card { width: 100%; max-width: 360px; }
+  .hero-video { transform: none !important; }
+  .hero-core { opacity: 1 !important; transform: none !important; }
 }
